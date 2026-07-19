@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f8f9fa;
+  color: #181512;
+  font-family: "Geist", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* PAGE WRAPPER */
+.signup-page {
+  min-height: 100vh;
+  display: flex;
+  background: #ffffff;
+  animation: bounceIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 
+   LEFT IMAGE PANEL 
+   Flipped to dark-mode background tint so white text pops perfectly 
+*/
+.signup-image-panel {
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+  background: #181512; /* Deep base color to ground the overlay */
+}
+
+.signup-image-panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.45; /* Lowered slightly to guarantee excellent text contrast */
+  filter: grayscale(100%); /* Keeps it clean and editorial */
+  display: block;
+}
+
+/* Linear overlay provides an extra layer of dark contrast behind the bottom text */
+.signup-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(24, 21, 18, 0.5) 0%,
+    rgba(24, 21, 18, 0.85) 100%
+  );
+  z-index: 1;
+}
+
+.signup-left-content {
+  position: absolute;
+  inset: 0;
+  padding: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+/* BRANDING */
+.signup-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Newsreader", serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: #ffffff; /* Turned white for dark backdrop readability */
+  letter-spacing: -0.5px;
+}
+
+/* White icon treatment dynamically handled inside JSX or via color prop */
+.signup-brand span {
+  color: #ffffff;
+}
+
+.mobile-brand {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  font-family: "Newsreader", serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #181512;
+}
+
+/* LEFT SIDE HERO TEXT */
+.signup-message {
+  max-width: 480px;
+}
+
+.signup-message h2 {
+  font-family: "Newsreader", serif;
+  font-size: 44px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  font-weight: 400;
+  margin: 0 0 20px;
+  color: #ffffff; /* Turned white for pristine readability */
+}
+
+.signup-message p {
+  color: rgba(255, 255, 255, 0.8); /* Crisp, highly readable muted text */
+  font-size: 17px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* RIGHT FORM PANEL */
+.signup-form-panel {
+  width: 50%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 48px;
+  background: #ffffff;
+}
+
+.signup-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* FORM HEADER */
+.signup-header {
+  margin-bottom: 36px;
+}
+
+.signup-header h1 {
+  font-family: "Newsreader", serif;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  margin: 0 0 8px;
+  color: #181512;
+}
+
+.signup-header p {
+  margin: 0;
+  color: #6b635d;
+  font-size: 15px;
+}
+
+/* INPUT INPUTS & FORM FIELDS */
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.signup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.signup-field label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #5c534e;
+}
+
+.signup-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #dcd4ce;
+  border-radius: 4px; /* Added clean, subtle micro-radius */
+  background: #ffffff;
+  font-family: "Geist", sans-serif;
+  font-size: 15px;
+  color: #181512;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signup-field input::placeholder {
+  color: #bfaea4;
+}
+
+.signup-field input:focus {
+  border-color: #181512;
+  box-shadow: 0 0 0 2px rgba(24, 21, 18, 0.05);
+}
+
+/* PASSWORD EXTRAS */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 45px;
+}
+
+.signup-field p {
+  margin: 6px 0 0;
+  color: #7a7069;
+  font-size: 12px;
+}
+
+/* PRIMARY CTA BUTTON */
+.signup-action button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 4px;
+  background: #181512;
+  color: #ffffff;
+  font-family: "Geist", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s ease, transform 0.1s ease;
+  margin-top: 8px;
+}
+
+.signup-action button:hover {
+  background: #2d2926;
+}
+
+.signup-action button:active {
+  transform: scale(0.99);
+}
+
+/* FORM FOOTER LINKS */
+.signup-footer {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #ebdcd1;
+  text-align: center;
+  color: #6b635d;
+  font-size: 14px;
+}
+
+.signup-footer a {
+  margin-left: 6px;
+  color: #181512;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.signup-footer a:hover {
+  border-bottom-color: #181512;
+}
+
+/* OPTIMIZED ANIMATIONS */
+.fade-up {
+  opacity: 0;
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 { animation-delay: 0.08s; }
+.delay-200 { animation-delay: 0.16s; }
+.delay-300 { animation-delay: 0.24s; }
+.delay-400 { animation-delay: 0.32s; }
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* RESPONSIVE FLUIDITY */
+@media (max-width: 1024px) {
+  .signup-left-content {
+    padding: 40px;
+  }
+  .signup-message h2 {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 900px) {
+  .signup-page {
+    flex-direction: column;
+  }
+
+  .signup-image-panel {
+    display: none;
+  }
+
+  .signup-form-panel {
+    width: 100%;
+    padding: 40px 24px;
+    min-height: 100vh;
+  }
+
+  .mobile-brand {
+    display: flex;
+  }
+}
+.signup-error {
+  color: #ba1a1a;
+  background: #ffdad6;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 0.375rem;
+  margin: -8px 0 8px 0;
+}
+.signup-error {
+  color: #ba1a1a;
+  background: #ffdad6;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 0.375rem;
+  margin: -8px 0 8px 0;
+}

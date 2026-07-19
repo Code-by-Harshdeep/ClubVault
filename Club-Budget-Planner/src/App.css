@@ -1,0 +1,15 @@
+/* Add this to whatever global CSS file already styles .dashboard-layout-container
+   (e.g. App.css) — this is the ONE place the 260px sidebar offset should live now. */
+
+.dashboard-layout-main {
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+  .dashboard-layout-main {
+    margin-left: 0;
+    width: 100%;
+  }
+}

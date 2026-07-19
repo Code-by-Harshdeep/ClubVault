@@ -1,0 +1,13 @@
+.global-topbar {
+  /* no margin-left here — .dashboard-layout-main already clears the sidebar */
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 40px 0;   /* was: 20px 40px 12px — dropped the bottom buffer */
+  box-sizing: border-box
+}
+
+@media (max-width: 800px) {
+  .global-topbar {
+    padding: 16px 20px 0;
+  }
+}

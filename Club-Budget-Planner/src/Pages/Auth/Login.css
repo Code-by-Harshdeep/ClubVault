@@ -1,0 +1,441 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:wght@400;500;600&display=swap');
+
+
+* {
+  box-sizing: border-box;
+}
+
+
+body {
+  margin: 0;
+  background: #f8f9fa;
+  color: #181512;
+  font-family: "Geist", sans-serif;
+}
+
+
+/* PAGE */
+
+.login-page {
+
+  min-height: 100vh;
+  display: flex;
+
+}
+
+
+/* PAGE ENTRY ANIMATION */
+
+.bounce-page {
+
+  animation: bounceIn 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+}
+
+
+
+/* LEFT PANEL */
+
+.login-panel {
+
+  width: 500px;
+
+  background: #ffffff;
+
+  border-right: 1px solid #cfc4bd66;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  padding: 48px;
+
+  box-shadow:
+    4px 0 24px rgba(0,0,0,.02);
+
+  z-index: 2;
+
+}
+
+
+
+.login-container {
+
+  width: 100%;
+
+  max-width: 400px;
+
+}
+
+
+
+/* BRAND */
+
+
+.brand {
+
+  margin-bottom: 48px;
+
+}
+
+
+
+.brand h1 {
+
+  font-family: "Newsreader", serif;
+
+  font-size: 48px;
+
+  font-weight: 600;
+
+  letter-spacing: -1px;
+
+  margin: 0;
+
+}
+
+
+
+.brand p {
+
+  margin-top: 12px;
+
+  padding-left: 12px;
+
+  border-left: 2px solid #181512;
+
+  color: #4d4540;
+
+  font-size: 16px;
+
+}
+
+
+
+/* HEADER */
+
+
+.header {
+
+  margin-bottom: 32px;
+
+}
+
+
+
+.header h2 {
+
+  font-family: "Newsreader", serif;
+
+  font-size: 32px;
+
+  font-weight: 500;
+
+  margin: 0;
+
+}
+
+
+
+.header p {
+
+  margin-top: 12px;
+
+  color: #4d4540;
+
+  line-height: 1.6;
+
+}
+
+
+
+/* FORM */
+
+
+.login-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 24px;
+
+}
+
+
+
+.field {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+}
+
+
+
+label {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+
+}
+
+
+
+input {
+
+  width: 100%;
+
+  padding: 14px 16px;
+
+  border: 1px solid #cfc4bd;
+
+  background: white;
+
+  font-size: 16px;
+
+  outline: none;
+
+  transition: border-color .2s ease;
+
+}
+
+
+
+input:focus {
+
+  border-color: #181512;
+
+}
+
+
+
+/* PASSWORD */
+
+
+.password-label {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+}
+
+
+
+.password-label a {
+
+  color: #4d4540;
+
+  font-size: 13px;
+
+  text-decoration: none;
+
+}
+
+
+
+.password-label a:hover {
+
+  text-decoration: underline;
+
+}
+
+
+
+/* BUTTON */
+
+
+.login-btn {
+
+  margin-top: 8px;
+
+  padding: 14px;
+
+  width: 100%;
+
+  border: none;
+
+  background: #181512;
+
+  color: white;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  letter-spacing: 1px;
+
+  cursor: pointer;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  transition: background .2s ease, transform .15s ease;
+
+}
+
+
+
+.login-btn:hover {
+
+  background: #2d2926;
+
+}
+
+
+
+.login-btn:active {
+
+  transform: scale(.98);
+
+}
+
+
+
+/* SIGNUP */
+
+
+.signup {
+
+  margin-top: 48px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid #cfc4bd66;
+
+  text-align: center;
+
+}
+
+
+
+.signup p {
+
+  color: #4d4540;
+
+}
+
+
+
+.signup a {
+
+  margin-left: 5px;
+
+  color: #181512;
+
+  font-weight: 600;
+
+}
+
+
+
+/* RIGHT IMAGE */
+
+
+.image-panel {
+
+  flex: 1;
+
+  background:
+
+  linear-gradient(
+    rgba(24,21,18,.05),
+    rgba(24,21,18,.05)
+  ),
+
+  url("https://lh3.googleusercontent.com/aida-public/AB6AXuAcSQi_TIrB1hgIDNQBq5yPnzpsVHoK8chwOOArAGH8qOb7in3pEJyamuieGuSJ3usHkhbpp6hvKXVR4r2gYEC6eYAq-RpdFCYP60I8H-jU1hAwhQ4XT60sNtzak9eBSCZJeyk6nQClzr3QMk08JEb_8ZOLCo7gQKfU-5pHtZCETQVLoNYVQA8cveXXpp8UDrqtbOHA5D7Uq3kIASLhVqc5F1juAB4nPkgBqMIv3b4MuHPzqi3YpvvaXInq4AlPN4ta93rXELVXIHcw");
+
+  background-size: cover;
+
+  background-position: center;
+
+  filter: grayscale(.2) contrast(1.1);
+
+  background-repeat: no-repeat;
+
+}
+
+
+
+/* MOBILE */
+
+
+@media(max-width:900px){
+
+
+  .login-page {
+
+    flex-direction: column;
+
+  }
+
+
+  .login-panel {
+
+    width: 100%;
+
+    min-height: 100vh;
+
+  }
+
+
+  .image-panel {
+
+    display:none;
+
+  }
+
+}
+
+
+
+/* ANIMATION */
+
+
+@keyframes bounceIn {
+
+  0% {
+    transform: scale(0.92) translateY(30px);
+  }
+
+  50% {
+    transform: scale(1.03) translateY(-8px);
+  }
+
+  75% {
+    transform: scale(0.99) translateY(3px);
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+  }
+
+}
+
+.login-error {
+  color: #ba1a1a;
+  background: #ffdad6;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 0.375rem;
+  margin: -8px 0 8px 0;
+}
