@@ -33,7 +33,7 @@ const Transactions = () => {
           <div className="transactions-kpi-card">
             <span className="kpi-label">Total Income</span>
 
-            <h2>$12,450.00</h2>
+            <h2>₹12,450.00</h2>
 
             <p className="kpi-success">
               <span className="material-symbols-outlined">
@@ -49,7 +49,7 @@ const Transactions = () => {
               Total Expenses
             </span>
 
-            <h2>$8,230.50</h2>
+            <h2>₹8,230.50</h2>
 
             <p className="kpi-success">
               <span className="material-symbols-outlined">
@@ -65,7 +65,7 @@ const Transactions = () => {
               Net Cash Flow
             </span>
 
-            <h2>$4,219.50</h2>
+            <h2>₹4,219.50</h2>
 
             <p className="kpi-muted">
               Positive margin
@@ -159,7 +159,7 @@ const Transactions = () => {
                   </td>
 
                   <td className="amount negative">
-                    -$1,250.00
+                    -₹1,250.00
                   </td>
 
                 </tr>
@@ -185,7 +185,7 @@ const Transactions = () => {
                   </td>
 
                   <td className="amount positive">
-                    +$3,400.00
+                    +₹3,400.00
                   </td>
 
                 </tr>
@@ -210,7 +210,7 @@ const Transactions = () => {
                   </td>
 
                   <td className="amount negative">
-                    -$149.90
+                    -₹149.90
                   </td>
 
                 </tr>
@@ -236,7 +236,7 @@ const Transactions = () => {
                   </td>
 
                   <td className="amount positive">
-                    +$500.00
+                    +₹500.00
                   </td>
 
                 </tr>
