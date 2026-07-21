@@ -58,6 +58,7 @@ export default function DemoModal({ open, onClose, videoSrc, youtubeId }) {
   const fmt = (s) =>
     `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
+  
   return (
     <div
       role="dialog"
