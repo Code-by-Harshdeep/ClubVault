@@ -1,6 +1,20 @@
 import { Users, Calendar, ChartLine } from "lucide-react";
 
-export const NAV_LINKS = ["Product", "Features", "Pricing", "About"];
+
+export const NAV_LINKS = [
+  {
+    label: "Features",
+    href: "#features",
+  },
+  {
+    label: "Pricing",
+    href: "#pricing",
+  },
+  {
+    label: "About",
+    href: "#about",
+  },
+];
 
 export const FEATURES = [
   {
