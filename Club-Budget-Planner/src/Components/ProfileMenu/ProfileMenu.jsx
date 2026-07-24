@@ -1,18 +1,63 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./ProfileMenu.css";
 
 const ProfileMenu = () => {
+  const [user, setUser] = useState({
+    fullName: "",
+    clubOrOrganization: "",
+  });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/profile`,
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        const data = await response.json();
+
+        setUser({
+          fullName: data.fullName,
+          clubOrOrganization: data.clubOrOrganization,
+        });
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const initials = user.fullName
+    ? user.fullName
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+    : "U";
+
   return (
     <div className="gp-wrapper">
       <button className="gp-btn">
-        <div className="gp-avatar">AC</div>
+        <div className="gp-avatar">{initials}</div>
 
         <div className="gp-info">
-          <span className="gp-name">Alex Chen</span>
-          <span className="gp-role">Treasurer</span>
+          <span className="gp-name">
+            {user.fullName || "Loading..."}
+          </span>
+
+          <span className="gp-role">
+            {user.clubOrOrganization || "Organization"}
+          </span>
         </div>
 
-        <span className="material-symbols-outlined">expand_more</span>
+        <span className="material-symbols-outlined">
+          expand_more
+        </span>
       </button>
 
       <div className="gp-dropdown">
