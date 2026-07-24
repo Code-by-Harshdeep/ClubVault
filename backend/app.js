@@ -6,7 +6,12 @@ const authRoutes = require("./routes/authRoutes");
 const app = express();
 
 // middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://club-vault-eosin.vercel.app",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // routes
