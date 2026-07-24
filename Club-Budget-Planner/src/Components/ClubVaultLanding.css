@@ -1636,8 +1636,8 @@ html[data-theme="dark"] .cv-glass-card {
 
 /* Hide desktop CTA on mobile */
 
-@media (max-width: 767px) {
-  .cv-btn-nav-cta {
-    display: none;
+@media screen and (max-width: 767px) {
+  a.cv-btn-nav-cta {
+    display: none !important;
   }
 }
