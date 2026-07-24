@@ -8,7 +8,11 @@ const app = express();
 // middleware
 app.use(
   cors({
-    origin: "https://club-vault-eosin.vercel.app",
+    origin: [
+      "http://localhost:5173",
+       "http://localhost:5174",
+      "https://club-vault-eosin.vercel.app",
+    ],
     credentials: true,
   })
 );

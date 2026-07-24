@@ -45,7 +45,7 @@ const ProfileMenu = () => {
 
         <hr />
 
-        <a href="#logout" className="gp-logout">
+        <a href="/" className="gp-logout">
           <span className="material-symbols-outlined">logout</span>
           <span>Sign Out</span>
         </a>
