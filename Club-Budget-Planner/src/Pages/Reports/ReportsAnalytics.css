@@ -5,13 +5,14 @@
 /* =========================
    PAGE ROOT
 ========================= */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined");
 * {
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
@@ -39,8 +40,6 @@ html, body {
   font-family: inherit;
   cursor: pointer;
 }
-
-
 
 /* =========================
    MOBILE HEADER
@@ -94,7 +93,6 @@ html, body {
   margin: auto;
 }
 
-
 /* =========================
    PAGE HEADER
 ========================= */
@@ -109,6 +107,7 @@ html, body {
   gap: 30px;
 
   padding-bottom: 30px;
+  margin-top: 20px;
 
   border-bottom: 1px solid #ddd;
 }

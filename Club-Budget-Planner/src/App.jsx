@@ -1,3 +1,4 @@
+import "./theme.css";
 import ClubVaultLanding from "./Components/ClubVaultLanding";
 import Topbar from "./Components/Topbar/Topbar";
 import Sidebar from "./Components/Sidebar/Sidebar";
@@ -8,6 +9,7 @@ import Dashboard from "./Pages/Dashboard/Dashboard";
 import ReportsAnalytics from "./Pages/Reports/ReportsAnalytics";
 import Budgets from "./Pages/Budget/Budgets";
 import Transactions from "./Pages/Transactions/Transactions";
+import { ThemeProvider } from "./ThemeContext";
 
 // Global Layout wrapper: Sidebar (left) + Topbar (top, holds ProfileMenu) + page content
 const DashboardLayout = () => {
@@ -67,7 +69,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 };
 
 export default App;

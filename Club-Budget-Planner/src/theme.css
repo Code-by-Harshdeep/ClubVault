@@ -1,0 +1,141 @@
+/* Global theme tokens — imported ONCE in App.jsx.
+   Every page/component should read colors via var(--color-*)
+   instead of hardcoding hex values, so all pages follow the
+   same light/dark switch. */
+
+:root {
+  --color-on-secondary-fixed-variant: #404754;
+  --color-on-primary-fixed-variant: #4b4642;
+  --color-on-background: #191c1d;
+  --color-surface-container-highest: #e1e3e4;
+  --color-on-secondary-fixed: #151c27;
+  --color-on-secondary-container: #5e6572;
+  --color-on-primary: #ffffff;
+  --color-inverse-primary: #cdc5c0;
+  --color-tertiary-container: #292a2c;
+  --color-primary-container: #2d2926;
+  --color-inverse-on-surface: #f0f1f2;
+  --color-primary-fixed: #e9e1dc;
+  --color-on-surface: #191c1d;
+  --color-tertiary: #151618;
+  --color-surface-container-lowest: #ffffff;
+  --color-primary-fixed-dim: #cdc5c0;
+  --color-outline-variant: #cfc4bd;
+  --color-error: #ba1a1a;
+  --color-surface-bright: #f8f9fa;
+  --color-on-tertiary-container: #919193;
+  --color-secondary-fixed-dim: #c0c7d6;
+  --color-on-surface-variant: #4d4540;
+  --color-on-tertiary-fixed-variant: #464749;
+  --color-surface-container-high: #e7e8e9;
+  --color-primary: #181512;
+  --color-outline: #7e756f;
+  --color-surface-dim: #d9dadb;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface: #f8f9fa;
+  --color-on-tertiary: #ffffff;
+  --color-surface-variant: #e1e3e4;
+  --color-on-primary-container: #96908b;
+  --color-background: #f8f9fa;
+  --color-surface-container: #edeeef;
+  --color-on-error-container: #93000a;
+  --color-tertiary-fixed-dim: #c7c6c8;
+  --color-secondary-container: #dce2f3;
+  --color-on-error: #ffffff;
+  --color-inverse-surface: #2e3132;
+  --color-on-primary-fixed: #1e1b18;
+  --color-tertiary-fixed: #e3e2e4;
+  --color-on-tertiary-fixed: #1a1c1d;
+  --color-on-secondary: #ffffff;
+  --color-secondary: #585f6c;
+  --color-error-container: #ffdad6;
+  --color-secondary-fixed: #dce2f3;
+  --color-surface-tint: #635d5a;
+
+  --color-border-soft: rgba(207, 196, 189, 0.2);
+  --color-border-mid: rgba(207, 196, 189, 0.3);
+  --color-border-strong: rgba(207, 196, 189, 0.5);
+  --color-nav-bg: rgba(248, 249, 250, 0.8);
+
+  --radius-default: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+
+  --space-unit: 8px;
+  --space-container-max: 1600px;
+  --space-stack-lg: 48px;
+  --space-stack-sm: 12px;
+  --space-stack-md: 24px;
+  --space-margin-desktop: 48px;
+  --space-gutter: 24px;
+  --space-margin-mobile: 16px;
+
+  --font-headline: "Newsreader", serif;
+  --font-body: "Geist", sans-serif;
+}
+
+/* ---------- Dark theme ---------- */
+/* Toggled by data-theme="dark" on <html> (set by ThemeProvider) */
+
+html[data-theme="dark"] {
+  --color-background: #14100e;
+  --color-surface: #1a1512;
+  --color-surface-bright: #1f1a16;
+  --color-surface-container-lowest: #100c0a;
+  --color-surface-container-low: #1a1512;
+  --color-surface-container: #221c18;
+  --color-surface-container-high: #2a231e;
+  --color-surface-container-highest: #332b24;
+  --color-surface-dim: #14100e;
+  --color-surface-variant: #2a231e;
+
+  --color-on-background: #efe9e4;
+  --color-on-surface: #efe9e4;
+  --color-on-surface-variant: #b8ada4;
+
+  --color-primary: #efe9e4;
+  --color-primary-container: #e0793d;
+  --color-on-primary: #14100e;
+  --color-on-primary-container: #f3e3d6;
+
+  --color-outline: #6f655c;
+  --color-outline-variant: #4a4038;
+
+  --color-inverse-primary: #e0793d;
+  --color-inverse-surface: #efe9e4;
+  --color-inverse-on-surface: #221c18;
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  --color-border-soft: rgba(239, 233, 228, 0.08);
+  --color-border-mid: rgba(239, 233, 228, 0.12);
+  --color-border-strong: rgba(239, 233, 228, 0.18);
+  --color-nav-bg: rgba(20, 16, 14, 0.75);
+}
+
+/* Smooth crossfade site-wide when the theme flips */
+body,
+body * {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  body * {
+    transition: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

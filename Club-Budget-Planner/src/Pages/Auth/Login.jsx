@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import { useTheme } from "../../ThemeContext";
+import { Sun, Moon } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [formData, setFormData] = useState({
     universityEmail: "",
@@ -57,6 +60,8 @@ const Login = () => {
         return;
       }
 
+   
+
       // Save token so future requests can use it
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -75,6 +80,15 @@ const Login = () => {
 
       {/* Left Login Panel */}
       <div className="login-panel">
+
+        <button
+          className="login-theme-toggle"
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={toggleTheme}
+          type="button"
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
         <div className="login-container">
 
