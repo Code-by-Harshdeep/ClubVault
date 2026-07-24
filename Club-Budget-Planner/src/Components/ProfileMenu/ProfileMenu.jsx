@@ -1,41 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./ProfileMenu.css";
 
 const ProfileMenu = () => {
-  const [user, setUser] = useState({
-    fullName: "",
-    clubOrOrganization: "",
-  });
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/profile`,
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
-
-        const data = await response.json();
-
-        setUser({
-          fullName: data.fullName,
-          clubOrOrganization: data.clubOrOrganization,
-        });
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const user = JSON.parse(localStorage.getItem("user")) || {};
 
   const initials = user.fullName
     ? user.fullName
         .split(" ")
-        .map((word) => word[0])
+        .map((name) => name[0])
         .join("")
         .toUpperCase()
     : "U";
@@ -47,7 +19,7 @@ const ProfileMenu = () => {
 
         <div className="gp-info">
           <span className="gp-name">
-            {user.fullName || "Loading..."}
+            {user.fullName || "User"}
           </span>
 
           <span className="gp-role">
