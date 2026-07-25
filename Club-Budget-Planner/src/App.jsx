@@ -9,6 +9,7 @@ import Dashboard from "./Pages/Dashboard/Dashboard";
 import ReportsAnalytics from "./Pages/Reports/ReportsAnalytics";
 import Budgets from "./Pages/Budget/Budgets";
 import Transactions from "./Pages/Transactions/Transactions";
+import EventsPlanning from "./Pages/Events/EventsPlanning";
 import { ThemeProvider } from "./ThemeContext";
 
 // Global Layout wrapper: Sidebar (left) + Topbar (top, holds ProfileMenu) + page content
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path:"/transactions",
         element:<Transactions/>
+      },
+      {
+        path:"/events",
+        element:<EventsPlanning/>
       }
     ]
   }
