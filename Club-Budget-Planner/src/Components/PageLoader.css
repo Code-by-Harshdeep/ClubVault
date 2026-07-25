@@ -1,0 +1,36 @@
+.cv-page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 200;
+  overflow: hidden;
+  background: transparent;
+}
+
+.cv-page-loader-bar {
+  height: 100%;
+  width: 35%;
+  border-radius: 999px;
+  background: var(--color-primary-container, #b5754b);
+  animation: cv-loader-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes cv-loader-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(60%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-page-loader-bar {
+    animation-duration: 1.8s;
+  }
+}

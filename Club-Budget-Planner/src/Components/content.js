@@ -1,6 +1,5 @@
 import { Users, Calendar, ChartLine } from "lucide-react";
 
-
 export const NAV_LINKS = [
   {
     label: "Features",
@@ -34,11 +33,17 @@ export const FEATURES = [
   },
 ];
 
+/**
+ * priceMonthly  -> price shown when billing = "monthly"
+ * priceYearly   -> effective PER-MONTH price when billing = "yearly" (billed annually)
+ * Yearly is modeled as roughly a 20% discount off the monthly rate.
+ */
 export const PLANS = [
   {
     name: "Starter",
     desc: "For small clubs starting out.",
-    price: "₹0",
+    priceMonthly: 0,
+    priceYearly: 0,
     features: ["1 Treasury Account", "Basic Expense Tracking", "2 Admin Users"],
     cta: "Get Started",
     featured: false,
@@ -46,7 +51,8 @@ export const PLANS = [
   {
     name: "Executive",
     desc: "For established student unions.",
-    price: "₹299",
+    priceMonthly: 299,
+    priceYearly: 239,
     features: [
       "Unlimited Accounts",
       "Advanced Receipt OCR",
@@ -59,7 +65,8 @@ export const PLANS = [
   {
     name: "Council",
     desc: "For overarching governing bodies.",
-    price: "₹999",
+    priceMonthly: 999,
+    priceYearly: 799,
     features: ["Multi-Club Management", "Consolidated Auditing", "Dedicated Support Lead"],
     cta: "Contact Sales",
     featured: false,
