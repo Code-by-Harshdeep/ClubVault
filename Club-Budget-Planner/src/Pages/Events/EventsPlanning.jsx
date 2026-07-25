@@ -1,15 +1,6 @@
 import React from "react";
 import {
-  Building2,
-  LayoutDashboard,
-  Wallet,
-  ReceiptText,
-  CalendarDays,
-  ChartNoAxesColumn,
-  Users,
   Plus,
-  Settings,
-  CircleHelp,
   School,
   Megaphone,
   CircleCheck,
@@ -52,78 +43,6 @@ const events = [
   },
 ];
 
-function Sidebar() {
-  const links = [
-    {
-      icon: LayoutDashboard,
-      name: "Dashboard",
-    },
-    {
-      icon: Wallet,
-      name: "Budgets",
-    },
-    {
-      icon: ReceiptText,
-      name: "Transactions",
-    },
-    {
-      icon: CalendarDays,
-      name: "Events",
-    },
-    {
-      icon: ChartNoAxesColumn,
-      name: "Analytics",
-    },
-    {
-      icon: Users,
-      name: "Members",
-    },
-  ];
-
-  return (
-    <aside className="sidebar">
-      <div className="brand">
-        <div className="logo">
-          <Building2 size={22} />
-        </div>
-
-        <div>
-          <h2>Finance Committee</h2>
-
-          <p>Student Union</p>
-        </div>
-      </div>
-
-      <nav>
-        {links.map(({ icon: Icon, name }) => (
-          <a key={name} className={name === "Events" ? "active" : ""}>
-            <Icon size={18} />
-
-            {name}
-          </a>
-        ))}
-      </nav>
-
-      <button className="expense-btn">
-        <Plus size={16} />
-        New Expense
-      </button>
-
-      <div className="sidebar-footer">
-        <a>
-          <Settings size={16} />
-          Settings
-        </a>
-
-        <a>
-          <CircleHelp size={16} />
-          Support
-        </a>
-      </div>
-    </aside>
-  );
-}
-
 function BudgetBar({ progress }) {
   return (
     <div className="progress">
@@ -159,7 +78,10 @@ function EventCard({ event }) {
           <strong>
             {event.spent}
 
-            <small>/ {event.budget}</small>
+            <small>
+              {" / "}
+              {event.budget}
+            </small>
           </strong>
         </div>
 
@@ -238,42 +160,38 @@ function FeaturedEvent() {
 
 export default function EventsPlanning() {
   return (
-    <div className="page">
-      <Sidebar />
+    <main className="events-page">
+      <header>
+        <div>
+          <h1>Events Planning</h1>
 
-      <main className="content">
-        <header>
-          <div>
-            <h1>Events Planning</h1>
-
-            <p>
-              Coordinate upcoming club activities and monitor dedicated
-              micro-budgets.
-            </p>
-          </div>
-
-          <div className="actions">
-            <div className="switch">
-              <button>Board</button>
-
-              <button>Calendar</button>
-            </div>
-
-            <button className="add-btn">
-              <Plus size={16} />
-              Add Event
-            </button>
-          </div>
-        </header>
-
-        <div className="grid">
-          <FeaturedEvent />
-
-          {events.map((event) => (
-            <EventCard key={event.title} event={event} />
-          ))}
+          <p>
+            Coordinate upcoming club activities and monitor dedicated
+            micro-budgets.
+          </p>
         </div>
-      </main>
-    </div>
+
+        <div className="actions">
+          <div className="switch">
+            <button>Board</button>
+
+            <button>Calendar</button>
+          </div>
+
+          <button className="add-btn">
+            <Plus size={16} />
+            Add Event
+          </button>
+        </div>
+      </header>
+
+      <div className="grid">
+        <FeaturedEvent />
+
+        {events.map((event) => (
+          <EventCard key={event.title} event={event} />
+        ))}
+      </div>
+    </main>
   );
 }
