@@ -11,6 +11,7 @@ import Budgets from "./Pages/Budget/Budgets";
 import Transactions from "./Pages/Transactions/Transactions";
 import EventsPlanning from "./Pages/Events/EventsPlanning";
 import Members from "./Pages/Members/Members";
+import Settings from "./Pages/Settings/Settings";
 import { ThemeProvider } from "./ThemeContext";
 
 // Global Layout wrapper: Sidebar (left) + Topbar (top, holds ProfileMenu) + page content
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
       {
         path:"/members",
         element:<Members/>
+      },
+      {
+        path:"/settings",
+        element:<Settings/>
       }
     ]
   }

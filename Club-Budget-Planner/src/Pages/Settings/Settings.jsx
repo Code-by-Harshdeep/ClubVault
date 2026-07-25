@@ -12,7 +12,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 
-import "../styles/Settings.css";
+import "./Settings.css";
 
 const Toggle = ({ checked = false }) => {
   return (
