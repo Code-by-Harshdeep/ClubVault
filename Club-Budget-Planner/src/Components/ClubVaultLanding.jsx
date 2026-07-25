@@ -21,6 +21,7 @@ import {
 import { NAV_LINKS, FEATURES, PLANS } from "./content";
 import DemoModal from "./WatchDemo/DemoModal";
 import { useReveal } from "./UserReveal/useReveal";
+import { useCountUp } from "./hooks/useCountUp";
 import { useTheme } from "../ThemeContext";
 
 /**
@@ -33,13 +34,22 @@ export default function ClubVaultLanding() {
   // NEW
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Monthly / yearly pricing toggle
+  const [billing, setBilling] = useState("monthly");
+
   const { theme, toggleTheme } = useTheme();
 
+  const [heroRef, heroVisible] = useReveal();
   const [featuresRef, featuresVisible] = useReveal();
   const [editorialRow1Ref, editorialRow1Visible] = useReveal();
   const [editorialRow2Ref, editorialRow2Visible] = useReveal();
+  const [asymHeadRef, asymHeadVisible] = useReveal();
   const [asymRef, asymVisible] = useReveal();
+  const [pricingHeadRef, pricingHeadVisible] = useReveal();
   const [pricingRef, pricingVisible] = useReveal();
+
+  // Counts up the hero stat card once it's scrolled into view
+  const budgetCount = useCountUp(12450, heroVisible, 1400);
 
   return (
     <div className="cv-root">
@@ -163,7 +173,7 @@ export default function ClubVaultLanding() {
             </div>
           </div>
 
-          <div className="cv-hero-visual">
+          <div className="cv-hero-visual" ref={heroRef}>
             <div className="cv-hero-backcard" />
 
             <div className="cv-hero-imgwrap">
@@ -179,12 +189,17 @@ export default function ClubVaultLanding() {
                 <div>
                   <p className="cv-glass-label">Fall Budget</p>
 
-                  <p className="cv-glass-amount">$12,450</p>
+                  <p className="cv-glass-amount">
+                    ${budgetCount.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
               <div className="cv-progress-track">
-                <div className="cv-progress-fill" />
+                <div
+                  className="cv-progress-fill"
+                  style={{ width: heroVisible ? "75%" : "0%" }}
+                />
               </div>
 
               <p className="cv-progress-caption">75% Allocated</p>
@@ -322,7 +337,12 @@ export default function ClubVaultLanding() {
 
       <section className="cv-asym">
         <div className="cv-container">
-          <div className="cv-asym-head">
+          <div
+            className={`cv-asym-head cv-reveal${
+              asymHeadVisible ? " is-visible" : ""
+            }`}
+            ref={asymHeadRef}
+          >
             <h2 className="cv-asym-title">
               Designed for precision. Built for accountability.
             </h2>
@@ -407,13 +427,58 @@ export default function ClubVaultLanding() {
 
       <section id="pricing" className="cv-pricing">
         <div className="cv-container">
-          <div className="cv-section-head">
-            <h2 className="cv-h2">Transparent Tiers</h2>
+          <div
+            className={`cv-pricing-head cv-reveal${
+              pricingHeadVisible ? " is-visible" : ""
+            }`}
+            ref={pricingHeadRef}
+          >
+            <div className="cv-section-head">
+              <h2 className="cv-h2">Transparent Tiers</h2>
 
-            <p className="cv-section-sub">
-              Invest in your club's financial infrastructure with plans designed
-              for student organizations of every size.
-            </p>
+              <p className="cv-section-sub">
+                Invest in your club's financial infrastructure with plans
+                designed for student organizations of every size.
+              </p>
+            </div>
+
+            {/* Monthly / Yearly toggle */}
+            <div className="cv-billing-toggle">
+              <div className="cv-billing-track">
+                <span
+                  className="cv-billing-pill"
+                  style={{
+                    transform:
+                      billing === "yearly"
+                        ? "translateX(100%)"
+                        : "translateX(0%)",
+                  }}
+                />
+
+                <button
+                  type="button"
+                  className={`cv-billing-option${
+                    billing === "monthly" ? " active" : ""
+                  }`}
+                  onClick={() => setBilling("monthly")}
+                  aria-pressed={billing === "monthly"}
+                >
+                  Monthly
+                </button>
+
+                <button
+                  type="button"
+                  className={`cv-billing-option${
+                    billing === "yearly" ? " active" : ""
+                  }`}
+                  onClick={() => setBilling("yearly")}
+                  aria-pressed={billing === "yearly"}
+                >
+                  Yearly
+                  <span className="cv-billing-save-tag">Save 20%</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div
@@ -422,63 +487,77 @@ export default function ClubVaultLanding() {
             }`}
             ref={pricingRef}
           >
-            {PLANS.map((plan, i) => (
-              <div
-                key={plan.name}
-                className={`cv-plan${plan.featured ? " featured" : ""}`}
-                style={{
-                  transitionDelay: pricingVisible ? `${i * 0.12}s` : "0s",
-                }}
-              >
-                {plan.featured && (
-                  <div className="cv-plan-badge">Most Popular</div>
-                )}
+            {PLANS.map((plan, i) => {
+              const price =
+                billing === "yearly" ? plan.priceYearly : plan.priceMonthly;
 
-                <h3 className="cv-plan-name">{plan.name}</h3>
+              return (
+                <div
+                  key={plan.name}
+                  className={`cv-plan${plan.featured ? " featured" : ""}`}
+                  style={{
+                    transitionDelay: pricingVisible ? `${i * 0.12}s` : "0s",
+                  }}
+                >
+                  {plan.featured && (
+                    <div className="cv-plan-badge">Most Popular</div>
+                  )}
 
-                <p className="cv-plan-desc">{plan.desc}</p>
+                  <h3 className="cv-plan-name">{plan.name}</h3>
 
-                <div className="cv-plan-price">
-                  <span className="amount">{plan.price}</span>
+                  <p className="cv-plan-desc">{plan.desc}</p>
 
-                  <span className="period">/mo</span>
+                  <div className="cv-plan-price">
+                    <span className="amount" key={`${plan.name}-${billing}`}>
+                      ₹{price.toLocaleString("en-IN")}
+                    </span>
+
+                    <span className="period">/mo</span>
+
+                    {billing === "yearly" && price > 0 && (
+                      <p className="cv-plan-billing-note">
+                        billed ₹{(price * 12).toLocaleString("en-IN")}{" "}
+                        annually
+                      </p>
+                    )}
+                  </div>
+
+                  <ul className="cv-plan-features">
+                    {plan.features.map((feature) => (
+                      <li key={feature}>
+                        <CircleCheck size={16} />
+
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {plan.name === "Council" ? (
+                    <button
+                      className="cv-btn-secondary"
+                      style={{
+                        width: "100%",
+                      }}
+                    >
+                      {plan.cta}
+                    </button>
+                  ) : (
+                    <a
+                      href="#"
+                      className={
+                        plan.featured ? "cv-btn-primary" : "cv-btn-secondary"
+                      }
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                      }}
+                    >
+                      {plan.cta}
+                    </a>
+                  )}
                 </div>
-
-                <ul className="cv-plan-features">
-                  {plan.features.map((feature) => (
-                    <li key={feature}>
-                      <CircleCheck size={16} />
-
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                {plan.name === "Council" ? (
-                  <button
-                    className="cv-btn-secondary"
-                    style={{
-                      width: "100%",
-                    }}
-                  >
-                    {plan.cta}
-                  </button>
-                ) : (
-                  <a
-                    href="#"
-                    className={
-                      plan.featured ? "cv-btn-primary" : "cv-btn-secondary"
-                    }
-                    style={{
-                      width: "100%",
-                      textAlign: "center",
-                    }}
-                  >
-                    {plan.cta}
-                  </a>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
