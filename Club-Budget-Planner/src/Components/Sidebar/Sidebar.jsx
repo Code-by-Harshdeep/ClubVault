@@ -1,86 +1,86 @@
 import React from "react";
-// 1. Import hooks from react-router-dom
-import { useNavigate, useLocation } from "react-router-dom";
-import { Plus, Settings, HelpCircle, LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  Wallet,
+  ReceiptText,
+  Calendar,
+  BarChart3,
+  Users,
+  Settings,
+  HelpCircle,
+  Plus
+} from "lucide-react";
 import "./Sidebar.css";
 
-const Sidebar = () => {
-  const navigate = useNavigate();
-  // 2. Grab the current active path from the URL
-  const location = useLocation();
+const MENU_ITEMS = [
+  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: true },
+  { label: "Budgets", icon: Wallet, href: "/budgets" },
+  { label: "Transactions", icon: ReceiptText, href: "/transactions" },
+  { label: "Events", icon: Calendar, href: "/events" },
+  { label: "Analytics", icon: BarChart3, href: "/analytics" },
+  { label: "Members", icon: Users, href: "/members" },
+];
 
-  // 3. Keep paths clean (removed duplicate keys)
-  const menu = [
-    { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={18} /> },
-    { name: "Budgets", path: "/budgets", icon: <Wallet size={18} /> },
-    { name: "Transactions", path: "/transactions", icon: <Receipt size={18} /> },
-    { name: "Events", path: "/events", icon: <Calendar size={18} /> },
-    { name: "Analytics", path: "/reportanalytics", icon: <BarChart3 size={18} /> },
-    { name: "Members", path: "/members", icon: <Users size={18} /> },
-  ];
-
+export default function Sidebar() {
   return (
-    <aside className="dashboard-sidebar">
-      <div className="sidebar-header">
-        <img
-          className="sidebar-logo"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpx4HmEQVhoa-2c7YtaScfpr9w6Lp_06DydiiAE2NkehYw77NgEXqRDNGQ5hizrvcTeaC3S6quaw1DR7D_olWng4le06FQUdE6WOW5Cy8bh_dC4Sw5jN6otYUuQkEYlDe6za9m3_5rsQY5S1nYFNZA8ooqyzUqyDuEFg326eSf9VCnF8Vl8FpDGZzK3fIqTmTe7XCbdJJJrLzxkXaboiK_znwGhp0UYz676ID1bOYwP9pKz3rI3ArDDa8IPikWHlPObQ_dnnKspV-3"
-          alt="logo"
-        />
-        <div>
-          <h2 className="sidebar-title">Finance Committee</h2>
-          <p className="sidebar-subtitle">Student Union</p>
-        </div>
+    <aside className="cv-sidebar">
+
+      <div className="cv-sidebar-header">
+        <a href="/" className="cv-sidebar-logo">
+          ClubVault
+        </a>
+        <span className="cv-sidebar-sub">
+          STUDENT UNION
+        </span>
       </div>
 
-      <button className="new-expense-btn">
+
+      <button className="cv-btn-sidebar-cta">
         <Plus size={18} />
-        New Expense
+        <span>New Expense</span>
       </button>
 
-      <nav className="sidebar-nav">
-        {menu.map((item, index) => {
-          // 4. Check if the current URL matches this item's path dynamically
-          const isActive = location.pathname === item.path;
 
-          return (
-            <a
-              href="#"
-              key={index}
-              // 5. Apply the active (black background) style dynamically
-              className={isActive ? "sidebar-link active" : "sidebar-link"}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(item.path); // 6. Navigate smoothly without full-page reloads
-              }}
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </a>
-          );
-        })}
-      </nav>
+      <div className="cv-sidebar-group">
+        <p className="cv-sidebar-label">
+          MAIN MENU
+        </p>
 
-      <div className="sidebar-bottom">
-        <a 
-          href="#" 
-          className={location.pathname === "/settings" ? "sidebar-link active" : "sidebar-link"}
-          onClick={(e) => { e.preventDefault(); navigate("/settings"); }}
-        >
+        <nav className="cv-sidebar-nav">
+          {MENU_ITEMS.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className={`cv-sidebar-link ${
+                  item.active ? "active" : ""
+                }`}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </a>
+            );
+          })}
+        </nav>
+      </div>
+
+
+      <div className="cv-sidebar-footer">
+
+        <a href="/settings" className="cv-sidebar-link">
           <Settings size={18} />
           <span>Settings</span>
         </a>
-        <a 
-          href="#" 
-          className={location.pathname === "/support" ? "sidebar-link active" : "sidebar-link"}
-          onClick={(e) => { e.preventDefault(); navigate("/support"); }}
-        >
+
+        <a href="/support" className="cv-sidebar-link">
           <HelpCircle size={18} />
           <span>Support</span>
         </a>
+
       </div>
+
     </aside>
   );
-};
-
-export default Sidebar;
+}
