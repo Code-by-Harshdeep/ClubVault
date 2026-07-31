@@ -72,3 +72,75 @@ export const PLANS = [
     featured: false,
   },
 ];
+
+/**
+ * Hero + stats-banner numbers.
+ * `decimals` is optional (used by the 99.9% uptime stat).
+ */
+export const STATS = [
+  { target: 50, prefix: "₹", suffix: "L+", label: "Managed Annually" },
+  { target: 250, suffix: "+", label: "Clubs Onboarded" },
+  { target: 20, suffix: "K+", label: "Transactions Logged" },
+  { target: 99.9, suffix: "%", label: "Platform Uptime", decimals: 1 },
+];
+
+export const TESTIMONIALS = [
+  {
+    name: "Aditi Rao",
+    role: "Treasurer, Debate Society",
+    initials: "AR",
+    rating: 5,
+    quote:
+      "Our audit went from a two-week scramble to a two-hour export. The whole exec board finally sees the same numbers.",
+  },
+  {
+    name: "Marcus Chen",
+    role: "President, Robotics Club",
+    initials: "MC",
+    rating: 5,
+    quote:
+      "We stopped losing receipts in a group chat. Every purchase is tagged, approved, and traceable now.",
+  },
+  {
+    name: "Priya Nair",
+    role: "Finance Secretary, Cultural Council",
+    initials: "PN",
+    rating: 4,
+    quote:
+      "Event budgeting used to be a spreadsheet nightmare across three people. ClubVault made it one shared view.",
+  },
+];
+
+export const FOOTER_COLUMNS = [
+  {
+    heading: "Product",
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "Changelog", href: "#" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { label: "About", href: "#about" },
+      { label: "Careers", href: "#" },
+      { label: "Contact", href: "#" },
+    ],
+  },
+  {
+    heading: "Resources",
+    links: [
+      { label: "Documentation", href: "#" },
+      { label: "University Guidelines", href: "#" },
+      { label: "GitHub", href: "#" },
+    ],
+  },
+  {
+    heading: "Legal",
+    links: [
+      { label: "Privacy Policy", href: "#" },
+      { label: "Terms of Service", href: "#" },
+    ],
+  },
+];

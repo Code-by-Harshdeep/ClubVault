@@ -8,8 +8,9 @@ import { useEffect, useRef, useState } from "react";
  * @param {number} target - final value to count up to
  * @param {boolean} start - when true (and hasn't already run), begins the animation
  * @param {number} duration - animation length in ms
+ * @param {number} decimals - decimal places to keep (0 = whole numbers, e.g. use 1 for "99.9")
  */
-export function useCountUp(target, start, duration = 1200) {
+export function useCountUp(target, start, duration = 1200, decimals = 0) {
   const [value, setValue] = useState(0);
   const hasRunRef = useRef(false);
   const rafRef = useRef(null);
@@ -19,6 +20,7 @@ export function useCountUp(target, start, duration = 1200) {
     hasRunRef.current = true;
 
     const startTime = performance.now();
+    const factor = Math.pow(10, decimals);
 
     function tick(now) {
       const elapsed = now - startTime;
@@ -26,7 +28,7 @@ export function useCountUp(target, start, duration = 1200) {
       // ease-out cubic — fast start, gentle settle
       const eased = 1 - Math.pow(1 - progress, 3);
 
-      setValue(Math.round(target * eased));
+      setValue(Math.round(target * eased * factor) / factor);
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(tick);
@@ -38,7 +40,7 @@ export function useCountUp(target, start, duration = 1200) {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [start, target, duration]);
+  }, [start, target, duration, decimals]);
 
   return value;
 }

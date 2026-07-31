@@ -1,10 +1,15 @@
 import "./theme.css";
+import "./App.css"; // <-- Ensure App.css is imported here!
 import ClubVaultLanding from "./Components/ClubVaultLanding";
+
 import Topbar from "./Components/Topbar/Topbar";
 import Sidebar from "./Components/Sidebar/Sidebar";
+
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+
 import Login from "./Pages/Auth/Login";
 import Signup from "./Pages/Auth/Signup";
+
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import ReportsAnalytics from "./Pages/Reports/ReportsAnalytics";
 import Budgets from "./Pages/Budget/Budgets";
@@ -14,13 +19,13 @@ import Members from "./Pages/Members/Members";
 import Settings from "./Pages/Settings/Settings";
 import { ThemeProvider } from "./ThemeContext";
 
-// Global Layout wrapper: Sidebar (left) + Topbar (top, holds ProfileMenu) + page content
+// Global Layout wrapper
 const DashboardLayout = () => {
   return (
     <div className="dashboard-layout-container">
       <Sidebar />
 
-      {/* Everything to the right of the sidebar: Topbar sits above whichever page is active */}
+      {/* Everything to the right of the sidebar */}
       <div className="dashboard-layout-main">
         <Topbar />
 
@@ -33,7 +38,7 @@ const DashboardLayout = () => {
 };
 
 const router = createBrowserRouter([
-  // Public Routes (No Profile Menu or Sidebar here)
+  // Public Routes
   {
     path: "/",
     element: <ClubVaultLanding />,
@@ -44,28 +49,28 @@ const router = createBrowserRouter([
   },
   {
     path: "/signup",
-    element: <Signup />
+    element: <Signup />,
   },
 
-  // Protected Dashboard Routes grouped inside the Layout wrapper
+  // Protected Dashboard Routes
   {
     element: <DashboardLayout />,
     children: [
       {
         path: "/dashboard",
-        element: <Dashboard />
+        element: <Dashboard />,
       },
       {
-        path: "/reportanalytics",
-        element: <ReportsAnalytics />
+        path: "/analytics",
+        element: <ReportsAnalytics />,
       },
       {
         path: "/budgets",
-        element: <Budgets />
+        element: <Budgets />,
       },
       {
-        path:"/transactions",
-        element:<Transactions/>
+        path: "/transactions",
+        element: <Transactions />,
       },
       {
         path:"/events",
@@ -78,9 +83,9 @@ const router = createBrowserRouter([
       {
         path:"/settings",
         element:<Settings/>
-      }
-    ]
-  }
+      },
+    ],
+  },
 ]);
 
 const App = () => {

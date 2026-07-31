@@ -11,8 +11,10 @@
   z-index: 20;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
+/* Header Area */
 .cv-sidebar-header {
   margin-bottom: 24px;
 }
@@ -38,6 +40,7 @@
   display: block;
 }
 
+/* Action Button */
 .cv-btn-sidebar-cta {
   display: flex;
   align-items: center;
@@ -62,14 +65,18 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
+/* Section Labels (MAIN MENU, etc.) */
 .cv-sidebar-label {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
   margin-bottom: 12px;
+  display: block;
 }
 
+/* Navigation Links */
 .cv-sidebar-nav {
   display: flex;
   flex-direction: column;

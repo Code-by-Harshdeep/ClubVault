@@ -1,15 +1,40 @@
-/* Add this to whatever global CSS file already styles .dashboard-layout-container
-   (e.g. App.css) — this is the ONE place the 260px sidebar offset should live now. */
+/* =========================================================
+   Global Layout Fix (App.css)
+   ========================================================= */
 
+/* 1. Flex container to align Sidebar & Main side-by-side */
+.dashboard-layout-container {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background, #faf9f6);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 2. Main content area sits right beside Sidebar */
 .dashboard-layout-main {
-  margin-left: 260px;
-  width: calc(100% - 260px);
-  box-sizing: border-box;
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important; /* Topbar on TOP (70px), Outlet BELOW */
+  min-width: 0 !important;
+  margin-left: 0 !important; /* DO NOT use margin-left: 260px with flexbox */
+  width: auto !important;
+}
+
+/* 3. Outlet container where pages render */
+.dashboard-layout-content {
+  flex: 1 !important;
+  padding: 32px 40px !important;
+  box-sizing: border-box !important;
+  overflow-y: auto !important;
 }
 
 @media (max-width: 800px) {
-  .dashboard-layout-main {
-    margin-left: 0;
-    width: 100%;
+  .dashboard-layout-container {
+    flex-direction: column !important;
   }
 }

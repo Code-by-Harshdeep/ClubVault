@@ -139,3 +139,28 @@ html {
     scroll-behavior: auto;
   }
 }
+/* =========================================================
+   DASHBOARD-ONLY DARK MODE OVERRIDES
+   Scoped strictly to .dashboard-layout-container so Landing,
+   Login, and Signup pages remain 100% untouched.
+   ========================================================= */
+
+html[data-theme="dark"] .dashboard-layout-container {
+  /* Scope sidebar background to deep charcoal instead of global primary accent */
+  --color-primary-container: #1c1714;
+  
+  /* High contrast surfaces for dashboard cards */
+  --color-surface: #1a1613;
+  --color-surface-container-low: #181411;
+  --color-surface-container: #201b17;
+  --color-surface-container-high: #28221d;
+  
+  /* Crisp readable text for dashboard metrics */
+  --color-primary: #f5f0eb;
+  --color-on-surface: #f5f0eb;
+  --color-on-surface-variant: #a89c92;
+  
+  /* Soft subtle borders for glassmorphism cards */
+  --color-border-soft: rgba(245, 240, 235, 0.08);
+  --color-border-mid: rgba(245, 240, 235, 0.14);
+}

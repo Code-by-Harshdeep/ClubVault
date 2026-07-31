@@ -1,55 +1,118 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  User,
+  Settings,
+  LogOut,
+  ChevronDown,
+  ShieldCheck
+} from "lucide-react";
 import "./ProfileMenu.css";
 
 const ProfileMenu = () => {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
 
-  const initials = user.fullName
-    ? user.fullName
+  // Safely parse localStorage
+  let user = {};
+  try {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      user = JSON.parse(stored);
+    }
+  } catch (err) {
+    user = {};
+  }
+
+  const fullName = user?.fullName || "marioo";
+  const initials = fullName
+    ? fullName
         .split(" ")
-        .map((name) => name[0])
+        .filter(Boolean)
+        .map((n) => n[0])
         .join("")
+        .slice(0, 2)
         .toUpperCase()
-    : "U";
+    : "M";
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <div className="gp-wrapper">
-      <button className="gp-btn">
-        <div className="gp-avatar">{initials}</div>
-
-        <div className="gp-info">
-          <span className="gp-name">
-            {user.fullName || "User"}
-          </span>
-
-          <span className="gp-role">
-            {user.clubOrOrganization || "Organization"}
-          </span>
+    <div className="cv-profile-wrapper" ref={menuRef}>
+      <button
+        className="cv-profile-button"
+        onClick={() => setOpen(!open)}
+        type="button"
+        aria-expanded={open}
+      >
+        <div className="cv-profile-avatar">
+          {initials}
+          <span className="cv-online-dot" />
         </div>
 
-        <span className="material-symbols-outlined">
-          expand_more
-        </span>
+        <div className="cv-profile-info">
+          <h4 className="cv-profile-name">{fullName}</h4>
+          <p className="cv-profile-role">
+            {user?.role || "Finance Chair"}
+          </p>
+        </div>
+
+        <ChevronDown
+          size={16}
+          className={`cv-chevron ${open ? "rotate" : ""}`}
+        />
       </button>
 
-      <div className="gp-dropdown">
-        <a href="#profile">
-          <span className="material-symbols-outlined">person</span>
-          <span>View Profile</span>
-        </a>
+      {open && (
+        <div className="cv-profile-dropdown">
+          <div className="cv-profile-header">
+            <div className="cv-large-avatar">{initials}</div>
 
-        <a href="#settings">
-          <span className="material-symbols-outlined">settings</span>
-          <span>Account Settings</span>
-        </a>
+            <div className="cv-header-details">
+              <h3>{fullName}</h3>
+              <p>
+                {user?.clubOrOrganization || "HEALTH EDU CLUB"}
+              </p>
+            </div>
+          </div>
 
-        <hr />
+          <div className="cv-profile-status">
+            <ShieldCheck size={15} />
+            <span>Account verified</span>
+          </div>
 
-        <a href="/" className="gp-logout">
-          <span className="material-symbols-outlined">logout</span>
-          <span>Sign Out</span>
-        </a>
-      </div>
+          <div className="cv-last-login">
+            <span>Last login</span>
+            <strong>Today, 09:42 AM</strong>
+          </div>
+
+          <div className="cv-dropdown-links">
+            <button className="cv-dropdown-btn" type="button">
+              <User size={16} />
+              <span>View Profile</span>
+            </button>
+
+            <button className="cv-dropdown-btn" type="button">
+              <Settings size={16} />
+              <span>Account Settings</span>
+            </button>
+
+            <div className="cv-dropdown-divider" />
+
+            <button className="cv-dropdown-btn cv-logout" type="button">
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

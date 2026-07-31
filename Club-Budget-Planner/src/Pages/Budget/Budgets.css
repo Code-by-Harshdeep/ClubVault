@@ -1,14 +1,13 @@
 /* Google Fonts & Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Newsreader:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700');
 
-/* ---------- Layout Realignment ---------- */
+/* ---------- Layout Alignment (Fits perfectly into DashboardLayout) ---------- */
 .dashboard-content {
-  margin-left: 260px;
-  width: calc(100% - 260px);
- padding: 0 48px 48px;
+  width: 100%;
+  padding: 0 0 40px;
   box-sizing: border-box;
-
+  position: relative;
 }
 
 /* ---------- Header ---------- */
@@ -17,105 +16,130 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 30px;
-  margin-bottom: 50px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #cfc4bd; /* Updated to match theme dividers */
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
 }
 
 .page-title {
-  font-family: 'Newsreader', serif;
-  font-size: 48px; /* Matches dashboard H1 scale exactly */
-  font-weight: 600;
-  color: #181512;
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--color-primary, #1f1b16);
   margin: 0 0 8px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .page-subtitle {
   margin: 0;
   max-width: 600px;
   font-size: 14px;
-  color: #4d4540;
+  color: var(--color-on-surface-variant, #6b6459);
   line-height: 1.6;
 }
 
 .primary-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #181512;
-  color: #fff;
+  background: var(--color-primary-container, #2c2620);
+  color: var(--color-on-primary, #ffffff);
   border: none;
-  padding: 14px 24px;
+  padding: 12px 24px;
   cursor: pointer;
-  border-radius: 6px;
-  font-size: 15px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 14px;
   font-weight: 600;
-  transition: .3s;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .primary-btn:hover {
-  background: #333;
+  background: var(--color-primary, #1f1b16);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* ---------- KPI ---------- */
+/* ---------- KPI Grid (10/10 Glassmorphism) ---------- */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 }
 
 .kpi-card {
-  background: #fff;
-  border: 1px solid #cfc4bd;
-  border-radius: 8px;
-  padding: 25px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius-xl, 20px);
+  padding: 24px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-primary, #1f1b16);
 }
 
 .kpi-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
-  color: #4d4540;
+  margin-bottom: 16px;
+  color: var(--color-on-surface-variant, #6b6459);
 }
 
 .kpi-header h3 {
-  font-size: 13px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
+  margin: 0;
 }
 
 .kpi-body h2 {
-  font-size: 34px;
-  color: #181512;
-  margin-bottom: 10px;
-  font-family: 'Newsreader', serif;
+  font-size: 38px;
+  color: var(--color-primary, #1f1b16);
+  margin: 0 0 8px;
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 .kpi-body p {
-  color: #4d4540;
-  font-size: 14px;
+  color: var(--color-on-surface-variant, #6b6459);
+  font-size: 13px;
+  margin: 0;
+  font-weight: 500;
 }
 
 .status-success {
-  color: #198754 !important;
+  color: #16a34a !important;
+  font-weight: 600;
 }
 
-/* ---------- Progress ---------- */
+/* ---------- Progress Bar ---------- */
 .progress-bar {
   width: 100%;
-  height: 8px;
-  background: #e5e5e5;
-  border-radius: 20px;
-  margin-top: 18px;
+  height: 6px;
+  background: var(--color-surface-container-high, #e8e4db);
+  border-radius: var(--radius-full, 9999px);
+  margin-top: 16px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: #181512;
-  border-radius: 20px;
+  background: var(--color-primary-container, #2c2620);
+  border-radius: var(--radius-full, 9999px);
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ---------- Section ---------- */
@@ -127,32 +151,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 
 .section-header h2 {
-  font-family: 'Newsreader', serif;
-  font-size: 32px;
-  color: #181512;
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--color-primary, #1f1b16);
+  margin: 0;
 }
 
 .filter-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: none;
-  border: none;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
+  padding: 8px 16px;
+  border-radius: var(--radius-full, 9999px);
   cursor: pointer;
-  color: #4d4540;
-  font-size: 15px;
+  color: var(--color-primary, #1f1b16);
+  font-size: 13px;
   font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .filter-btn:hover {
-  color: #181512;
+  background: var(--color-surface-container-low, #f8f6f0);
+  border-color: var(--color-primary, #1f1b16);
 }
 
-/* ---------- Budget Cards ---------- */
+/* ---------- Budget Cards List ---------- */
 .budget-list {
   display: flex;
   flex-direction: column;
@@ -160,16 +190,18 @@
 }
 
 .budget-card {
-  background: #fff;
-  border: 1px solid #cfc4bd;
-  border-radius: 8px;
-  padding: 25px;
-  transition: .3s;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius-xl, 20px);
+  padding: 28px;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .budget-card:hover {
-  border-color: #181512;
-  transform: translateY(-2px);
+  border-color: var(--color-primary, #1f1b16);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.08);
 }
 
 .budget-top {
@@ -187,29 +219,34 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .budget-title-row h3 {
-  font-size: 26px;
-  font-family: 'Newsreader', serif;
-  color: #181512;
+  font-size: 24px;
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-weight: 700;
+  color: var(--color-primary, #1f1b16);
+  margin: 0;
 }
 
 .budget-tag {
-  background: #f3f4f5;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
+  background: var(--color-surface-container-low, #f8f6f0);
+  border: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  font-size: 10px;
   text-transform: uppercase;
-  font-weight: 600;
-  color: #4d4540;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--color-on-surface-variant, #6b6459);
 }
 
 .budget-info p {
-  color: #4d4540;
+  color: var(--color-on-surface-variant, #6b6459);
   line-height: 1.6;
-  font-size: 15px;
+  font-size: 14px;
+  margin: 0;
 }
 
 .budget-amount {
@@ -219,28 +256,33 @@
 
 .budget-amount h3 {
   font-size: 30px;
-  color: #181512;
-  font-family: 'Newsreader', serif;
+  color: var(--color-primary, #1f1b16);
+  font-family: var(--font-headline, 'Playfair Display', serif);
+  font-weight: 700;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .budget-amount span {
-  color: #777;
-  font-size: 20px;
+  color: var(--color-on-surface-variant, #6b6459);
+  font-size: 18px;
+  font-weight: 400;
 }
 
 .budget-amount p {
-  margin-top: 8px;
-  color: #4d4540;
-  font-size: 14px;
+  margin-top: 6px;
+  color: var(--color-on-surface-variant, #6b6459);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .warning {
-  color: #b36b00 !important;
+  color: #b45309 !important;
 }
 
-/* ---------- Icons ---------- */
+/* ---------- Material Icons Fix ---------- */
 .material-symbols-outlined {
-  font-size: 22px;
+  font-size: 20px;
   vertical-align: middle;
 }
 
@@ -263,7 +305,7 @@
 
 @media (max-width: 800px) {
   .dashboard-content {
-    padding: 24px;
+    padding: 16px 0;
   }
 
   .page-header {
@@ -274,7 +316,7 @@
   }
 
   .page-title {
-    font-size: 36px;
+    font-size: 32px;
   }
 
   .section-header {
