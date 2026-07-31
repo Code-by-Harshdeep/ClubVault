@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Wallet,
@@ -8,9 +8,11 @@ import {
   Users,
   Settings,
   HelpCircle,
-  Plus
+  Plus,
+  Menu,
+  X
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
 const MENU_ITEMS = [
@@ -23,83 +25,115 @@ const MENU_ITEMS = [
 ];
 
 export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  // Close the mobile drawer whenever the route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  // Close the drawer if the viewport is resized back to desktop
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 768) setIsOpen(false);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <aside className="cv-sidebar">
-
-      <div className="cv-sidebar-header">
-        <NavLink to="/" className="cv-sidebar-logo">
-          ClubVault
-        </NavLink>
-
-        <span className="cv-sidebar-sub">
-          STUDENT UNION
-        </span>
-      </div>
-
-
-      <button className="cv-btn-sidebar-cta">
-        <Plus size={18} />
-        <span>New Expense</span>
+    <>
+      <button
+        className="cv-sidebar-toggle"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
+      <div
+        className={`cv-sidebar-overlay ${isOpen ? "is-active" : ""}`}
+        onClick={() => setIsOpen(false)}
+      />
 
-      <div className="cv-sidebar-group">
+      <aside className={`cv-sidebar ${isOpen ? "is-open" : ""}`}>
 
-        <p className="cv-sidebar-label">
-          MAIN MENU
-        </p>
+        <div className="cv-sidebar-header">
+          <NavLink to="/" className="cv-sidebar-logo">
+            ClubVault
+          </NavLink>
 
-
-        <nav className="cv-sidebar-nav">
-
-          {MENU_ITEMS.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <NavLink
-                key={item.label}
-                to={item.href}
-                className={({ isActive }) =>
-                  `cv-sidebar-link ${isActive ? "active" : ""}`
-                }
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </NavLink>
-            );
-          })}
-
-        </nav>
-
-      </div>
+          <span className="cv-sidebar-sub">
+            STUDENT UNION
+          </span>
+        </div>
 
 
-      <div className="cv-sidebar-footer">
-
-        <NavLink
-          to="/settings"
-          className={({ isActive }) =>
-            `cv-sidebar-link ${isActive ? "active" : ""}`
-          }
-        >
-          <Settings size={18} />
-          <span>Settings</span>
-        </NavLink>
+        <button className="cv-btn-sidebar-cta">
+          <Plus size={18} />
+          <span>New Expense</span>
+        </button>
 
 
-        <NavLink
-          to="/support"
-          className={({ isActive }) =>
-            `cv-sidebar-link ${isActive ? "active" : ""}`
-          }
-        >
-          <HelpCircle size={18} />
-          <span>Support</span>
-        </NavLink>
+        <div className="cv-sidebar-group">
 
-      </div>
+          <p className="cv-sidebar-label">
+            MAIN MENU
+          </p>
 
 
-    </aside>
+          <nav className="cv-sidebar-nav">
+
+            {MENU_ITEMS.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <NavLink
+                  key={item.label}
+                  to={item.href}
+                  className={({ isActive }) =>
+                    `cv-sidebar-link ${isActive ? "active" : ""}`
+                  }
+                >
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
+
+          </nav>
+
+        </div>
+
+
+        <div className="cv-sidebar-footer">
+
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `cv-sidebar-link ${isActive ? "active" : ""}`
+            }
+          >
+            <Settings size={18} />
+            <span>Settings</span>
+          </NavLink>
+
+
+          <NavLink
+            to="/support"
+            className={({ isActive }) =>
+              `cv-sidebar-link ${isActive ? "active" : ""}`
+            }
+          >
+            <HelpCircle size={18} />
+            <span>Support</span>
+          </NavLink>
+
+        </div>
+
+      </aside>
+    </>
   );
 }
