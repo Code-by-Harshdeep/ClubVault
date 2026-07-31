@@ -1,26 +1,16 @@
-import React, { useState } from "react";
-import { Search, Bell, Menu, Sun, Moon } from "lucide-react";
+import React from "react";
+import { Search, Bell, Sun, Moon } from "lucide-react";
 import ProfileMenu from "../ProfileMenu/ProfileMenu";
 import { useTheme } from "../../ThemeContext";
 import "./Topbar.css";
 
 const Topbar = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="cv-topbar">
-      {/* LEFT SIDE: Search & Mobile Menu */}
+      {/* LEFT SIDE: Search */}
       <div className="cv-topbar-left">
-        <button
-          type="button"
-          className="cv-mobile-menu-btn"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle mobile menu"
-        >
-          <Menu size={22} />
-        </button>
-
         <div className="cv-search">
           <Search size={18} />
           <input type="text" placeholder="Search anything..." />
