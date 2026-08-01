@@ -77,11 +77,21 @@ body,
 }
 
 .cv-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-headline);
   font-size: 32px;
   font-weight: 700;
   color: var(--color-primary);
   letter-spacing: -0.01em;
+}
+
+.cv-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .cv-nav-links {
@@ -1489,10 +1499,18 @@ html[data-theme="dark"] .cv-glass-card {
 }
 
 .cv-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-headline);
   font-weight: 700;
   font-size: 24px;
   color: var(--color-primary);
+}
+
+.cv-footer-logo .cv-logo-mark {
+  width: 28px;
+  height: 28px;
 }
 
 .cv-footer-tagline {

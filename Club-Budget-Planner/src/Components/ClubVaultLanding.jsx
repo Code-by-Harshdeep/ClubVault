@@ -4,6 +4,8 @@ import "./ClubVaultLanding.css";
 import budgetImage from "../assets/budget.png";
 import collabImage from "../assets/collab.png";
 import mainImage from "../assets/main.jpg";
+import logoImage from "../../public/favicon.svg";
+
 
 import {
   Users,
@@ -65,6 +67,7 @@ export default function ClubVaultLanding() {
         <div className="cv-nav-inner">
           <div className="cv-nav-left">
             <a className="cv-logo" href="/">
+              <img className="cv-logo-mark" src={logoImage} alt="" />
               ClubVault
             </a>
 
@@ -574,7 +577,10 @@ export default function ClubVaultLanding() {
         <div className="cv-container">
           <div className="cv-footer-top">
             <div className="cv-footer-brand-block">
-              <span className="cv-footer-logo">ClubVault</span>
+              <span className="cv-footer-logo">
+                <img className="cv-logo-mark" src={logoImage} alt="" />
+                ClubVault
+              </span>
 
               <p className="cv-footer-tagline">
                 The treasury operating system for student organizations —
