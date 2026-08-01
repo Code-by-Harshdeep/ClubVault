@@ -16,9 +16,13 @@ import {
   X,
   Sun,
   Moon,
+  Globe,
+  MessageCircle,
+  Rss,
+  Mail,
 } from "lucide-react";
 
-import { NAV_LINKS, FEATURES, PLANS } from "./content";
+import { NAV_LINKS, FEATURES, PLANS, FOOTER_COLUMNS } from "./content";
 import DemoModal from "./WatchDemo/DemoModal";
 import { useReveal } from "./UserReveal/useReveal";
 import { useCountUp } from "./hooks/useCountUp";
@@ -561,26 +565,71 @@ export default function ClubVaultLanding() {
           </div>
         </div>
       </section>
+
       {/* =========================
           FOOTER
       ========================== */}
 
       <footer className="cv-footer">
-        <div className="cv-footer-inner">
-          <div className="cv-footer-brand">
-            <span className="cv-footer-logo">ClubVault</span>
+        <div className="cv-container">
+          <div className="cv-footer-top">
+            <div className="cv-footer-brand-block">
+              <span className="cv-footer-logo">ClubVault</span>
 
+              <p className="cv-footer-tagline">
+                The treasury operating system for student organizations —
+                budgets, approvals, and audit trails in one place.
+              </p>
+
+              <div className="cv-footer-socials">
+                <a href="#" aria-label="Website">
+                  <Globe size={17} />
+                </a>
+                <a href="#" aria-label="Community">
+                  <MessageCircle size={17} />
+                </a>
+                <a href="#" aria-label="Blog">
+                  <Rss size={17} />
+                </a>
+                <a href="#" aria-label="Email">
+                  <Mail size={17} />
+                </a>
+              </div>
+            </div>
+
+            <div className="cv-footer-columns">
+              {FOOTER_COLUMNS.map((col) => (
+                <div className="cv-footer-col" key={col.heading}>
+                  <h4>{col.heading}</h4>
+                  <ul>
+                    {col.links.map((link) => (
+                      <li key={link.label}>
+                        <a href={link.href}>{link.label}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="cv-footer-newsletter">
+              <h4>Stay in the loop</h4>
+              <p>Product updates, no spam.</p>
+
+              <form
+                className="cv-newsletter-form"
+                onSubmit={(e) => e.preventDefault()}
+              >
+                <input type="email" placeholder="you@university.edu" />
+                <button type="submit">Subscribe</button>
+              </form>
+            </div>
+          </div>
+
+          <div className="cv-footer-bottom">
             <span className="cv-footer-copy">
               © 2026 ClubVault Finance. Built for Student Leaders.
             </span>
-          </div>
-
-          <div className="cv-footer-links">
-            <a href="#priva">Privacy Policy</a>
-
-            <a href="#">Terms of Service</a>
-
-            <a href="#">University Guidelines</a>
           </div>
         </div>
       </footer>
