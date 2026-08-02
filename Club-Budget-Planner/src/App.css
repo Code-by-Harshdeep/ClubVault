@@ -7,12 +7,12 @@
   display: flex !important;
   flex-direction: row !important;
   width: 100vw;
-  min-height: 100vh;
+  height: 100vh; /* was: min-height: 100vh — this let the whole page grow taller than the viewport and scroll along with the sidebar */
   margin: 0;
   padding: 0;
   background-color: var(--color-background, #faf9f6);
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden; /* the shell itself never scrolls */
 }
 
 /* 2. Main content area sits right beside Sidebar */
@@ -23,6 +23,7 @@
   min-width: 0 !important;
   margin-left: 0 !important; /* DO NOT use margin-left: 260px with flexbox */
   width: auto !important;
+  height: 100vh; /* stretches to match .dashboard-layout-container's fixed height */
 }
 
 /* 3. Outlet container where pages render */
@@ -30,11 +31,13 @@
   flex: 1 !important;
   padding: 32px 40px !important;
   box-sizing: border-box !important;
-  overflow-y: auto !important;
+  overflow-y: auto !important; /* the ONLY scrollable region on the page */
 }
 
 @media (max-width: 800px) {
   .dashboard-layout-container {
     flex-direction: column !important;
+    height: auto; /* let the mobile stacked layout size naturally; the off-canvas sidebar drawer handles its own fixed positioning */
+    overflow: visible;
   }
 }
