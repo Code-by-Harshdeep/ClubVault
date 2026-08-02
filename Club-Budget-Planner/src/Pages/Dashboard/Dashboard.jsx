@@ -19,6 +19,18 @@ import {
 } from "lucide-react";
 import "./Dashboard.css";
 
+// Small inline sparkline — purely decorative, gives the count cards
+// visual weight beyond a bare number sitting in whitespace.
+function MiniSparkline({ values, tone }) {
+  return (
+    <div className={`cv-mini-sparkline ${tone}`}>
+      {values.map((h, i) => (
+        <span key={i} style={{ height: `${h}%` }} />
+      ))}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -127,9 +139,10 @@ export default function Dashboard() {
       <div className="cv-stats-row">
         {/* Total Vault Balance */}
         <div className="cv-glass-stat-card primary-highlight">
+          <div className="cv-stat-accent-bar primary" />
           <div className="cv-stat-header">
             <span className="cv-stat-label">TOTAL VAULT BALANCE</span>
-            <div className="cv-icon-bubble">
+            <div className="cv-icon-bubble primary">
               <Building2 size={18} />
             </div>
           </div>
@@ -151,13 +164,17 @@ export default function Dashboard() {
 
         {/* Active Budgets */}
         <div className="cv-glass-stat-card">
+          <div className="cv-stat-accent-bar info" />
           <div className="cv-stat-header">
             <span className="cv-stat-label">ACTIVE COMMITTEE BUDGETS</span>
-            <div className="cv-icon-bubble">
+            <div className="cv-icon-bubble info">
               <PieChart size={18} />
             </div>
           </div>
-          <p className="cv-stat-value">8</p>
+          <div className="cv-stat-value-row">
+            <p className="cv-stat-value">8</p>
+            <MiniSparkline values={[45, 60, 50, 75, 65, 85]} tone="info" />
+          </div>
           <p className="cv-stat-sub">Across 4 active committees</p>
           <div className="cv-stat-meta-pills">
             <span className="cv-mini-pill">Events</span>
@@ -169,13 +186,17 @@ export default function Dashboard() {
 
         {/* Pending Approvals */}
         <div className="cv-glass-stat-card warning-highlight">
+          <div className="cv-stat-accent-bar warning" />
           <div className="cv-stat-header">
             <span className="cv-stat-label">PENDING REIMBURSEMENTS</span>
             <div className="cv-icon-bubble warning">
               <Clock size={18} />
             </div>
           </div>
-          <p className="cv-stat-value">14</p>
+          <div className="cv-stat-value-row">
+            <p className="cv-stat-value">14</p>
+            <MiniSparkline values={[30, 55, 40, 70, 85, 95]} tone="warning" />
+          </div>
           <div className="cv-warning-footer">
             <span className="cv-badge-trend warning">
               <AlertCircle size={12} /> Requires Treasurer Review
@@ -248,56 +269,60 @@ export default function Dashboard() {
           </div>
 
           {/* Table View */}
-          <table className="cv-ledger-table">
-            <thead>
-              <tr>
-                <th>DESCRIPTION & DEPT</th>
-                <th>CATEGORY</th>
-                <th>DATE</th>
-                <th>STATUS</th>
-                <th style={{ textAlign: "right" }}>AMOUNT</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEntries.length > 0 ? (
-                filteredEntries.map((entry) => (
-                  <tr key={entry.id} className="cv-table-row">
-                    <td>
-                      <div className="cv-entry-info">
-                        <p className="cv-entry-title">{entry.title}</p>
-                        <span className="cv-dept-name">{entry.dept}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`cv-tag cv-tag-${entry.type}`}>
-                        {entry.categoryTag}
-                      </span>
-                    </td>
-                    <td className="cv-entry-date">{entry.date}</td>
-                    <td>
-                      <span className={`cv-status-pill ${entry.statusType}`}>
-                        {entry.statusType === "success" && <CheckCircle2 size={12} />}
-                        {entry.statusType === "warning" && <Clock size={12} />}
-                        {entry.status}
-                      </span>
-                    </td>
-                    <td
-                      style={{ textAlign: "right" }}
-                      className={`cv-entry-amount ${entry.type}`}
-                    >
-                      {entry.amount}
+          <div className="cv-table-scroll">
+            <table className="cv-ledger-table">
+              <thead>
+                <tr>
+                  <th>DESCRIPTION & DEPT</th>
+                  <th>CATEGORY</th>
+                  <th>DATE</th>
+                  <th>STATUS</th>
+                  <th style={{ textAlign: "right" }}>AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEntries.length > 0 ? (
+                  filteredEntries.map((entry) => (
+                    <tr key={entry.id} className="cv-table-row">
+                      <td>
+                        <div className="cv-entry-info">
+                          <p className="cv-entry-title">{entry.title}</p>
+                          <span className="cv-dept-name">{entry.dept}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`cv-tag cv-tag-${entry.type}`}>
+                          {entry.categoryTag}
+                        </span>
+                      </td>
+                      <td className="cv-entry-date">{entry.date}</td>
+                      <td>
+                        <span className={`cv-status-pill ${entry.statusType}`}>
+                          {entry.statusType === "success" && <CheckCircle2 size={12} />}
+                          {entry.statusType === "warning" && <Clock size={12} />}
+                          {entry.status}
+                        </span>
+                      </td>
+                      <td
+                        style={{ textAlign: "right" }}
+                        className={`cv-entry-amount ${entry.type}`}
+                      >
+                        <span className={`cv-amount-chip ${entry.type}`}>
+                          {entry.amount}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="cv-empty-state">
+                      No matching ledger entries found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="cv-empty-state">
-                    No matching ledger entries found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Executive Action Buttons */}
@@ -313,7 +338,7 @@ export default function Dashboard() {
             onClick={() => alert("Opening Reimbursement Form...")}
           >
             <div className="cv-action-left">
-              <div className="cv-action-icon">
+              <div className="cv-action-icon accent">
                 <Plus size={18} />
               </div>
               <div>
@@ -361,4 +386,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
+} 

@@ -17,6 +17,7 @@ import Transactions from "./Pages/Transactions/Transactions";
 import EventsPlanning from "./Pages/Events/EventsPlanning";
 import Members from "./Pages/Members/Members";
 import Settings from "./Pages/Settings/Settings";
+import Support from "./Components/Support/Support";
 import { ThemeProvider } from "./ThemeContext";
 
 // Global Layout wrapper
@@ -84,6 +85,10 @@ const router = createBrowserRouter([
         path:"/settings",
         element:<Settings/>
       },
+      {
+        path:"/support",
+        element:<Support/>
+      }
     ],
   },
 ]);
