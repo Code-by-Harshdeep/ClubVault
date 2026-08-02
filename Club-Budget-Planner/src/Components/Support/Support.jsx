@@ -207,7 +207,7 @@ export default function Support() {
             <div className="support-box-content">
               <h3>Live Chat</h3>
 
-              <p>Chat with our finance experts. Average response: 2 mins.</p>
+              <p>Currently Unavailable due to no Agent is Present , Will be Available Soon</p>
 
               <button className="chat-button">
                 <MessageCircle size={16} />
