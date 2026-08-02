@@ -225,7 +225,7 @@ export default function Support() {
               <div>
                 <h4>Email Support</h4>
 
-                <span>Response within 24 hours</span>
+                <span>Response within 24 to 48 hours</span>
               </div>
             </div>
 
