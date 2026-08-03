@@ -53,19 +53,16 @@ const faqs = [
     answer:
       'To submit an expense, navigate to the Dashboard and click "New Expense". Upload a clear image of your receipt, select the appropriate budget category, and provide a brief justification. Once submitted, your club treasurer and Student Union will receive it for approval.',
   },
-
   {
     question: "How to invite new members to the finance committee?",
     answer:
       'Head to the Members tab. Click "Invite Officer", enter their university email, and assign a role. They will receive setup instructions.',
   },
-
   {
     question: "Can I export reports for my university audit?",
     answer:
       "Yes, the Reporting section allows you to generate PDF and CSV summaries for any fiscal period.",
   },
-
   {
     question: "What happens if my budget is overspent?",
     answer:
@@ -106,51 +103,46 @@ export default function Support() {
     const shortcutHandler = (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-
         searchRef.current?.focus();
       }
     };
 
     window.addEventListener("keydown", shortcutHandler);
-
     return () => window.removeEventListener("keydown", shortcutHandler);
   }, []);
 
   return (
     <main className="support-page">
       {/* PAGE HEADER */}
-
       <header className="support-header">
-        <span className="support-eyebrow">Resources</span>
+        <div className="support-header-left">
+          <span className="support-eyebrow">Resources</span>
+          <h1>Support & Help Center</h1>
+        </div>
 
-        <h1>Support & Help Center</h1>
-
-        <p>Find guides, tutorials and answers to frequently asked questions.</p>
+        <p className="support-header-desc">
+          Find guides, tutorials and answers to frequently asked questions.
+        </p>
       </header>
 
       {/* SEARCH SECTION */}
-
       <section className="support-search">
         <h2>How can we help you today?</h2>
-
         <p>Search articles, tutorials and documentation for ClubVault.</p>
 
         <div className="support-search-box">
-          <Search size={20} />
-
+          <Search size={18} />
           <input
             ref={searchRef}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search for 'How to submit an expense'..."
           />
-
           <kbd>Ctrl + K</kbd>
         </div>
       </section>
 
       {/* CATEGORY CARDS */}
-
       <section className="support-categories">
         {categories.map((item, index) => {
           const Icon = item.icon;
@@ -158,9 +150,7 @@ export default function Support() {
           return (
             <article className="category-card" key={index}>
               <Icon size={34} strokeWidth={1.5} />
-
               <h3>{item.title}</h3>
-
               <p>{item.description}</p>
             </article>
           );
@@ -168,12 +158,10 @@ export default function Support() {
       </section>
 
       {/* MAIN CONTENT START */}
-
       <section className="support-main-grid">
         <div className="faq-card">
           <div className="faq-header">
             <h2>Common Questions</h2>
-
             <button>View All FAQ</button>
           </div>
 
@@ -188,8 +176,7 @@ export default function Support() {
                     onClick={() => setActiveFAQ(open ? -1 : index)}
                   >
                     <span>{faq.question}</span>
-
-                    {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
 
                   {open && <div className="faq-answer">{faq.answer}</div>}
@@ -198,17 +185,17 @@ export default function Support() {
             })}
           </div>
         </div>
-        {/* SUPPORT SIDEBAR */}
 
+        {/* SUPPORT SIDEBAR */}
         <aside className="support-sidebar">
           {/* LIVE CHAT */}
-
           <div className="support-box live-chat-box">
             <div className="support-box-content">
               <h3>Live Chat</h3>
-
-              <p>Currently Unavailable due to no Agent is Present , Will be Available Soon</p>
-
+              <p>
+                Currently Unavailable due to no Agent is Present , Will be
+                Available Soon
+              </p>
               <button className="chat-button">
                 <MessageCircle size={16} />
                 Start Conversation
@@ -217,32 +204,25 @@ export default function Support() {
           </div>
 
           {/* EMAIL SUPPORT */}
-
           <div className="support-box">
             <div className="support-box-title">
               <Mail size={18} />
-
               <div>
                 <h4>Email Support</h4>
-
                 <span>Response within 24 to 48 hours</span>
               </div>
             </div>
 
             <p>Best for complex billing questions or platform bugs.</p>
-
             <a href="mailto:support@clubvault.edu">support@clubvault.edu</a>
           </div>
 
           {/* UNIVERSITY GUIDELINES */}
-
           <div className="support-box guideline-box">
             <div className="support-box-title">
               <ExternalLink size={18} />
-
               <div>
                 <h4>University Guidelines</h4>
-
                 <span>External Resource</span>
               </div>
             </div>
@@ -258,7 +238,6 @@ export default function Support() {
       </section>
 
       {/* TRENDING GUIDES */}
-
       <section className="trending-section">
         <h3>Trending Guides</h3>
 
@@ -268,11 +247,9 @@ export default function Support() {
 
             return (
               <article className="guide-card" key={index}>
-                <Icon size={20} strokeWidth={1.5} />
-
+                <Icon size={24} strokeWidth={1.5} />
                 <div>
                   <h4>{guide.title}</h4>
-
                   <p>{guide.description}</p>
                 </div>
               </article>

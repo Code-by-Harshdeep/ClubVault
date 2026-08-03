@@ -1,583 +1,410 @@
-/* =========================
-   RESET
-========================= */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #f8f9fa;
-  color: #191c1d;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* =========================
-   PAGE
-========================= */
-
+/* Base Page Layout */
 .support-page {
-  max-width: 1440px;
-
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-
-  padding: 48px 48px 80px;
+  margin-top: -70px;
+  padding: 40px 24px 80px;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  color: #1a1a1a;
+  background-color: #faf9f6; /* Off-white background matching the design */
 }
 
-/* =========================
-   HEADER
-========================= */
-
+/* Header Container */
 .support-header {
-  padding-bottom: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e2e0d8;
+  margin-bottom: 48px;
+  gap: 24px;
+}
 
-  border-bottom: 1px solid #d8cec7;
+/* Left Stack: RESOURCES over Support & Help Center */
+.support-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .support-eyebrow {
-  display: block;
-
-  margin-bottom: 16px;
-
-  font-size: 12px;
-
-  font-weight: 600;
-
-  color: #7e756f;
-
-  letter-spacing: 0.18em;
-
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #8c857b;
 }
 
-.support-header h1 {
+.support-header-left h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px;
+  font-weight: 700;
   margin: 0;
-
-  font-family: Georgia, "Times New Roman", serif;
-
-  font-size: 64px;
-
-  line-height: 1.05;
-
-  font-weight: 600;
-
-  letter-spacing: -0.03em;
-
-  color: #181512;
+  color: #111;
+  line-height: 1;
 }
 
-.support-header p {
-  margin-top: 20px;
-
-  max-width: 700px;
-
-  color: #4d4540;
-
-  font-size: 18px;
-
-  line-height: 1.6;
+/* Right-aligned Paragraph */
+.support-header-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  max-width: 300px;
+  line-height: 1.4;
+  text-align: right;
+  flex-shrink: 0;
 }
 
-/* =========================
-   SEARCH
-========================= */
-
+/* Search Section */
 .support-search {
-  max-width: 850px;
-
-  margin: 72px auto;
-
   text-align: center;
+  margin-bottom: 56px;
 }
 
 .support-search h2 {
-  margin: 0 0 14px;
-
-  font-family: Georgia, serif;
-
-  font-size: 42px;
-
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
   font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #111;
 }
 
 .support-search p {
-  margin-bottom: 40px;
-
-  color: #4d4540;
-
-  font-size: 17px;
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 24px 0;
 }
 
 .support-search-box {
-  height: 72px;
-
+  max-width: 580px;
+  margin: 0 auto;
   display: flex;
-
   align-items: center;
-
-  gap: 15px;
-
-  padding: 0 20px;
-
-  background: white;
-
-  border: 1px solid #cfc4bd;
+  background: #ffffff;
+  border: 1px solid #e0ded7;
+  padding: 10px 16px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .support-search-box svg {
-  color: #7e756f;
+  color: #8c857b;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .support-search-box input {
-  flex: 1;
-
   border: none;
-
   outline: none;
-
-  font-size: 17px;
-
+  width: 100%;
+  font-size: 14px;
+  color: #1a1a1a;
   background: transparent;
 }
 
-.support-search-box input::placeholder {
-  color: #928982;
-}
-
 .support-search-box kbd {
-  padding: 5px 10px;
-
-  border: 1px solid #cfc4bd;
-
-  background: #f3f4f5;
-
-  color: #7e756f;
-
-  font-size: 12px;
+  background: #f0ede6;
+  border: 1px solid #dcd8ce;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: #666;
+  font-family: inherit;
+  white-space: nowrap;
 }
 
-/* =========================
-   CATEGORY CARDS
-========================= */
-
+/* Category Grid (5 Columns) */
 .support-categories {
   display: grid;
-
   grid-template-columns: repeat(5, 1fr);
-
-  gap: 24px;
-
+  gap: 16px;
   margin-bottom: 56px;
 }
 
 .category-card {
-  min-height: 220px;
-
-  padding: 36px 30px;
-
-  background: white;
-
-  border: 1px solid #d8cec7;
-
+  background: #ffffff;
+  padding: 24px 20px;
+  border-radius: 4px;
+  border: 1px solid #ebd9c8; /* Light warm accent border */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
   display: flex;
-
   flex-direction: column;
-
-  gap: 22px;
-
-  transition: 0.25s ease;
-
-  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .category-card:hover {
-  border-color: #181512;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
 }
 
 .category-card svg {
-  color: #181512;
+  color: #2c2825;
+  margin-bottom: 16px;
 }
 
 .category-card h3 {
-  margin: 0;
-
-  font-size: 15px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.12em;
-
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 8px 0;
+  color: #111;
 }
 
 .category-card p {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
   margin: 0;
-
-  color: #4d4540;
-
-  font-size: 15px;
-
-  line-height: 1.6;
 }
 
-/* =========================
-   MAIN GRID
-========================= */
-
+/* Main Grid Layout */
 .support-main-grid {
   display: grid;
-
-  grid-template-columns: 2fr 1fr;
-
-  gap: 24px;
+  grid-template-columns: 1fr 340px;
+  gap: 32px;
+  margin-bottom: 64px;
 }
 
-/* =========================
-   FAQ
-========================= */
-
+/* FAQ Section */
 .faq-card {
-  background: white;
-
-  border: 1px solid #d8cec7;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 4px;
+  border: 1px solid #e8e5dd;
 }
 
 .faq-header {
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
-  padding: 28px;
-
-  border-bottom: 1px solid #e5ddd7;
+  margin-bottom: 24px;
 }
 
 .faq-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
   margin: 0;
-
-  font-family: Georgia, serif;
-
-  font-size: 30px;
-
-  font-weight: 500;
 }
 
 .faq-header button {
-  border: none;
-
   background: none;
-
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
+  color: #111;
+}
 
-  color: #4d4540;
+.faq-list {
+  display: flex;
+  flex-direction: column;
 }
 
 .faq-item {
-  border-bottom: 1px solid #eee5df;
+  border-bottom: 1px solid #f0ede6;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
 }
 
 .faq-question {
   width: 100%;
-
-  padding: 26px;
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
-  background: white;
-
+  background: none;
   border: none;
-
-  cursor: pointer;
-
-  text-align: left;
-
-  font-size: 14px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.08em;
-
+  padding: 18px 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-}
-
-.faq-question:hover {
-  background: #f3f4f5;
+  text-align: left;
+  cursor: pointer;
+  color: #111;
 }
 
 .faq-answer {
-  padding: 0 26px 28px;
-
-  color: #4d4540;
-
-  font-size: 15px;
-
-  line-height: 1.7;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+  padding-bottom: 18px;
 }
 
-/* =========================
-   SUPPORT SIDEBAR
-========================= */
-
+/* Sidebar Boxes */
 .support-sidebar {
   display: flex;
-
   flex-direction: column;
-
-  gap: 24px;
+  gap: 16px;
 }
 
 .support-box {
   background: #ffffff;
-
-  border: 1px solid #d8cec7;
-
-  padding: 28px;
+  padding: 24px;
+  border-radius: 4px;
+  border: 1px solid #e8e5dd;
 }
 
-.support-box h3 {
-  margin: 0 0 14px;
-
-  font-family: Georgia, serif;
-
-  font-size: 30px;
-
-  font-weight: 500;
-}
-
-.support-box p {
-  margin: 0 0 24px;
-
-  color: #4d4540;
-
-  font-size: 15px;
-
-  line-height: 1.6;
-}
-
-/* =========================
-   LIVE CHAT
-========================= */
-
+/* Dark Live Chat Box */
 .live-chat-box {
-  background: #2d2926;
-
-  color: white;
-
-  min-height: 270px;
-
-  display: flex;
-
-  align-items: flex-start;
+  background: #23201d;
+  color: #ffffff;
+  border: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .live-chat-box h3 {
-  color: white;
+  font-size: 20px;
+  font-family: 'Playfair Display', serif;
+  margin: 0 0 10px 0;
+  color: #ffffff;
 }
 
 .live-chat-box p {
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  color: #c5c0b8;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
 }
 
 .chat-button {
-  display: flex;
-
+  background: #3e3833;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
   align-items: center;
-
-  gap: 10px;
-
-  padding: 12px 18px;
-
-  background: rgba(255, 255, 255, 0.1);
-
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  color: white;
-
+  gap: 8px;
   cursor: pointer;
-
-  font-size: 14px;
-
-  transition: 0.2s ease;
+  transition: background 0.2s;
 }
 
 .chat-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #4e4741;
 }
 
-/* =========================
-   EMAIL / GUIDELINE
-========================= */
-
+/* Email & Guideline Box Header */
 .support-box-title {
   display: flex;
-
   align-items: flex-start;
-
-  gap: 14px;
-
-  margin-bottom: 22px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .support-box-title svg {
-  color: #181512;
+  color: #111;
+  margin-top: 2px;
 }
 
 .support-box-title h4 {
-  margin: 0 0 5px;
-
-  font-size: 13px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.15em;
-
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 2px 0;
 }
 
 .support-box-title span {
-  font-size: 12px;
+  font-size: 11px;
+  color: #8c857b;
+}
 
-  color: #7e756f;
+.support-box p {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.4;
+  margin: 0 0 16px 0;
 }
 
 .support-box a {
-  display: block;
-
-  padding-top: 18px;
-
-  border-top: 1px solid #e5ddd7;
-
-  color: #181512;
-
-  text-decoration: none;
-
+  font-size: 12px;
   font-weight: 600;
-
-  font-size: 14px;
-}
-
-.support-box a:hover {
+  color: #111;
   text-decoration: underline;
 }
 
 .handbook-button {
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-
-  padding-top: 18px;
-
-  border: none;
-
-  border-top: 1px solid #e5ddd7;
-
   background: none;
-
-  color: #181512;
-
+  border: none;
+  padding: 0;
+  font-size: 12px;
   font-weight: 600;
-
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
 }
 
-/* =========================
-   TRENDING GUIDES
-========================= */
-
+/* Trending Guides Section */
 .trending-section {
-  margin-top: 70px;
+  border-top: 1px solid #e2e0d8;
+  padding-top: 32px;
 }
 
-.trending-section > h3 {
-  margin-bottom: 26px;
-
-  color: #7e756f;
-
-  font-size: 12px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.18em;
-
+.trending-section h3 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: #8c857b;
+  margin: 0 0 20px 0;
 }
 
 .trending-grid {
   display: grid;
-
   grid-template-columns: repeat(4, 1fr);
-
-  gap: 24px;
+  gap: 16px;
 }
 
 .guide-card {
-  background: white;
-
-  border: 1px solid #d8cec7;
-
-  padding: 20px;
-
+  background: #ffffff;
+  padding: 18px 16px;
+  border-radius: 4px;
+  border: 1px solid #e8e5dd;
   display: flex;
-
   align-items: flex-start;
-
-  gap: 16px;
-
-  transition: 0.2s ease;
-}
-
-.guide-card:hover {
-  border-color: #181512;
+  gap: 12px;
 }
 
 .guide-card svg {
-  color: #7e756f;
-
+  color: #111;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .guide-card h4 {
-  margin: 0 0 8px;
-
-  font-size: 14px;
-
-  font-weight: 600;
-
-  letter-spacing: 0.08em;
-
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
+  margin: 0 0 4px 0;
+  color: #111;
 }
 
 .guide-card p {
+  font-size: 12px;
+  color: #666;
   margin: 0;
-
-  color: #4d4540;
-
-  font-size: 13px;
-
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media (max-width: 1200px) {
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
   .support-categories {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .support-main-grid {
-    grid-template-columns: 1fr;
   }
 
   .trending-grid {
@@ -586,59 +413,32 @@ body {
 }
 
 @media (max-width: 768px) {
-  .support-page {
-    padding: 24px 18px;
+  .support-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
-  .support-header h1 {
-    font-size: 42px;
+  .support-header-desc {
+    text-align: left;
+    max-width: 100%;
   }
 
-  .support-header p {
-    font-size: 16px;
-  }
-
-  .support-search {
-    margin: 45px auto;
-  }
-
-  .support-search h2 {
-    font-size: 32px;
+  .support-main-grid {
+    grid-template-columns: 1fr;
   }
 
   .support-categories {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .trending-grid {
     grid-template-columns: 1fr;
   }
-
-  .faq-header {
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    gap: 16px;
-  }
 }
 
 @media (max-width: 480px) {
-  .support-header h1 {
-    font-size: 34px;
-  }
-
-  .support-search-box {
-    height: 60px;
-  }
-
-  .support-search-box kbd {
-    display: none;
-  }
-
-  .faq-question {
-    padding: 20px;
-
-    font-size: 12px;
+  .support-categories {
+    grid-template-columns: 1fr;
   }
 }
