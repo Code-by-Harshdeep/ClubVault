@@ -1,5 +1,5 @@
 /* Google Fonts & Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700");
 
 /* ---------- Settings Page Layout ---------- */
@@ -110,64 +110,68 @@
 }
 
 /* Buttons */
-.settings-btn {
-  border-radius: var(--radius-full, 9999px);
+/* Save Changes Button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 22px;
+  border: none;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--color-primary-container, #2c2620);
+  color: var(--color-on-primary, #ffffff);
   font-family: var(--font-body, "Inter", sans-serif);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.settings-btn-primary {
-  background: var(--color-primary-container, #2c2620);
-  color: var(--color-on-primary, #ffffff);
-  border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.settings-btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--color-primary, #1f1b16);
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.settings-btn-outline {
-  background: var(--color-surface, #ffffff);
-  color: var(--color-primary, #1f1b16);
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-.settings-btn-outline:hover {
-  background: var(--color-surface-container-low, #f8f6f0);
-  border-color: var(--color-primary, #1f1b16);
-  transform: translateY(-1px);
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
 }
 
 /* Form Grid */
-.settings-form-grid {
+.form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
-.settings-field {
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.settings-field.full {
+.form-group.full {
   grid-column: span 2;
 }
 
-.settings-field label {
+.form-group label {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -175,8 +179,8 @@
   color: var(--color-on-surface-variant, #6b6459);
 }
 
-.settings-field input,
-.settings-field textarea {
+.form-group input,
+.form-group textarea {
   width: 100%;
   padding: 12px 16px;
   border-radius: var(--radius-lg, 12px);
@@ -188,15 +192,21 @@
   font-family: var(--font-body, "Inter", sans-serif);
   transition: all 0.2s ease;
   box-sizing: border-box;
+  resize: vertical;
 }
 
-.settings-field input:focus,
-.settings-field textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
   border-color: var(--color-primary, #1f1b16);
   background: var(--color-surface, #ffffff);
   box-shadow: 0 0 0 3px rgba(31, 27, 22, 0.08);
 }
 
+.form-group input:read-only,
+.form-group textarea:read-only {
+  cursor: default;
+  opacity: 0.8;
+}
 /* Actions Footer */
 .settings-actions {
   display: flex;
@@ -351,25 +361,213 @@
 }
 
 /* Responsive Design */
+
+/* Tablets and smaller laptops */
 @media (max-width: 900px) {
+  .settings-page {
+    padding: 0 0 32px;
+  }
+
   .settings-section {
     grid-template-columns: 1fr;
     gap: 16px;
+    margin-bottom: 32px;
   }
 
-  .settings-form-grid {
+  .settings-section-title h2 {
+    font-size: 20px;
+  }
+
+  .settings-card {
+    padding: 24px;
+  }
+
+  /* Form */
+  .form-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 
-  .settings-field.full {
+  .form-group.full {
     grid-column: span 1;
   }
 
+  /* Integrations */
   .integration-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .settings-header {
+    margin-bottom: 28px;
   }
 
   .settings-header h1 {
     font-size: 32px;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 600px) {
+  .settings-page {
+    padding: 0 0 24px;
+  }
+
+  /* Header */
+  .settings-header {
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+  }
+
+  .settings-header h1 {
+    font-size: 28px;
+    line-height: 1.2;
+  }
+
+  .settings-header p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Sections */
+  .settings-section {
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .settings-section-title h2 {
+    font-size: 19px;
+  }
+
+  .settings-section-title p {
+    font-size: 12px;
+  }
+
+  /* Cards */
+  .settings-card {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  /* Form */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-group.full {
+    grid-column: span 1;
+  }
+
+  .form-group label {
+    font-size: 11px;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 11px 14px;
+    font-size: 14px;
+  }
+
+  /* Save Button */
+  .form-actions {
+    margin-top: 22px;
+    padding-top: 18px;
+  }
+
+  .form-actions .btn-primary {
+    width: 100%;
+  }
+
+  /* Notifications */
+  .notification-item {
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+  }
+
+  .notification-item h3 {
+    font-size: 13px;
+  }
+
+  .notification-item p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* Toggle */
+  .toggle {
+    width: 44px;
+    height: 24px;
+  }
+
+  .toggle-slider::before {
+    width: 18px;
+    height: 18px;
+    top: 3px;
+    left: 3px;
+  }
+
+  .toggle input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  /* Security */
+  .session-item {
+    padding: 14px 0;
+  }
+
+  .session-info {
+    gap: 10px;
+  }
+
+  .session-info h4 {
+    font-size: 13px;
+  }
+
+  .session-info p {
+    font-size: 11px;
+  }
+
+  /* Integrations */
+  .integration-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .integration-card {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .integration-header {
+    margin-bottom: 14px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+  .settings-card {
+    padding: 16px;
+  }
+
+  .settings-header h1 {
+    font-size: 25px;
+  }
+
+  .settings-section-title h2 {
+    font-size: 18px;
+  }
+
+  .notification-item {
+    align-items: flex-start;
+  }
+
+  .toggle {
+    margin-top: 2px;
+  }
+
+  .form-actions .btn-primary {
+    padding: 10px 18px;
+    font-size: 12px;
   }
 }
