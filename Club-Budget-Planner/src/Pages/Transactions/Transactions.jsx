@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useClub } from "../../ClubContext";
 import { api } from "../../api";
 import "./Transactions.css";
@@ -74,12 +75,25 @@ function NewTransactionModal({ onClose, onSubmit, defaultType }) {
 
 const Transactions = () => {
   const { club } = useClub();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("income");
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
+
+  // Support being deep-linked here with ?new=1 (e.g. the sidebar's
+  // "New Expense" button) so it opens straight into the add form.
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setFilter("expense");
+      setShowModal(true);
+      searchParams.delete("new");
+      setSearchParams(searchParams, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const load = async () => {
     if (!club?._id) return;

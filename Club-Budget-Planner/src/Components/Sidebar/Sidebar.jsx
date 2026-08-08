@@ -12,7 +12,8 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useClub } from "../../ClubContext";
 import "./Sidebar.css";
 
 const MENU_ITEMS = [
@@ -27,6 +28,8 @@ const MENU_ITEMS = [
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { club } = useClub();
 
   // Close the mobile drawer whenever the route changes
   useEffect(() => {
@@ -66,12 +69,15 @@ export default function Sidebar() {
           </NavLink>
 
           <span className="cv-sidebar-sub">
-            STUDENT UNION
+            {club?.name ? club.name.toUpperCase() : "STUDENT UNION"}
           </span>
         </div>
 
 
-        <button className="cv-btn-sidebar-cta">
+        <button
+          className="cv-btn-sidebar-cta"
+          onClick={() => navigate("/transactions?new=1")}
+        >
           <Plus size={18} />
           <span>New Expense</span>
         </button>
