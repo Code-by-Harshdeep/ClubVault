@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
+const clubRoutes = require("./routes/clubRoutes");
 
 const app = express();
 
@@ -20,5 +21,6 @@ app.use(express.json());
 
 // routes
 app.use("/api", authRoutes);
+app.use("/api/clubs", clubRoutes);
 
 module.exports = app;

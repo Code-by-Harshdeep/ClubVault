@@ -1,23 +1,20 @@
-// src/pages/Settings.jsx
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ShieldCheck,
   Monitor,
-  Smartphone,
   Landmark,
   Receipt,
   Tag,
-  CheckCircle,
-  Settings as SettingsIcon,
 } from "lucide-react";
+import { useClub } from "../../ClubContext";
+import { api } from "../../api";
 
 import "./Settings.css";
 
-const Toggle = ({ checked = false }) => {
+const Toggle = ({ checked, onChange }) => {
   return (
     <label className="toggle">
-      <input type="checkbox" defaultChecked={checked} />
+      <input type="checkbox" checked={checked} onChange={onChange} />
       <span />
     </label>
   );
@@ -37,217 +34,187 @@ const SettingSection = ({ title, description, children }) => {
 };
 
 export default function Settings() {
+  const { club, role, refreshClub } = useClub();
+  const isAdmin = role === "admin";
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+  const [error, setError] = useState("");
+
+  // Local-only preference toggles — not yet backed by a persisted setting.
+  const [notifExpense, setNotifExpense] = useState(true);
+  const [notifBudget, setNotifBudget] = useState(true);
+  const [notifWeekly, setNotifWeekly] = useState(false);
+
+  useEffect(() => {
+    if (club) {
+      setName(club.name || "");
+      setDescription(club.description || "");
+    }
+  }, [club]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSaveMessage("");
+    setSaving(true);
+    try {
+      await api.patch(`/api/clubs/${club._id}`, { name, description });
+      await refreshClub();
+      setSaveMessage("Saved.");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <main className="settings-page">
-      {/* Header */}
       <header className="settings-header">
         <h1>Settings</h1>
-        <p>
-          Manage your organization's core details, security preferences, and
-          external connections.
-        </p>
+        <p>Manage your club's core details and preferences.</p>
       </header>
-
-      {/* Organization */}
 
       <SettingSection
         title="Organization Info"
-        description="Update your club's public profile and contact details."
+        description={
+          isAdmin
+            ? "Update your club's public profile."
+            : "Only club admins can edit these details."
+        }
       >
-        <div className="avatar-box">
-          <div className="avatar">
-            <img
-              src="https://via.placeholder.com/150"
-              alt="Organization logo"
+        <form className="form-grid" onSubmit={handleSave}>
+          <div className="form-group">
+            <label>Club Name</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              readOnly={!isAdmin}
             />
           </div>
 
-          <div>
-            <button className="btn-secondary">Change Avatar</button>
-
-            <p>JPG, GIF or PNG. 1MB max.</p>
-          </div>
-        </div>
-
-        <div className="form-grid">
           <div className="form-group">
-            <label>Organization Name</label>
-
-            <input value="Finance Committee" readOnly />
-          </div>
-
-          <div className="form-group">
-            <label>Short Name / Acronym</label>
-
-            <input value="FinCom" readOnly />
+            <label>Club ID</label>
+            <input value={club?.clubId || ""} readOnly />
           </div>
 
           <div className="form-group full">
             <label>Description</label>
-
             <textarea
               rows="3"
-              readOnly
-              value="Managing the student union budget and funding allocations."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              readOnly={!isAdmin}
             />
           </div>
+        </form>
 
-          <div className="form-group full">
-            <label>Primary Contact Email</label>
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        {saveMessage && <p style={{ color: "#15803d" }}>{saveMessage}</p>}
 
-            <input value="finance@studentunion.edu" readOnly />
+        {isAdmin && (
+          <div className="form-actions">
+            <button className="btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save Changes"}
+            </button>
           </div>
-        </div>
-
-        <div className="form-actions">
-          <button className="btn-primary">Save Changes</button>
-        </div>
+        )}
       </SettingSection>
-
-      {/* Notifications */}
 
       <SettingSection
         title="Notifications"
-        description="Manage how and when you receive alerts."
+        description="Manage how and when you receive alerts. (Preference only — not yet wired to email delivery.)"
       >
         <div className="notification-list">
           <div className="notification-item">
             <div>
               <h3>Expense Approvals</h3>
-
-              <p>Receive email alerts when expenses need approval.</p>
+              <p>Get alerted when expenses need approval.</p>
             </div>
-
-            <Toggle checked />
+            <Toggle checked={notifExpense} onChange={() => setNotifExpense((v) => !v)} />
           </div>
 
           <div className="notification-item">
             <div>
               <h3>Budget Threshold Alerts</h3>
-
               <p>Get notified when budgets reach 80%.</p>
             </div>
-
-            <Toggle checked />
+            <Toggle checked={notifBudget} onChange={() => setNotifBudget((v) => !v)} />
           </div>
 
           <div className="notification-item">
             <div>
               <h3>Weekly Summary</h3>
-
               <p>Receive weekly financial activity reports.</p>
             </div>
-
-            <Toggle />
+            <Toggle checked={notifWeekly} onChange={() => setNotifWeekly((v) => !v)} />
           </div>
         </div>
       </SettingSection>
 
-      {/* Security */}
-
       <SettingSection
         title="Security"
-        description="Protect your organization's sensitive data."
+        description="Protect your account. Password changes go through your account, not this club."
       >
         <div className="security-block">
-          <h3>Password</h3>
-
-          <button className="btn-secondary">Update Password</button>
-        </div>
-
-        <div className="security-block">
           <h3>Two-Factor Authentication</h3>
-
           <div className="security-card">
             <ShieldCheck size={24} />
-
             <div>
-              <strong>Authenticator App</strong>
-
-              <p>Configured via Google Authenticator</p>
+              <strong>Not yet available</strong>
+              <p>2FA isn't wired up in this build.</p>
             </div>
-
-            <button className="btn-danger">Disable</button>
           </div>
         </div>
 
         <div className="security-block">
           <h3>Active Sessions</h3>
-
           <div className="session">
             <div className="session-info">
               <Monitor />
-
               <div>
-                <strong>Mac OS X · Chrome</strong>
-
-                <p>Current Session</p>
+                <strong>This device</strong>
+                <p>Current session</p>
               </div>
             </div>
-
             <span className="badge">Active</span>
-          </div>
-
-          <div className="session">
-            <div className="session-info">
-              <Smartphone />
-
-              <div>
-                <strong>iOS · Safari</strong>
-
-                <p>Last active 2 hours ago</p>
-              </div>
-            </div>
-
-            <button className="btn-danger">Revoke</button>
           </div>
         </div>
       </SettingSection>
 
-      {/* Integrations */}
-
       <SettingSection
         title="Integrations"
-        description="Connect ClubVault with external tools."
+        description="Connect ClubVault with external tools. (Not yet implemented — shown for reference.)"
       >
         <div className="integration-grid">
           <div className="integration-card">
             <div className="integration-icon">
               <Landmark />
             </div>
-
             <h3>Plaid</h3>
-
             <p>Bank Syncing</p>
-
-            <div className="connected">
-              <CheckCircle size={16} />
-              Connected
-            </div>
+            <button className="btn-secondary" disabled>Coming soon</button>
           </div>
 
           <div className="integration-card">
             <div className="integration-icon">
               <Tag />
             </div>
-
             <h3>Slack</h3>
-
             <p>Notifications</p>
-
-            <button className="btn-secondary">Connect</button>
+            <button className="btn-secondary" disabled>Coming soon</button>
           </div>
 
           <div className="integration-card">
             <div className="integration-icon">
               <Receipt />
             </div>
-
             <h3>QuickBooks</h3>
-
             <p>Accounting</p>
-
-            <button className="btn-secondary">Connect</button>
+            <button className="btn-secondary" disabled>Coming soon</button>
           </div>
         </div>
       </SettingSection>

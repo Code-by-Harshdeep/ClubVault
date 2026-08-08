@@ -1,4 +1,4 @@
-import { Users, Calendar, ChartLine } from "lucide-react";
+import { Users, Calendar, LineChart } from "lucide-react";
 
 export const NAV_LINKS = [
   {
@@ -17,7 +17,7 @@ export const NAV_LINKS = [
 
 export const FEATURES = [
   {
-    icon: ChartLine,
+    icon: LineChart,
     title: "Budget Tracking",
     desc: "Visualize allocations and track spending against university grants in real-time.",
   },

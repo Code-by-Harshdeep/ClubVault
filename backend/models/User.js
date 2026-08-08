@@ -7,11 +7,6 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    clubOrOrganization: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     universityEmail: {
       type: String,
       required: true,

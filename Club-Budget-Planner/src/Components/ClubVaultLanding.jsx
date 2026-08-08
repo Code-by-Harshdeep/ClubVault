@@ -10,7 +10,7 @@ import logoImage from "../../public/favicon.svg";
 import {
   Users,
   Wallet,
-  ChartLine,
+  LineChart,
   CirclePlay,
   CircleCheck,
   ReceiptText,
@@ -190,7 +190,7 @@ export default function ClubVaultLanding() {
             <div className="cv-glass-card">
               <div className="cv-glass-top">
                 <div className="cv-glass-icon">
-                  <ChartLine size={18} />
+                  <LineChart size={18} />
                 </div>
 
                 <div>

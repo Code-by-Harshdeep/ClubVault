@@ -1,0 +1,214 @@
+.club-setup-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background);
+  padding: 24px;
+  position: relative;
+}
+
+.club-setup-loading {
+  color: var(--color-on-surface-variant);
+  font-size: 0.95rem;
+}
+
+.club-setup-theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-mid);
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  cursor: pointer;
+}
+
+.club-setup-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 16px;
+  padding: 36px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.club-setup-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--color-on-surface);
+  margin-bottom: 28px;
+}
+
+.club-setup-header h2 {
+  font-size: 1.35rem;
+  margin: 0 0 6px;
+  color: var(--color-on-surface);
+}
+
+.club-setup-header p {
+  color: var(--color-on-surface-variant);
+  font-size: 0.9rem;
+  margin: 0 0 22px;
+}
+
+.club-setup-tabs {
+  display: flex;
+  background: var(--color-surface-container-low);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.club-setup-tab {
+  flex: 1;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+}
+
+.club-setup-tab.active {
+  background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.club-setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.club-setup-form label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+  margin-top: 10px;
+}
+
+.club-setup-form input,
+.club-setup-form textarea {
+  padding: 11px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-mid);
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.club-setup-hint {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  margin: 4px 0 0;
+}
+
+.club-setup-error {
+  color: var(--color-error);
+  font-size: 0.82rem;
+  margin: 4px 0 0;
+}
+
+.club-setup-success {
+  color: #1a7f37;
+  font-size: 0.82rem;
+  margin: 4px 0 0;
+}
+
+.club-setup-btn {
+  margin-top: 18px;
+  padding: 11px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.club-setup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.club-setup-secondary-btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-mid);
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.club-setup-link-btn {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-on-surface-variant);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.club-setup-state {
+  text-align: center;
+}
+
+.club-setup-state-icon {
+  margin-bottom: 10px;
+}
+
+.club-setup-state-icon.pending {
+  color: #b98900;
+}
+
+.club-setup-state-icon.rejected {
+  color: var(--color-error);
+}
+
+.club-setup-state h2 {
+  font-size: 1.2rem;
+  margin: 0 0 8px;
+  color: var(--color-on-surface);
+}
+
+.club-setup-state p {
+  color: var(--color-on-surface-variant);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+
+.club-setup-state-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.club-setup-logout {
+  margin-top: 8px;
+}

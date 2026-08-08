@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { useTheme } from "../../ThemeContext";
+import { useClub } from "../../ClubContext";
 import { Sun, Moon } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -9,6 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const Login = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { refreshClub } = useClub();
 
   const [formData, setFormData] = useState({
     universityEmail: "",
@@ -66,7 +68,10 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      navigate("/dashboard");
+      // Find out whether this user already belongs to a club before
+      // deciding where to send them — club-setup handles that routing.
+      await refreshClub();
+      navigate("/club-setup");
     } catch (err) {
       console.error(err);
       setError("Could not reach the server. Please try again.");

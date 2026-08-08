@@ -6,11 +6,15 @@ import {
   ChevronDown,
   ShieldCheck
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useClub } from "../../ClubContext";
 import "./ProfileMenu.css";
 
 const ProfileMenu = () => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
+  const { club, role } = useClub();
 
   // Safely parse localStorage
   let user = {};
@@ -24,6 +28,13 @@ const ProfileMenu = () => {
   }
 
   const fullName = user?.fullName || "marioo";
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("club");
+    navigate("/login", { replace: true });
+  };
   const initials = fullName
     ? fullName
         .split(" ")
@@ -60,7 +71,7 @@ const ProfileMenu = () => {
         <div className="cv-profile-info">
           <h4 className="cv-profile-name">{fullName}</h4>
           <p className="cv-profile-role">
-            {user?.role || "Finance Chair"}
+            {role === "admin" ? "Admin" : "Member"}
           </p>
         </div>
 
@@ -77,9 +88,7 @@ const ProfileMenu = () => {
 
             <div className="cv-header-details">
               <h3>{fullName}</h3>
-              <p>
-                {user?.clubOrOrganization || "HEALTH EDU CLUB"}
-              </p>
+              <p>{club?.name || "No club yet"}</p>
             </div>
           </div>
 
@@ -106,7 +115,7 @@ const ProfileMenu = () => {
 
             <div className="cv-dropdown-divider" />
 
-            <button className="cv-dropdown-btn cv-logout" type="button">
+            <button className="cv-dropdown-btn cv-logout" type="button" onClick={handleLogout}>
               <LogOut size={16} />
               <span>Sign Out</span>
             </button>

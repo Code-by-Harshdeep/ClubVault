@@ -19,6 +19,9 @@ import Members from "./Pages/Members/Members";
 import Settings from "./Pages/Settings/Settings";
 import Support from "./Components/Support/Support";
 import { ThemeProvider } from "./ThemeContext";
+import { ClubProvider } from "./ClubContext";
+import ClubSetup from "./Pages/Club/ClubSetup";
+import RequireApprovedClub from "./Components/RequireApprovedClub";
 
 // Global Layout wrapper
 const DashboardLayout = () => {
@@ -52,43 +55,52 @@ const router = createBrowserRouter([
     path: "/signup",
     element: <Signup />,
   },
-
-  // Protected Dashboard Routes
   {
-    element: <DashboardLayout />,
+    path: "/club-setup",
+    element: <ClubSetup />,
+  },
+
+  // Protected Dashboard Routes — must be an approved club member
+  {
+    element: <RequireApprovedClub />,
     children: [
       {
-        path: "/dashboard",
-        element: <Dashboard />,
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <Dashboard />,
+          },
+          {
+            path: "/analytics",
+            element: <ReportsAnalytics />,
+          },
+          {
+            path: "/budgets",
+            element: <Budgets />,
+          },
+          {
+            path: "/transactions",
+            element: <Transactions />,
+          },
+          {
+            path: "/events",
+            element: <EventsPlanning />,
+          },
+          {
+            path: "/members",
+            element: <Members />,
+          },
+          {
+            path: "/settings",
+            element: <Settings />,
+          },
+          {
+            path: "/support",
+            element: <Support />,
+          },
+        ],
       },
-      {
-        path: "/analytics",
-        element: <ReportsAnalytics />,
-      },
-      {
-        path: "/budgets",
-        element: <Budgets />,
-      },
-      {
-        path: "/transactions",
-        element: <Transactions />,
-      },
-      {
-        path:"/events",
-        element:<EventsPlanning/>
-      },
-      {
-        path:"/members",
-        element:<Members/>
-      },
-      {
-        path:"/settings",
-        element:<Settings/>
-      },
-      {
-        path:"/support",
-        element:<Support/>
-      }
     ],
   },
 ]);
@@ -96,7 +108,9 @@ const router = createBrowserRouter([
 const App = () => {
   return (
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <ClubProvider>
+        <RouterProvider router={router} />
+      </ClubProvider>
     </ThemeProvider>
   );
 };

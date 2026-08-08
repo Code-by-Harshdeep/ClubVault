@@ -1,108 +1,63 @@
-import React from "react";
-import {
-  Plus,
-  School,
-  Megaphone,
-  CircleCheck,
-  MoreHorizontal,
-} from "lucide-react";
-
+import React, { useEffect, useState } from "react";
+import { Plus, School, Megaphone, CircleCheck, Calendar } from "lucide-react";
+import { useClub } from "../../ClubContext";
+import { api } from "../../api";
 import "./EventsPlanning.css";
 
-const events = [
-  {
-    type: "Workshop",
-    icon: School,
-    title: "Tech Leadership Panel",
-    date: "APR 02, 2024 • Student Union Hall",
-    spent: "$350",
-    budget: "$500",
-    progress: "70%",
-    person: "MR",
-    name: "Mike R.",
-  },
-  {
-    type: "Campaign",
-    icon: Megaphone,
-    title: "Fall Recruitment Drive",
-    date: "SEP 10, 2024 • Main Quad",
-    spent: "$0",
-    budget: "$1,200",
-    progress: "5%",
-    unassigned: true,
-  },
-  {
-    type: "Completed",
-    icon: CircleCheck,
-    title: "Winter Charity Bake Sale",
-    date: "DEC 12, 2023 • Library Lobby",
-    spent: "$180",
-    budget: "$200",
-    progress: "90%",
-    completed: true,
-  },
-];
+function iconFor(type) {
+  if (type === "Completed") return CircleCheck;
+  if (type === "Campaign") return Megaphone;
+  return School;
+}
+
+function formatDateLine(event) {
+  const d = event.date ? new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "Date TBD";
+  return event.location ? `${d} • ${event.location}` : d;
+}
 
 function BudgetBar({ progress }) {
   return (
     <div className="progress">
-      <div
-        className="progress-fill"
-        style={{
-          width: progress,
-        }}
-      />
+      <div className="progress-fill" style={{ width: `${progress}%` }} />
     </div>
   );
 }
 
 function EventCard({ event }) {
-  const Icon = event.icon;
+  const Icon = iconFor(event.type);
+  const pct = event.budget ? Math.min(100, (event.spent / event.budget) * 100) : 0;
+  const completed = event.status === "completed";
 
   return (
-    <div className={`event-card ${event.completed ? "completed" : ""}`}>
+    <div className={`event-card ${completed ? "completed" : ""}`}>
       <div className="event-type">
         <Icon size={16} />
-
-        {event.type}
+        {event.type || "Event"}
       </div>
 
       <h3>{event.title}</h3>
-
-      <p className="date">{event.date}</p>
+      <p className="date">{formatDateLine(event)}</p>
 
       <div className="budget">
         <div className="budget-head">
-          <span>{event.completed ? "Final Spend" : "Allocated"}</span>
-
+          <span>{completed ? "Final Spend" : "Allocated"}</span>
           <strong>
-            {event.spent}
-
-            <small>
-              {" / "}
-              {event.budget}
-            </small>
+            ₹{event.spent || 0}
+            <small> / ₹{event.budget || 0}</small>
           </strong>
         </div>
 
-        <BudgetBar progress={event.progress} />
+        <BudgetBar progress={pct} />
 
         <div className="person">
-          {event.unassigned ? (
+          {event.assignedTo ? (
+            <span>{event.assignedTo.fullName}</span>
+          ) : (
             <>
               <div className="empty-avatar">
                 <Plus size={12} />
               </div>
-
               <span>Unassigned</span>
-            </>
-          ) : event.completed ? (
-            <span>Reconciled & Closed</span>
-          ) : (
-            <>
-              <div className="avatar">{event.person}</div>
-
-              <span>{event.name}</span>
             </>
           )}
         </div>
@@ -111,86 +66,130 @@ function EventCard({ event }) {
   );
 }
 
-function FeaturedEvent() {
+function NewEventModal({ onClose, onSubmit }) {
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState("Workshop");
+  const [date, setDate] = useState("");
+  const [location, setLocation] = useState("");
+  const [budget, setBudget] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!title) {
+      setError("Event title is required.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await onSubmit({ title, type, date, location, budget: Number(budget) || 0, description });
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="featured-card">
-      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuByzvtLN7G0x5tESEAf64n0fB6NkhfeECNijJ-Lvt6QrmiGIJMeXvf6o9xTz3g2ZX698q72xXboDHBnr-aF1Mm3l6DTOOfViqE24OnWMQSh269IYwwRpqwEWeJeT8eck3YeatTvlHWu64hD8JRPLWgoQoizoA879F89FfTA-UiAzF4wMyIUaT8iDvZ4HbIK4ZfPunmDtbiS75810nFtFs1ts0kOJiGly9Rlskm5ANsxJtP7Hl9y4DfuyMyctODgINCOggt0RuBp_6ZP" />
-
-      <div className="featured-content">
-        <div className="featured-title">
-          <div>
-            <span className="tag">Marquee Event</span>
-
-            <h3>Spring Alumni Gala</h3>
+    <div className="ev-modal-overlay" onClick={onClose}>
+      <div className="ev-modal-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Add Event</h3>
+        <form onSubmit={handleSubmit} className="ev-modal-form">
+          <label>Title</label>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Spring Alumni Gala" />
+          <label>Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option>Workshop</option>
+            <option>Campaign</option>
+            <option>Social</option>
+            <option>Fundraiser</option>
+          </select>
+          <label>Date</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <label>Location</label>
+          <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Student Union Hall" />
+          <label>Budget (₹)</label>
+          <input type="number" min="0" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="0" />
+          <label>Description</label>
+          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional" />
+          {error && <p className="ev-modal-error">{error}</p>}
+          <div className="ev-modal-actions">
+            <button type="button" onClick={onClose}>Cancel</button>
+            <button type="submit" className="ev-primary-btn" disabled={loading}>
+              {loading ? "Creating..." : "Create Event"}
+            </button>
           </div>
-
-          <MoreHorizontal size={20} />
-        </div>
-
-        <p>
-          The flagship networking event connecting current student leaders with
-          distinguished university alumni. Requires final catering confirmation
-          by Friday.
-        </p>
-
-        <div className="featured-budget">
-          <div className="budget-head">
-            <span>Budget Utilization</span>
-
-            <strong>
-              $4,250
-              <small>/ $5,000</small>
-            </strong>
-          </div>
-
-          <BudgetBar progress="85%" />
-
-          <div className="person">
-            <div className="avatar">SJ</div>
-
-            <span>Sarah J. (Coordinator)</span>
-
-            <span className="warning">Action Required</span>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 }
 
 export default function EventsPlanning() {
+  const { club } = useClub();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
+  const load = async () => {
+    if (!club?._id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.get(`/api/clubs/${club._id}/events`);
+      setEvents(data.events || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [club?._id]);
+
+  const handleCreate = async (payload) => {
+    await api.post(`/api/clubs/${club._id}/events`, payload);
+    await load();
+  };
+
   return (
     <main className="events-page">
+      {showModal && <NewEventModal onClose={() => setShowModal(false)} onSubmit={handleCreate} />}
+
       <header>
         <div>
           <h1>Events Planning</h1>
-
-          <p>
-            Coordinate upcoming club activities and monitor dedicated
-            micro-budgets.
-          </p>
+          <p>Coordinate upcoming club activities and monitor dedicated micro-budgets.</p>
         </div>
 
         <div className="actions">
-          <div className="switch">
-            <button>Board</button>
-
-            <button>Calendar</button>
-          </div>
-
-          <button className="add-btn">
+          <button className="add-btn" onClick={() => setShowModal(true)}>
             <Plus size={16} />
             Add Event
           </button>
         </div>
       </header>
 
-      <div className="grid">
-        <FeaturedEvent />
+      {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
 
-        {events.map((event) => (
-          <EventCard key={event.title} event={event} />
-        ))}
+      <div className="grid">
+        {loading ? (
+          <p>Loading events…</p>
+        ) : events.length === 0 ? (
+          <p style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Calendar size={16} /> No events yet. Add your first one.
+          </p>
+        ) : (
+          events.map((event) => <EventCard key={event._id} event={event} />)
+        )}
       </div>
     </main>
   );

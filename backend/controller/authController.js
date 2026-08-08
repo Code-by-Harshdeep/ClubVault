@@ -4,11 +4,17 @@ const jwt = require("jsonwebtoken");
 
 const signup = async (req, res) => {
   try {
-    const { universityEmail, password, fullName, clubOrOrganization } = req.body;
+    const { universityEmail, password, fullName } = req.body;
 
     if (!universityEmail || !password || !fullName) {
       return res.status(400).json({
         message: "Full name, university email and password are required",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
       });
     }
 
@@ -20,23 +26,12 @@ const signup = async (req, res) => {
       });
     }
 
-    if (!clubOrOrganization) {
-      return res.status(400).json({
-        message: "Club or organization is required",
-      });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({
-        message: "Password must be at least 6 characters",
-      });
-    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       fullName,
       universityEmail,
       password: hashedPassword,
-      clubOrOrganization,
     });
 
     return res.status(201).json({
@@ -45,7 +40,6 @@ const signup = async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         universityEmail: user.universityEmail,
-        clubOrOrganization: user.clubOrOrganization,
       },
     });
   } catch (error) {
@@ -90,7 +84,7 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRES_IN,
-      },
+      }
     );
     return res.status(200).json({
       message: "Login successful",
@@ -99,7 +93,6 @@ const login = async (req, res) => {
         _id: user._id,
         universityEmail: user.universityEmail,
         fullName: user.fullName,
-        clubOrOrganization: user.clubOrOrganization,
         createdAt: user.createdAt,
       },
     });
@@ -115,7 +108,7 @@ const login = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
-      "fullName universityEmail clubOrOrganization"
+      "fullName universityEmail"
     );
 
     if (!user) {

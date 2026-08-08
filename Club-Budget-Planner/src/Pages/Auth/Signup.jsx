@@ -12,7 +12,6 @@ const Signup = () => {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    clubOrOrganization: "",
     universityEmail: "",
     password: "",
   });
@@ -33,19 +32,9 @@ const Signup = () => {
     e.preventDefault();
     setError("");
 
-    const {
-      fullName,
-      clubOrOrganization,
-      universityEmail,
-      password,
-    } = formData;
+    const { fullName, universityEmail, password } = formData;
 
-    if (
-      !fullName ||
-      !clubOrOrganization ||
-      !universityEmail ||
-      !password
-    ) {
+    if (!fullName || !universityEmail || !password) {
       setError("Please fill in all fields.");
       return;
     }
@@ -156,18 +145,6 @@ const Signup = () => {
             </div>
 
             <div className="signup-field fade-up delay-200">
-              <label>Club or Organization</label>
-
-              <input
-                type="text"
-                name="clubOrOrganization"
-                placeholder="e.g. Debate Society"
-                value={formData.clubOrOrganization}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="signup-field fade-up delay-300">
               <label>University Email</label>
 
               <input

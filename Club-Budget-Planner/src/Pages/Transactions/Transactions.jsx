@@ -1,280 +1,246 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useClub } from "../../ClubContext";
+import { api } from "../../api";
 import "./Transactions.css";
 
+function formatMoney(n) {
+  const num = Number(n) || 0;
+  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatDate(d) {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+}
+
+function NewTransactionModal({ onClose, onSubmit, defaultType }) {
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [type, setType] = useState(defaultType || "expense");
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!title || !category || !amount) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await onSubmit({ title, category, type, amount: Number(amount) });
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="tx-modal-overlay" onClick={onClose}>
+      <div className="tx-modal-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Log Transaction</h3>
+        <form onSubmit={handleSubmit} className="tx-modal-form">
+          <label>Type</label>
+          <div className="tx-modal-type-switch">
+            <button type="button" className={type === "income" ? "active" : ""} onClick={() => setType("income")}>
+              Income
+            </button>
+            <button type="button" className={type === "expense" ? "active" : ""} onClick={() => setType("expense")}>
+              Expense
+            </button>
+          </div>
+          <label>Description</label>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Fall Festival Catering" />
+          <label>Category</label>
+          <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Events" />
+          <label>Amount (₹)</label>
+          <input type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+          {error && <p className="tx-modal-error">{error}</p>}
+          <div className="tx-modal-actions">
+            <button type="button" className="action-btn" onClick={onClose}>Cancel</button>
+            <button type="submit" className="action-btn tx-primary-btn" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 const Transactions = () => {
+  const { club } = useClub();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("income");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
+  const load = async () => {
+    if (!club?._id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.get(`/api/clubs/${club._id}/transactions`);
+      setTransactions(data.transactions || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [club?._id]);
+
+  const handleCreate = async (payload) => {
+    await api.post(`/api/clubs/${club._id}/transactions`, payload);
+    await load();
+  };
+
+  const totalIncome = useMemo(
+    () => transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0),
+    [transactions]
+  );
+  const totalExpenses = useMemo(
+    () => transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0),
+    [transactions]
+  );
+  const netFlow = totalIncome - totalExpenses;
+
+  const filtered = transactions
+    .filter((t) => t.type === filter)
+    .filter((t) => `${t.title} ${t.category}`.toLowerCase().includes(searchTerm.toLowerCase()));
+
   return (
     <div className="transactions-page">
       <main className="transactions-container">
+        {showModal && (
+          <NewTransactionModal
+            onClose={() => setShowModal(false)}
+            onSubmit={handleCreate}
+            defaultType={filter}
+          />
+        )}
 
-        {/* Header */}
         <section className="transactions-header">
           <div>
             <h1 className="transactions-title">Income &amp; Expenses</h1>
-            <p className="transactions-subtitle">
-              Ledger overview for Q3 2024
-            </p>
+            <p className="transactions-subtitle">{club?.name || "Ledger overview"}</p>
           </div>
 
           <div className="transactions-toggle">
-            <button className="toggle-btn active">
+            <button
+              className={`toggle-btn ${filter === "income" ? "active" : ""}`}
+              onClick={() => setFilter("income")}
+            >
               Income
             </button>
-
-            <button className="toggle-btn">
+            <button
+              className={`toggle-btn ${filter === "expense" ? "active" : ""}`}
+              onClick={() => setFilter("expense")}
+            >
               Expenses
             </button>
           </div>
         </section>
 
-        {/* KPI Cards */}
+        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
 
         <section className="transactions-kpi-grid">
-
           <div className="transactions-kpi-card">
             <span className="kpi-label">Total Income</span>
-
-            <h2>₹12,450.00</h2>
-
-            <p className="kpi-success">
-              <span className="material-symbols-outlined">
-                trending_up
-              </span>
-
-              +15% from last month
-            </p>
+            <h2>{loading ? "…" : formatMoney(totalIncome)}</h2>
           </div>
 
           <div className="transactions-kpi-card">
-            <span className="kpi-label">
-              Total Expenses
-            </span>
-
-            <h2>₹8,230.50</h2>
-
-            <p className="kpi-success">
-              <span className="material-symbols-outlined">
-                trending_down
-              </span>
-
-              -5% from last month
-            </p>
+            <span className="kpi-label">Total Expenses</span>
+            <h2>{loading ? "…" : formatMoney(totalExpenses)}</h2>
           </div>
 
           <div className="transactions-kpi-card">
-            <span className="kpi-label">
-              Net Cash Flow
-            </span>
-
-            <h2>₹4,219.50</h2>
-
-            <p className="kpi-muted">
-              Positive margin
-            </p>
+            <span className="kpi-label">Net Cash Flow</span>
+            <h2>{loading ? "…" : formatMoney(netFlow)}</h2>
+            <p className="kpi-muted">{netFlow >= 0 ? "Positive margin" : "Negative margin"}</p>
           </div>
-
         </section>
 
-        {/* Ledger */}
-
         <section className="transactions-ledger">
-
           <div className="ledger-header">
-
             <h2>Transaction Ledger</h2>
 
             <div className="ledger-actions">
-
               <div className="search-box">
-
-                <span className="material-symbols-outlined">
-                  search
-                </span>
-
+                <span className="material-symbols-outlined">search</span>
                 <input
                   type="text"
                   placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
-
               </div>
 
-              <button className="action-btn">
-                <span className="material-symbols-outlined">
-                  filter_list
-                </span>
-
-                Filter
+              <button className="action-btn" onClick={() => setShowModal(true)}>
+                <span className="material-symbols-outlined">add</span>
+                Add
               </button>
-
-              <button className="action-btn">
-                <span className="material-symbols-outlined">
-                  download
-                </span>
-
-                Export
-              </button>
-
             </div>
-
           </div>
 
-          {/* Table */}
-
           <div className="table-wrapper">
-
             <table className="transactions-table">
-
               <thead>
-
                 <tr>
                   <th>Date</th>
                   <th>Description</th>
                   <th>Category</th>
-                  <th className="amount-column">
-                    Amount
-                  </th>
+                  <th className="amount-column">Amount</th>
                 </tr>
-
               </thead>
-
               <tbody>
-
-                <tr>
-
-                  <td>Oct 24, 2024</td>
-
-                  <td>
-                    <div className="transaction-title">
-                      Fall Festival Catering
-                    </div>
-
-                    <div className="transaction-subtitle">
-                      Invoice #4920
-                    </div>
-                  </td>
-
-                  <td>
-                    <span className="category-tag">
-                      Events
-                    </span>
-                  </td>
-
-                  <td className="amount negative">
-                    -₹1,250.00
-                  </td>
-
-                </tr>
-
-                <tr>
-
-                  <td>Oct 22, 2024</td>
-
-                  <td>
-                    <div className="transaction-title">
-                      Membership Dues Collection
-                    </div>
-
-                    <div className="transaction-subtitle">
-                      Stripe Payout
-                    </div>
-                  </td>
-
-                  <td>
-                    <span className="category-tag">
-                      Income
-                    </span>
-                  </td>
-
-                  <td className="amount positive">
-                    +₹3,400.00
-                  </td>
-
-                </tr>
-                                <tr>
-
-                  <td>Oct 18, 2024</td>
-
-                  <td>
-                    <div className="transaction-title">
-                      Zoom Annual Subscription
-                    </div>
-
-                    <div className="transaction-subtitle">
-                      Software
-                    </div>
-                  </td>
-
-                  <td>
-                    <span className="category-tag">
-                      Operations
-                    </span>
-                  </td>
-
-                  <td className="amount negative">
-                    -₹149.90
-                  </td>
-
-                </tr>
-
-                <tr>
-
-                  <td>Oct 15, 2024</td>
-
-                  <td>
-                    <div className="transaction-title">
-                      Alumni Donation
-                    </div>
-
-                    <div className="transaction-subtitle">
-                      Check Deposit
-                    </div>
-                  </td>
-
-                  <td>
-                    <span className="category-tag">
-                      Donations
-                    </span>
-                  </td>
-
-                  <td className="amount positive">
-                    +₹500.00
-                  </td>
-
-                </tr>
-
+                {loading ? (
+                  <tr>
+                    <td colSpan="4">Loading…</td>
+                  </tr>
+                ) : filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan="4">No transactions yet.</td>
+                  </tr>
+                ) : (
+                  filtered.map((t) => (
+                    <tr key={t._id}>
+                      <td>{formatDate(t.date)}</td>
+                      <td>
+                        <div className="transaction-title">{t.title}</div>
+                        <div className="transaction-subtitle">{t.status}</div>
+                      </td>
+                      <td>
+                        <span className="category-tag">{t.category}</span>
+                      </td>
+                      <td className={`amount ${t.type === "income" ? "positive" : "negative"}`}>
+                        {t.type === "income" ? "+" : "-"}
+                        {formatMoney(t.amount)}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
-
             </table>
-
           </div>
-
-          {/* Pagination */}
 
           <div className="transactions-pagination">
-
             <span className="pagination-text">
-              Showing 1–4 of 128 transactions
+              Showing {filtered.length} of {transactions.filter((t) => t.type === filter).length} transactions
             </span>
-
-            <div className="pagination-buttons">
-
-              <button className="page-btn">
-                <span className="material-symbols-outlined">
-                  chevron_left
-                </span>
-              </button>
-
-              <button className="page-btn">
-                <span className="material-symbols-outlined">
-                  chevron_right
-                </span>
-              </button>
-
-            </div>
-
           </div>
-
         </section>
-
       </main>
     </div>
   );

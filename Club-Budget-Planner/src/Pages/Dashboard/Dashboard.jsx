@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building2,
   PieChart,
@@ -11,16 +11,15 @@ import {
   AlertCircle,
   CheckCircle2,
   FileSpreadsheet,
-  Filter,
   Search,
-  Check,
   X,
   Sparkles
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useClub } from "../../ClubContext";
+import { api } from "../../api";
 import "./Dashboard.css";
 
-// Small inline sparkline — purely decorative, gives the count cards
-// visual weight beyond a bare number sitting in whitespace.
 function MiniSparkline({ values, tone }) {
   return (
     <div className={`cv-mini-sparkline ${tone}`}>
@@ -31,95 +30,144 @@ function MiniSparkline({ values, tone }) {
   );
 }
 
+function formatMoney(n) {
+  const num = Number(n) || 0;
+  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatDate(d) {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+}
+
+// Quick "Request Reimbursement" form — posts a pending expense transaction
+function ReimbursementModal({ onClose, onSubmit }) {
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (!title || !category || !amount) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await onSubmit({
+        title,
+        category,
+        type: "expense",
+        amount: Number(amount),
+        status: "Pending Bill",
+      });
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="cv-modal-overlay" onClick={onClose}>
+      <div className="cv-modal" onClick={(e) => e.stopPropagation()}>
+        <h3>Request Reimbursement</h3>
+        <form onSubmit={handleSubmit} className="cv-modal-form">
+          <label>Description</label>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Printing costs" />
+          <label>Category</label>
+          <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Operations" />
+          <label>Amount (₹)</label>
+          <input type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+          {error && <p className="cv-modal-error">{error}</p>}
+          <div className="cv-modal-actions">
+            <button type="button" className="cv-btn-secondary-sm" onClick={onClose}>Cancel</button>
+            <button type="submit" className="cv-btn-secondary-sm cv-btn-primary-sm" disabled={loading}>
+              {loading ? "Submitting..." : "Submit"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
+  const { club } = useClub();
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showReimbursement, setShowReimbursement] = useState(false);
 
-  // Realistic Club Ledger Data with Actionable Statuses
-  const allEntries = [
-    {
-      id: 1,
-      title: "Fall Hackathon Catering",
-      dept: "Events Committee",
-      categoryTag: "Food & Drinks",
-      date: "Oct 12, 2026",
-      amount: "-₹12,500.00",
-      type: "expense",
-      status: "Approved",
-      statusType: "success"
-    },
-    {
-      id: 2,
-      title: "Annual Tech Fest Sponsorship",
-      dept: "Sponsorship Team",
-      categoryTag: "Sponsorship",
-      date: "Oct 10, 2026",
-      amount: "+₹45,000.00",
-      type: "income",
-      status: "Cleared",
-      statusType: "success"
-    },
-    {
-      id: 3,
-      title: "Domain & Cloud Hosting (Annual)",
-      dept: "Tech Committee",
-      categoryTag: "Operations",
-      date: "Oct 05, 2026",
-      amount: "-₹2,840.00",
-      type: "expense",
-      status: "Reimbursed",
-      statusType: "neutral"
-    },
-    {
-      id: 4,
-      title: "Official Club Merch Sales",
-      dept: "Executive Board",
-      categoryTag: "Revenue",
-      date: "Sep 28, 2026",
-      amount: "+₹18,200.00",
-      type: "income",
-      status: "Cleared",
-      statusType: "success"
-    },
-    {
-      id: 5,
-      title: "Sound System Rental Deposit",
-      dept: "Logistics Team",
-      categoryTag: "Venue",
-      date: "Sep 22, 2026",
-      amount: "-₹6,500.00",
-      type: "expense",
-      status: "Pending Bill",
-      statusType: "warning"
+  const loadDashboard = async () => {
+    if (!club?._id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.get(`/api/clubs/${club._id}/dashboard`);
+      setSummary(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  // UX Filtering Logic
-  const filteredEntries = allEntries.filter((entry) => {
+  useEffect(() => {
+    loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [club?._id]);
+
+  const handleAddTransaction = async (payload) => {
+    await api.post(`/api/clubs/${club._id}/transactions`, payload);
+    await loadDashboard();
+  };
+
+  const entries = summary?.recentTransactions || [];
+
+  const filteredEntries = entries.filter((entry) => {
+    const statusType =
+      entry.status === "Pending Bill"
+        ? "warning"
+        : entry.status === "Reimbursed"
+        ? "neutral"
+        : "success";
+
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "expense" && entry.type === "expense") ||
       (activeTab === "income" && entry.type === "income") ||
-      (activeTab === "pending" && entry.statusType === "warning");
+      (activeTab === "pending" && statusType === "warning");
 
-    const matchesSearch =
-      entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.dept.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.categoryTag.toLowerCase().includes(searchTerm.toLowerCase());
+    const haystack = `${entry.title} ${entry.category}`.toLowerCase();
+    const matchesSearch = haystack.includes(searchTerm.toLowerCase());
 
     return matchesTab && matchesSearch;
   });
 
   return (
     <div className="cv-dash-page">
-      {/* Background Ambient Orb */}
       <div className="cv-dash-orb" />
 
-      {/* 1. Header Area with Friendly Context */}
+      {showReimbursement && (
+        <ReimbursementModal
+          onClose={() => setShowReimbursement(false)}
+          onSubmit={handleAddTransaction}
+        />
+      )}
+
       <div className="cv-dash-page-header">
         <div>
           <span className="cv-dash-eyebrow-badge">
-            <Sparkles size={12} className="cv-sparkle-icon" /> Q3 Treasury Workspace
+            <Sparkles size={12} className="cv-sparkle-icon" /> {club?.name || "Treasury Workspace"}
           </span>
           <h1 className="cv-dash-title">Club Financial Standing</h1>
         </div>
@@ -128,16 +176,29 @@ export default function Dashboard() {
           <button
             type="button"
             className="cv-btn-secondary-sm"
-            onClick={() => alert("Downloading CSV Audit Log...")}
+            onClick={() => {
+              const rows = [
+                ["Description", "Category", "Date", "Status", "Amount"],
+                ...entries.map((e) => [e.title, e.category, formatDate(e.date), e.status, e.amount]),
+              ];
+              const csv = rows.map((r) => r.join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "audit-log.csv";
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
           >
             <FileSpreadsheet size={14} /> Export Audit Sheet
           </button>
         </div>
       </div>
 
-      {/* 2. Stat Cards with Rich Visual Hierarchy */}
+      {error && <p className="cv-dash-error">{error}</p>}
+
       <div className="cv-stats-row">
-        {/* Total Vault Balance */}
         <div className="cv-glass-stat-card primary-highlight">
           <div className="cv-stat-accent-bar primary" />
           <div className="cv-stat-header">
@@ -146,45 +207,29 @@ export default function Dashboard() {
               <Building2 size={18} />
             </div>
           </div>
-          <p className="cv-stat-value">₹124,500.00</p>
-          <div className="cv-progress-container">
-            <div className="cv-progress-track">
-              <div className="cv-progress-fill" style={{ width: "75%" }} />
-            </div>
-            <span className="cv-badge-trend positive">
-              <TrendingUp size={12} /> +12%
-            </span>
-          </div>
+          <p className="cv-stat-value">
+            {loading ? "…" : formatMoney(summary?.totalBalance)}
+          </p>
           <div className="cv-card-footer-info">
-            <span>75% Allocated</span>
-            <span className="cv-dot-separator">•</span>
-            <span>₹31,125 Available</span>
+            <span>{summary?.memberCount ?? 0} members</span>
           </div>
         </div>
 
-        {/* Active Budgets */}
         <div className="cv-glass-stat-card">
           <div className="cv-stat-accent-bar info" />
           <div className="cv-stat-header">
-            <span className="cv-stat-label">ACTIVE COMMITTEE BUDGETS</span>
+            <span className="cv-stat-label">ACTIVE BUDGETS</span>
             <div className="cv-icon-bubble info">
               <PieChart size={18} />
             </div>
           </div>
           <div className="cv-stat-value-row">
-            <p className="cv-stat-value">8</p>
+            <p className="cv-stat-value">{loading ? "…" : summary?.activeBudgets ?? 0}</p>
             <MiniSparkline values={[45, 60, 50, 75, 65, 85]} tone="info" />
           </div>
-          <p className="cv-stat-sub">Across 4 active committees</p>
-          <div className="cv-stat-meta-pills">
-            <span className="cv-mini-pill">Events</span>
-            <span className="cv-mini-pill">Tech</span>
-            <span className="cv-mini-pill">Media</span>
-            <span className="cv-mini-pill">+1 more</span>
-          </div>
+          <p className="cv-stat-sub">Across this club</p>
         </div>
 
-        {/* Pending Approvals */}
         <div className="cv-glass-stat-card warning-highlight">
           <div className="cv-stat-accent-bar warning" />
           <div className="cv-stat-header">
@@ -194,7 +239,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="cv-stat-value-row">
-            <p className="cv-stat-value">14</p>
+            <p className="cv-stat-value">{loading ? "…" : summary?.pendingReimbursements ?? 0}</p>
             <MiniSparkline values={[30, 55, 40, 70, 85, 95]} tone="warning" />
           </div>
           <div className="cv-warning-footer">
@@ -205,9 +250,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 3. Lower Content Grid */}
       <div className="cv-dash-grid">
-        {/* Ledger Panel with Search & Tab Filtering */}
         <div className="cv-ledger-panel">
           <div className="cv-panel-header">
             <div>
@@ -215,65 +258,40 @@ export default function Dashboard() {
               <p className="cv-panel-sub">Real-time audited transactions</p>
             </div>
 
-            {/* Quick Filter Tabs */}
             <div className="cv-filter-tabs">
-              <button
-                type="button"
-                className={`cv-tab-btn ${activeTab === "all" ? "active" : ""}`}
-                onClick={() => setActiveTab("all")}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                className={`cv-tab-btn ${activeTab === "expense" ? "active" : ""}`}
-                onClick={() => setActiveTab("expense")}
-              >
-                Expenses
-              </button>
-              <button
-                type="button"
-                className={`cv-tab-btn ${activeTab === "income" ? "active" : ""}`}
-                onClick={() => setActiveTab("income")}
-              >
-                Income
-              </button>
-              <button
-                type="button"
-                className={`cv-tab-btn ${activeTab === "pending" ? "active" : ""}`}
-                onClick={() => setActiveTab("pending")}
-              >
-                Pending
-              </button>
+              {["all", "expense", "income", "pending"].map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  className={`cv-tab-btn ${activeTab === t ? "active" : ""}`}
+                  onClick={() => setActiveTab(t)}
+                >
+                  {t[0].toUpperCase() + t.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Quick Search Input */}
           <div className="cv-table-search-bar">
             <Search size={14} className="cv-search-icon" />
             <input
               type="text"
-              placeholder="Search by event, committee, or category..."
+              placeholder="Search by title or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {searchTerm && (
-              <button
-                type="button"
-                className="cv-clear-btn"
-                onClick={() => setSearchTerm("")}
-              >
+              <button type="button" className="cv-clear-btn" onClick={() => setSearchTerm("")}>
                 <X size={12} />
               </button>
             )}
           </div>
 
-          {/* Table View */}
           <div className="cv-table-scroll">
             <table className="cv-ledger-table">
               <thead>
                 <tr>
-                  <th>DESCRIPTION & DEPT</th>
+                  <th>DESCRIPTION</th>
                   <th>CATEGORY</th>
                   <th>DATE</th>
                   <th>STATUS</th>
@@ -281,42 +299,49 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredEntries.length > 0 ? (
-                  filteredEntries.map((entry) => (
-                    <tr key={entry.id} className="cv-table-row">
-                      <td>
-                        <div className="cv-entry-info">
-                          <p className="cv-entry-title">{entry.title}</p>
-                          <span className="cv-dept-name">{entry.dept}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`cv-tag cv-tag-${entry.type}`}>
-                          {entry.categoryTag}
-                        </span>
-                      </td>
-                      <td className="cv-entry-date">{entry.date}</td>
-                      <td>
-                        <span className={`cv-status-pill ${entry.statusType}`}>
-                          {entry.statusType === "success" && <CheckCircle2 size={12} />}
-                          {entry.statusType === "warning" && <Clock size={12} />}
-                          {entry.status}
-                        </span>
-                      </td>
-                      <td
-                        style={{ textAlign: "right" }}
-                        className={`cv-entry-amount ${entry.type}`}
-                      >
-                        <span className={`cv-amount-chip ${entry.type}`}>
-                          {entry.amount}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="cv-empty-state">Loading ledger…</td>
+                  </tr>
+                ) : filteredEntries.length > 0 ? (
+                  filteredEntries.map((entry) => {
+                    const statusType =
+                      entry.status === "Pending Bill"
+                        ? "warning"
+                        : entry.status === "Reimbursed"
+                        ? "neutral"
+                        : "success";
+                    return (
+                      <tr key={entry._id} className="cv-table-row">
+                        <td>
+                          <div className="cv-entry-info">
+                            <p className="cv-entry-title">{entry.title}</p>
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`cv-tag cv-tag-${entry.type}`}>{entry.category}</span>
+                        </td>
+                        <td className="cv-entry-date">{formatDate(entry.date)}</td>
+                        <td>
+                          <span className={`cv-status-pill ${statusType}`}>
+                            {statusType === "success" && <CheckCircle2 size={12} />}
+                            {statusType === "warning" && <Clock size={12} />}
+                            {entry.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "right" }} className={`cv-entry-amount ${entry.type}`}>
+                          <span className={`cv-amount-chip ${entry.type}`}>
+                            {entry.type === "income" ? "+" : "-"}
+                            {formatMoney(entry.amount)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan="5" className="cv-empty-state">
-                      No matching ledger entries found.
+                      No ledger entries yet. Add one from Transactions.
                     </td>
                   </tr>
                 )}
@@ -325,7 +350,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Executive Action Buttons */}
         <div className="cv-actions-stack">
           <div className="cv-actions-header">
             <h3>Executive Operations</h3>
@@ -335,7 +359,7 @@ export default function Dashboard() {
           <button
             type="button"
             className="cv-quick-action-pill highlight"
-            onClick={() => alert("Opening Reimbursement Form...")}
+            onClick={() => setShowReimbursement(true)}
           >
             <div className="cv-action-left">
               <div className="cv-action-icon accent">
@@ -352,15 +376,15 @@ export default function Dashboard() {
           <button
             type="button"
             className="cv-quick-action-pill"
-            onClick={() => alert("Opening Invoice Uploader...")}
+            onClick={() => navigate("/transactions")}
           >
             <div className="cv-action-left">
               <div className="cv-action-icon">
                 <Upload size={18} />
               </div>
               <div>
-                <span className="cv-action-title">Upload Receipt / Bill</span>
-                <span className="cv-action-sub">Attach for audit log</span>
+                <span className="cv-action-title">Log a Transaction</span>
+                <span className="cv-action-sub">Add income or expense</span>
               </div>
             </div>
             <ArrowUpRight size={16} className="cv-action-arrow" />
@@ -369,15 +393,15 @@ export default function Dashboard() {
           <button
             type="button"
             className="cv-quick-action-pill"
-            onClick={() => alert("Opening Union Audit Scheduler...")}
+            onClick={() => navigate("/events")}
           >
             <div className="cv-action-left">
               <div className="cv-action-icon">
                 <CalendarCheck2 size={18} />
               </div>
               <div>
-                <span className="cv-action-title">Schedule Union Audit</span>
-                <span className="cv-action-sub">Submit treasury sheet</span>
+                <span className="cv-action-title">Plan an Event</span>
+                <span className="cv-action-sub">Set up a micro-budget</span>
               </div>
             </div>
             <ArrowUpRight size={16} className="cv-action-arrow" />
@@ -386,4 +410,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-} 
+}
