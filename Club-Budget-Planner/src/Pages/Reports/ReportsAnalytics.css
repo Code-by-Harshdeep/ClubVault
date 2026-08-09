@@ -736,3 +736,32 @@
     gap: 15px;
   }
 }
+/* --- Added: real recharts donut replaces the old static conic-gradient --- */
+.reports-page .donut-chart.live {
+  background: none;
+  box-shadow: none;
+  position: relative;
+  display: block; /* was inheriting display:flex from .donut-chart, which
+                      fought with the SVG for space and could let content
+                      spill into the legend below it */
+}
+
+.reports-page .donut-chart.live .donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* clicks/hovers pass through to the chart below */
+  z-index: 1; /* stays under .recharts-tooltip-wrapper (z-index: 50 below)
+                 so the hover tooltip is never hidden behind this label */
+}
+
+/* Keep the hover tooltip above surrounding card content. */
+.reports-page .recharts-tooltip-wrapper {
+  z-index: 50;
+}
+
+/* --- Added: recharts renders its own axis labels, old left offset not needed --- */
+.reports-page .chart-area {
+  margin-left: 0;
+}

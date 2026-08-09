@@ -1,9 +1,42 @@
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Sector,
+} from "recharts";
 import { useClub } from "../../ClubContext";
+import { useTheme } from "../../ThemeContext";
 import { api } from "../../api";
 import "./ReportsAnalytics.css";
 
 const DOT_CLASSES = ["dot-events", "dot-marketing", "dot-office", "dot-other"];
+const PIE_COLORS = ["#2c2620", "#6b6459", "#a39c90", "#e8e4db", "#8a7f6d", "#c9c2b4"];
+
+// Recharts auto-enlarges the hovered slice by default when a Tooltip is
+// present. Rendering an identical-geometry active shape keeps the hover
+// state (for the tooltip) without the slice visually "popping" bigger.
+function renderStableSlice(props) {
+  const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
+  return (
+    <Sector
+      cx={cx}
+      cy={cy}
+      innerRadius={innerRadius}
+      outerRadius={outerRadius}
+      startAngle={startAngle}
+      endAngle={endAngle}
+      fill={fill}
+    />
+  );
+}
 
 function formatMoney(n) {
   const num = Number(n) || 0;
@@ -28,6 +61,7 @@ function lastSixMonthKeys() {
 
 const ReportsAnalytics = () => {
   const { club } = useClub();
+  const { theme } = useTheme();
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,19 +135,6 @@ const ReportsAnalytics = () => {
     return { totals, max };
   }, [transactions]);
 
-  const linePath = useMemo(() => {
-    const { totals, max } = monthlyExpense;
-    if (totals.length === 0) return "";
-    const step = 100 / (totals.length - 1);
-    return totals
-      .map((t, i) => {
-        const x = (i * step).toFixed(1);
-        const y = (100 - (t.sum / max) * 90).toFixed(1); // leave headroom at top
-        return `${i === 0 ? "M" : "L"}${x},${y}`;
-      })
-      .join(" ");
-  }, [monthlyExpense]);
-
   const significantTransactions = useMemo(
     () =>
       transactions
@@ -122,6 +143,23 @@ const ReportsAnalytics = () => {
         .slice(0, 6),
     [transactions]
   );
+
+  const tooltipStyle =
+    theme === "dark"
+      ? {
+          background: "var(--color-surface-container-lowest, #1e1e1e)",
+          border: "1px solid var(--color-border-mid, #2a2a2a)",
+          borderRadius: "8px",
+          color: "#e5e7eb",
+          fontSize: "13px",
+        }
+      : {
+          background: "#ffffff",
+          border: "1px solid #dcdcdc",
+          borderRadius: "8px",
+          color: "#374151",
+          fontSize: "13px",
+        };
 
   const exportCsv = () => {
     const rows = [
@@ -140,13 +178,6 @@ const ReportsAnalytics = () => {
 
   return (
     <div className="reports-page">
-      <header className="mobile-header">
-        <h2>Finance Committee</h2>
-        <button>
-          <span className="material-symbols-outlined">menu</span>
-        </button>
-      </header>
-
       <main className="main-content">
         <div className="page-container">
           <section className="page-header">
@@ -217,21 +248,26 @@ const ReportsAnalytics = () => {
               </div>
 
               <div className="chart-area">
-                <div className="chart-grid">
-                  <div className="grid-line"><span>{formatMoney(monthlyExpense.max)}</span></div>
-                  <div className="grid-line"><span>{formatMoney(monthlyExpense.max * 0.5)}</span></div>
-                  <div className="grid-line"><span>0</span></div>
-                </div>
-
-                <svg className="line-chart" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  <path d={linePath} className="actual-line" fill="none" />
-                </svg>
-
-                <div className="x-axis">
-                  {monthlyExpense.totals.map((t) => (
-                    <span key={t.label}>{t.label}</span>
-                  ))}
-                </div>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthlyExpense.totals} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-mid, #e5e0d8)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${v}`} width={60} />
+                    <Tooltip formatter={(value) => formatMoney(value)} contentStyle={tooltipStyle} itemStyle={{ color: tooltipStyle.color }} isAnimationActive={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="sum"
+                      name="Actual Spend"
+                      stroke="#2c2620"
+                      strokeWidth={2.5}
+                      dot={{ r: 4 }}
+                      activeDot={{ r: 6 }}
+                      isAnimationActive={true}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
 
               <div className="chart-legend">
@@ -251,7 +287,36 @@ const ReportsAnalytics = () => {
               </div>
 
               <div className="donut-wrapper">
-                <div className="donut-chart">
+                <div className="donut-chart live" style={{ width: 200, height: 200, position: "relative" }}>
+                  {categoryBreakdown.length > 0 && (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={categoryBreakdown}
+                          dataKey="amount"
+                          nameKey="category"
+                          innerRadius={62}
+                          outerRadius={98}
+                          paddingAngle={categoryBreakdown.length > 1 ? 2 : 0}
+                          stroke="none"
+                          activeShape={renderStableSlice}
+                          isAnimationActive={true}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        >
+                          {categoryBreakdown.map((entry, i) => (
+                            <Cell key={entry.category} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value) => formatMoney(value)}
+                          contentStyle={tooltipStyle}
+                          itemStyle={{ color: tooltipStyle.color }}
+                          isAnimationActive={false}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
                   <div className="donut-center">
                     <strong>{categoryBreakdown.length}</strong>
                     <span>Categories</span>
