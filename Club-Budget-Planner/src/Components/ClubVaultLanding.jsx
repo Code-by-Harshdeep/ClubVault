@@ -4,7 +4,7 @@ import "./ClubVaultLanding.css";
 import budgetImage from "../assets/budget.png";
 import collabImage from "../assets/collab.png";
 import mainImage from "../assets/main.jpg";
-import logoImage from "../../public/favicon.svg";
+const logoImage = "/favicon.svg";
 
 
 import {
