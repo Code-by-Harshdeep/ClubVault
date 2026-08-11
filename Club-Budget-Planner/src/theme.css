@@ -117,6 +117,97 @@ html[data-theme="dark"] {
   --color-nav-bg: rgba(20, 16, 14, 0.75);
 }
 
+/* =========================================================
+   LIGHT MODE + DARK SIDEBAR
+   ---------------------------------------------------------
+   The application stays in LIGHT mode.
+   Only the dashboard sidebar becomes dark.
+   ========================================================= */
+
+html[data-theme="light-dark-sidebar"] {
+  /* Keep all normal light-mode tokens */
+  --color-background: #f8f9fa;
+  --color-surface: #f8f9fa;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+
+  --color-on-background: #191c1d;
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #4d4540;
+
+  --color-primary: #181512;
+  --color-primary-container: #2d2926;
+  --color-on-primary: #ffffff;
+
+  --color-outline: #7e756f;
+  --color-outline-variant: #cfc4bd;
+
+  --color-border-soft: rgba(207, 196, 189, 0.2);
+  --color-border-mid: rgba(207, 196, 189, 0.3);
+  --color-border-strong: rgba(207, 196, 189, 0.5);
+
+  --color-nav-bg: rgba(248, 249, 250, 0.8);
+}
+
+
+/* =========================================================
+   THIRD MODE — SIDEBAR ONLY
+   ========================================================= */
+
+html[data-theme="light-dark-sidebar"] .cv-sidebar {
+  --sidebar-background: #1a1613;
+  --sidebar-text: #f5f0eb;
+  --sidebar-muted: #b8ada4;
+
+  --sidebar-hover-background: #28221d;
+  --sidebar-active-background: #f5f0eb;
+  --sidebar-active-text: #1a1613;
+
+  --sidebar-border: rgba(245, 240, 235, 0.10);
+
+  --sidebar-shadow: 4px 0 28px rgba(0, 0, 0, 0.30);
+}
+
+
+/* =========================================================
+   NORMAL LIGHT + DARK MODE SIDEBAR VARIABLES
+   ========================================================= */
+
+.cv-sidebar {
+  --sidebar-background: #ffffff;
+  --sidebar-text: var(--color-on-surface);
+  --sidebar-muted: var(--color-on-surface-variant);
+
+  --sidebar-hover-background: var(--color-surface-container-low);
+  --sidebar-active-background: var(--color-primary);
+  --sidebar-active-text: var(--color-on-primary);
+
+  --sidebar-border: var(--color-border-mid);
+
+  --sidebar-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+}
+
+
+/* Dark mode sidebar variables */
+
+html[data-theme="dark"] .cv-sidebar {
+  --sidebar-background: #1a1613;
+  --sidebar-text: #f5f0eb;
+  --sidebar-muted: #b8ada4;
+
+  --sidebar-hover-background: #28221d;
+  --sidebar-active-background: #f5f0eb;
+  --sidebar-active-text: #1a1613;
+
+  --sidebar-border: rgba(245, 240, 235, 0.10);
+
+  --sidebar-shadow: 4px 0 28px rgba(0, 0, 0, 0.35);
+}
+
 /* Smooth crossfade site-wide when the theme flips */
 body,
 body * {

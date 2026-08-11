@@ -2,9 +2,15 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext(null);
 
+const THEMES = ["light", "dark", "light-dark-sidebar"];
+
 function getInitialTheme() {
   const saved = localStorage.getItem("cv-theme");
-  if (saved === "light" || saved === "dark") return saved;
+
+  if (THEMES.includes(saved)) {
+    return saved;
+  }
+
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
@@ -13,18 +19,37 @@ function getInitialTheme() {
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme);
 
-  // Apply to <html> so every page/route picks it up, not just one component
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("cv-theme", theme);
   }, [theme]);
 
+  // Cycles:
+  // light → dark → light-dark-sidebar → light
   const toggleTheme = () => {
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
+    setTheme((currentTheme) => {
+      const currentIndex = THEMES.indexOf(currentTheme);
+      const nextIndex = (currentIndex + 1) % THEMES.length;
+
+      return THEMES[nextIndex];
+    });
+  };
+
+  const setThemeMode = (newTheme) => {
+    if (THEMES.includes(newTheme)) {
+      setTheme(newTheme);
+    }
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setTheme: setThemeMode,
+        toggleTheme,
+        themes: THEMES,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -32,11 +57,10 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
+
   if (!ctx) {
     throw new Error("useTheme must be used inside a <ThemeProvider>");
   }
+
   return ctx;
 }
-
-
-
