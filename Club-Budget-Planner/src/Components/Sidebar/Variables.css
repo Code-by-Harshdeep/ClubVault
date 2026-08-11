@@ -1,0 +1,44 @@
+:root {
+  /* Colors */
+  --color-background: #faf9f6;
+  --color-surface: #ffffff;
+  --color-surface-container: #f3f0e9;
+  --color-surface-container-low: #f8f6f0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e8e4db;
+  --color-primary: #1f1b16;
+  --color-primary-container: #2c2620;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #1f1b16;
+  --color-on-surface-variant: #6b6459;
+  --color-border-soft: rgba(0, 0, 0, 0.05);
+  --color-border-mid: rgba(0, 0, 0, 0.09);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+
+  /* Typography */
+  --font-headline: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Border Radii */
+  --radius-full: 9999px;
+  --radius-xl: 20px;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+}
+
+html[data-theme="dark"] {
+  --color-background: #12100e;
+  --color-surface: #1a1815;
+  --color-surface-container: #24211c;
+  --color-surface-container-low: #1e1b17;
+  --color-surface-container-lowest: #141210;
+  --color-surface-container-high: #2d2923;
+  --color-primary: #f5f2eb;
+  --color-primary-container: #332d26;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #f5f2eb;
+  --color-on-surface-variant: #a39c90;
+  --color-border-soft: rgba(255, 255, 255, 0.06);
+  --color-border-mid: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.2);
+}
