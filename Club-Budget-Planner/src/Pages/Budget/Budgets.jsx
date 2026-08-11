@@ -1,11 +1,17 @@
+
 import React, { useEffect, useState } from "react";
 import { useClub } from "../../ClubContext";
+import { useTheme } from "../../ThemeContext";
 import { api } from "../../api";
 import "./Budgets.css";
 
 function formatMoney(n) {
   const num = Number(n) || 0;
-  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  return `₹${num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 function NewBudgetModal({ onClose, onSubmit }) {
@@ -19,13 +25,22 @@ function NewBudgetModal({ onClose, onSubmit }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     if (!title || !category || !allocated) {
       setError("Title, category and allocated amount are required.");
       return;
     }
+
     setLoading(true);
+
     try {
-      await onSubmit({ title, category, description, allocated: Number(allocated) });
+      await onSubmit({
+        title,
+        category,
+        description,
+        allocated: Number(allocated),
+      });
+
       onClose();
     } catch (err) {
       setError(err.message);
@@ -35,22 +50,71 @@ function NewBudgetModal({ onClose, onSubmit }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="modal-box"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>Create New Budget</h3>
-        <form onSubmit={handleSubmit} className="modal-form">
-          <label>Title</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Fall Gala 2026" />
-          <label>Category</label>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Event" />
-          <label>Description</label>
-          <input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional" />
-          <label>Allocated Amount (₹)</label>
-          <input type="number" min="0" value={allocated} onChange={(e) => setAllocated(e.target.value)} placeholder="0.00" />
+
+        <form className="modal-form" onSubmit={handleSubmit}>
+          <label htmlFor="budget-title">Title</label>
+          <input
+            id="budget-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Fall Gala 2026"
+          />
+
+          <label htmlFor="budget-category">Category</label>
+          <input
+            id="budget-category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="e.g. Event"
+          />
+
+          <label htmlFor="budget-description">Description</label>
+          <input
+            id="budget-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Optional"
+          />
+
+          <label htmlFor="budget-allocated">
+            Allocated Amount (₹)
+          </label>
+          <input
+            id="budget-allocated"
+            type="number"
+            min="0"
+            value={allocated}
+            onChange={(e) => setAllocated(e.target.value)}
+            placeholder="0.00"
+          />
+
           {error && <p className="modal-error">{error}</p>}
+
           <div className="modal-actions">
-            <button type="button" className="filter-btn" onClick={onClose}>Cancel</button>
-            <button type="submit" className="primary-btn" disabled={loading}>
+            <button
+              type="button"
+              className="modal-cancel-btn"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="primary-btn modal-submit-btn"
+              disabled={loading}
+            >
               {loading ? "Creating..." : "Create Budget"}
             </button>
           </div>
@@ -62,6 +126,11 @@ function NewBudgetModal({ onClose, onSubmit }) {
 
 const Budgets = () => {
   const { club } = useClub();
+
+  // Connect this page to your global ThemeContext.
+  // The actual colors are handled by CSS variables.
+  const { theme } = useTheme();
+
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -69,8 +138,10 @@ const Budgets = () => {
 
   const load = async () => {
     if (!club?._id) return;
+
     setLoading(true);
     setError("");
+
     try {
       const data = await api.get(`/api/clubs/${club._id}/budgets`);
       setBudgets(data.budgets || []);
@@ -91,56 +162,106 @@ const Budgets = () => {
     await load();
   };
 
-  const totalAllocated = budgets.reduce((sum, b) => sum + (b.allocated || 0), 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + (b.spent || 0), 0);
+  const totalAllocated = budgets.reduce(
+    (sum, b) => sum + (Number(b.allocated) || 0),
+    0
+  );
+
+  const totalSpent = budgets.reduce(
+    (sum, b) => sum + (Number(b.spent) || 0),
+    0
+  );
+
   const remaining = totalAllocated - totalSpent;
 
   return (
-    <div className="dashboard-content">
-      <main className="budgets-container">
-        {showModal && (
-          <NewBudgetModal onClose={() => setShowModal(false)} onSubmit={handleCreate} />
-        )}
+    <div
+      className="budgets-page"
+      data-theme={theme}
+    >
+      {showModal && (
+        <NewBudgetModal
+          onClose={() => setShowModal(false)}
+          onSubmit={handleCreate}
+        />
+      )}
 
+      <main className="dashboard-content">
         <header className="page-header">
           <div>
             <h1 className="page-title">Budgets</h1>
+
             <p className="page-subtitle">
-              Allocate funds and monitor expenditure across all committee initiatives.
+              Allocate funds and monitor expenditure across all committee
+              initiatives.
             </p>
           </div>
 
-          <button className="primary-btn" onClick={() => setShowModal(true)}>
-            <span className="material-symbols-outlined">add_circle</span>
+          <button
+            className="primary-btn"
+            onClick={() => setShowModal(true)}
+          >
+            <span className="material-symbols-outlined">
+              add_circle
+            </span>
             Create New Budget
           </button>
         </header>
 
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        {error && (
+          <p className="page-error">
+            {error}
+          </p>
+        )}
 
         <section className="kpi-grid">
           <div className="kpi-card">
             <div className="kpi-header">
-              <span className="material-symbols-outlined">account_balance</span>
+              <span className="material-symbols-outlined">
+                account_balance
+              </span>
+
               <h3>Total Allocated</h3>
             </div>
+
             <div className="kpi-body">
-              <h2>{loading ? "…" : formatMoney(totalAllocated)}</h2>
-              <p>Across {budgets.length} budgets</p>
+              <h2>
+                {loading ? "…" : formatMoney(totalAllocated)}
+              </h2>
+
+              <p>
+                Across {budgets.length} budgets
+              </p>
             </div>
           </div>
 
           <div className="kpi-card">
             <div className="kpi-header">
-              <span className="material-symbols-outlined">trending_up</span>
+              <span className="material-symbols-outlined">
+                trending_up
+              </span>
+
               <h3>Total Spent</h3>
             </div>
+
             <div className="kpi-body">
-              <h2>{loading ? "…" : formatMoney(totalSpent)}</h2>
+              <h2>
+                {loading ? "…" : formatMoney(totalSpent)}
+              </h2>
+
               <div className="progress-bar">
                 <div
                   className="progress-fill"
-                  style={{ width: `${totalAllocated ? Math.min(100, (totalSpent / totalAllocated) * 100) : 0}%` }}
+                  style={{
+                    width: `${
+                      totalAllocated
+                        ? Math.min(
+                            100,
+                            (totalSpent / totalAllocated) * 100
+                          )
+                        : 0
+                    }%`,
+                  }}
                 />
               </div>
             </div>
@@ -148,13 +269,28 @@ const Budgets = () => {
 
           <div className="kpi-card">
             <div className="kpi-header">
-              <span className="material-symbols-outlined">savings</span>
+              <span className="material-symbols-outlined">
+                savings
+              </span>
+
               <h3>Remaining Balance</h3>
             </div>
+
             <div className="kpi-body">
-              <h2>{loading ? "…" : formatMoney(remaining)}</h2>
-              <p className={remaining >= 0 ? "status-success" : "warning"}>
-                {remaining >= 0 ? "Healthy status" : "Over budget"}
+              <h2>
+                {loading ? "…" : formatMoney(remaining)}
+              </h2>
+
+              <p
+                className={
+                  remaining >= 0
+                    ? "status-success"
+                    : "warning"
+                }
+              >
+                {remaining >= 0
+                  ? "Healthy status"
+                  : "Over budget"}
               </p>
             </div>
           </div>
@@ -167,37 +303,74 @@ const Budgets = () => {
 
           <div className="budget-list">
             {loading ? (
-              <p>Loading budgets…</p>
+              <p className="empty-state">
+                Loading budgets…
+              </p>
             ) : budgets.length === 0 ? (
-              <p>No budgets yet. Create one to get started.</p>
+              <p className="empty-state">
+                No budgets yet. Create one to get started.
+              </p>
             ) : (
               budgets.map((b) => {
-                const pct = b.allocated ? Math.min(100, (b.spent / b.allocated) * 100) : 0;
+                const allocated = Number(b.allocated) || 0;
+                const spent = Number(b.spent) || 0;
+
+                const pct = allocated
+                  ? Math.min(100, (spent / allocated) * 100)
+                  : 0;
+
                 const warning = pct >= 70;
+
                 return (
-                  <article className="budget-card" key={b._id}>
+                  <article
+                    className="budget-card"
+                    key={b._id}
+                  >
                     <div className="budget-top">
                       <div className="budget-info">
                         <div className="budget-title-row">
                           <h3>{b.title}</h3>
-                          <span className="budget-tag">{b.category}</span>
+
+                          <span className="budget-tag">
+                            {b.category}
+                          </span>
                         </div>
-                        <p>{b.description}</p>
+
+                        <p>
+                          {b.description ||
+                            "No description provided."}
+                        </p>
                       </div>
 
                       <div className="budget-amount">
                         <h3>
-                          {formatMoney(b.spent)}
-                          <span> / {formatMoney(b.allocated)}</span>
+                          {formatMoney(spent)}
+                          <span>
+                            {" "}
+                            / {formatMoney(allocated)}
+                          </span>
                         </h3>
-                        <p className={warning ? "warning" : ""}>
-                          {pct.toFixed(1)}% Utilized{warning ? " - Warning" : ""}
+
+                        <p
+                          className={
+                            warning ? "warning" : ""
+                          }
+                        >
+                          {pct.toFixed(1)}% Utilized
+                          {warning
+                            ? " - Warning"
+                            : ""}
                         </p>
                       </div>
                     </div>
 
                     <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${pct}%` }} />
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${pct}%`,
+                        }}
+                      />
                     </div>
                   </article>
                 );
