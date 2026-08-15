@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Landmark, Sun, Moon } from "lucide-react";
 import { useTheme } from "../../ThemeContext";
 import "./Signup.css";
+import SignupImage from "../../assets/signupImg.png";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -91,7 +92,7 @@ const Signup = () => {
       {/* Left Image Panel */}
       <div className="signup-image-panel">
         <img
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-49f9SEvG6mmJFCGdFBs1h25uHRZBIoB-pehlwC1hIQCrrTjuKqXz2P89z7BsjQmfCU21QARwkTUrMzuHlQm9_N0Uisx-qdMKhPtQZDI8xy-t4QYWGiGwGp_nhO3XnvXxVC0MaLQWY34x5S_A4Y7vk80sQlCHGrmRTH60GTdS70gCcssYXs26KGrPBrHXJXl1S3gIfPNt54I3SCNlld_NIHIUz3yjnTuroz2TYL9ZUF0YWOBXvn8q_lKX1RF83LJyWqzCv3uqDOj1"
+          src={SignupImage}
           alt="University architecture"
         />
 
