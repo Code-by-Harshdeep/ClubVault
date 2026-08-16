@@ -1,8 +1,15 @@
-/* Google Fonts & Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700');
+/* =========================================================
+   GOOGLE FONTS & MATERIAL SYMBOLS
+   ========================================================= */
 
-/* ---------- Transactions Page Container ---------- */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap");
+
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700");
+
+/* =========================================================
+   TRANSACTIONS PAGE
+   ========================================================= */
+
 .transactions-page {
   width: 100%;
   min-height: 100%;
@@ -22,7 +29,10 @@
   box-sizing: border-box;
 }
 
-/* ---------- Header ---------- */
+/* =========================================================
+   HEADER
+   ========================================================= */
+
 .transactions-header {
   display: flex;
   justify-content: space-between;
@@ -50,7 +60,10 @@
   font-weight: 400;
 }
 
-/* ---------- Income/Expense Toggle Pill ---------- */
+/* =========================================================
+   INCOME / EXPENSE TOGGLE
+   ========================================================= */
+
 .transactions-toggle {
   display: flex;
   gap: 4px;
@@ -73,13 +86,20 @@
   transition: all 0.2s ease;
 }
 
+.toggle-btn:hover {
+  opacity: 0.85;
+}
+
 .toggle-btn.active {
   background: var(--color-primary-container, #2c2620);
   color: var(--color-on-primary, #ffffff);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ---------- KPI Cards (10/10 Glassmorphism) ---------- */
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
 .transactions-kpi-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -88,7 +108,7 @@
 }
 
 .transactions-kpi-card {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--color-surface-container-lowest, #ffffff);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
@@ -98,7 +118,10 @@
   flex-direction: column;
   gap: 10px;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
   position: relative;
 }
 
@@ -151,7 +174,10 @@
   font-weight: 500;
 }
 
-/* ---------- Ledger Header ---------- */
+/* =========================================================
+   LEDGER
+   ========================================================= */
+
 .transactions-ledger {
   display: flex;
   flex-direction: column;
@@ -179,7 +205,10 @@
   align-items: center;
 }
 
-/* ---------- Search Box ---------- */
+/* =========================================================
+   SEARCH BOX
+   ========================================================= */
+
 .search-box {
   height: 42px;
   width: 280px;
@@ -191,6 +220,7 @@
   border: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
   border-radius: var(--radius-full, 9999px);
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .search-box:focus-within {
@@ -201,10 +231,12 @@
 .search-box .material-symbols-outlined {
   color: var(--color-on-surface-variant, #6b6459);
   font-size: 18px;
+  flex-shrink: 0;
 }
 
 .search-box input {
   width: 100%;
+  min-width: 0;
   border: none;
   outline: none;
   font-size: 13px;
@@ -217,7 +249,10 @@
   color: var(--color-on-surface-variant, #6b6459);
 }
 
-/* ---------- Action Buttons ---------- */
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
 .action-btn {
   height: 42px;
   padding: 0 20px;
@@ -226,6 +261,7 @@
   border-radius: var(--radius-full, 9999px);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-family: var(--font-body, "Inter", sans-serif);
   font-size: 13px;
@@ -242,11 +278,20 @@
   transform: translateY(-1px);
 }
 
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .action-btn .material-symbols-outlined {
   font-size: 18px;
 }
 
-/* ---------- Table Container ---------- */
+/* =========================================================
+   TABLE
+   ========================================================= */
+
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -274,6 +319,7 @@
   text-transform: uppercase;
   color: var(--color-on-surface-variant, #6b6459);
   border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
+  white-space: nowrap;
 }
 
 .transactions-table td {
@@ -296,7 +342,10 @@
   border-bottom: none;
 }
 
-/* ---------- Transaction Details ---------- */
+/* =========================================================
+   TRANSACTION DETAILS
+   ========================================================= */
+
 .transaction-title {
   font-size: 14px;
   font-weight: 600;
@@ -309,7 +358,10 @@
   color: var(--color-on-surface-variant, #6b6459);
 }
 
-/* ---------- Category Tag ---------- */
+/* =========================================================
+   CATEGORY TAG
+   ========================================================= */
+
 .category-tag {
   display: inline-block;
   padding: 4px 10px;
@@ -323,7 +375,10 @@
   letter-spacing: 0.03em;
 }
 
-/* ---------- Amount Column ---------- */
+/* =========================================================
+   AMOUNT
+   ========================================================= */
+
 .amount-column {
   text-align: right;
 }
@@ -334,6 +389,7 @@
   color: var(--color-primary, #1f1b16);
   font-variant-numeric: tabular-nums;
   font-size: 15px;
+  white-space: nowrap;
 }
 
 .amount.negative {
@@ -344,7 +400,10 @@
   color: #16a34a;
 }
 
-/* ---------- Pagination ---------- */
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
 .transactions-pagination {
   display: flex;
   justify-content: space-between;
@@ -387,7 +446,407 @@
   font-size: 18px;
 }
 
-/* ---------- Responsive ---------- */
+/* =========================================================
+   TRANSACTION MODAL
+   ========================================================= */
+
+.tx-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.tx-modal-box {
+  background: var(--color-surface-container-lowest, #ffffff);
+  color: var(--color-on-surface, #1f1b16);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+}
+
+.tx-modal-box h3 {
+  margin: 0 0 16px;
+  color: var(--color-on-surface, #1f1b16);
+}
+
+.tx-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tx-modal-form label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-on-surface-variant, #6b6459);
+  margin-top: 10px;
+}
+
+.tx-modal-form input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
+  background: var(--color-surface-container-low, #f8f6f0);
+  color: var(--color-on-surface, #1f1b16);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.tx-modal-form input:focus {
+  border-color: var(--color-primary, #1f1b16);
+}
+
+.tx-modal-form input::placeholder {
+  color: var(--color-on-surface-variant, #6b6459);
+  opacity: 0.75;
+}
+
+.tx-modal-type-switch {
+  display: flex;
+  gap: 8px;
+}
+
+.tx-modal-type-switch button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
+  background: var(--color-surface-container-low, #f8f6f0);
+  color: var(--color-on-surface, #1f1b16);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.tx-modal-type-switch button:hover {
+  border-color: var(--color-primary, #1f1b16);
+}
+
+.tx-modal-type-switch button.active {
+  background: var(--color-primary, #1f1b16);
+  color: var(--color-on-primary, #ffffff);
+  border-color: var(--color-primary, #1f1b16);
+}
+
+.tx-modal-error {
+  color: var(--color-error, #ba1a1a);
+  font-size: 0.8rem;
+  margin: 8px 0 0;
+}
+
+.tx-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.tx-primary-btn {
+  background: var(--color-primary, #1f1b16);
+  color: var(--color-on-primary, #ffffff);
+}
+
+/* =========================================================
+   DARK MODE
+   Controlled by:
+   <html data-theme="dark">
+   ========================================================= */
+
+[data-theme="dark"] .transactions-page,
+[data-theme="light-dark-sidebar"] .transactions-page {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+/* ---------- Header ---------- */
+
+[data-theme="dark"] .transactions-header,
+[data-theme="light-dark-sidebar"] .transactions-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .transactions-title,
+[data-theme="light-dark-sidebar"] .transactions-title {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .transactions-subtitle,
+[data-theme="light-dark-sidebar"] .transactions-subtitle {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+/* ---------- Toggle ---------- */
+
+[data-theme="dark"] .transactions-toggle,
+[data-theme="light-dark-sidebar"] .transactions-toggle {
+  background: var(--color-surface-container-low, #26231f);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .toggle-btn,
+[data-theme="light-dark-sidebar"] .toggle-btn {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+[data-theme="dark"] .toggle-btn.active,
+[data-theme="light-dark-sidebar"] .toggle-btn.active {
+  background: var(--color-primary, #f5f1e8);
+  color: var(--color-on-primary, #1a1815);
+}
+
+/* ---------- KPI Cards ---------- */
+
+[data-theme="dark"] .transactions-kpi-card,
+[data-theme="light-dark-sidebar"] .transactions-kpi-card {
+  background: var(--color-surface-container-lowest, #1d1b18);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .transactions-kpi-card:hover,
+[data-theme="light-dark-sidebar"] .transactions-kpi-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="dark"] .transactions-kpi-card h2,
+[data-theme="light-dark-sidebar"] .transactions-kpi-card h2 {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .kpi-label,
+[data-theme="dark"] .kpi-muted,
+[data-theme="light-dark-sidebar"] .kpi-label,
+[data-theme="light-dark-sidebar"] .kpi-muted {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+/* ---------- Ledger ---------- */
+
+[data-theme="dark"] .ledger-header h2,
+[data-theme="light-dark-sidebar"] .ledger-header h2 {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+/* ---------- Search ---------- */
+
+[data-theme="dark"] .search-box,
+[data-theme="light-dark-sidebar"] .search-box {
+  background: var(--color-surface-container-low, #26231f);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .search-box:focus-within,
+[data-theme="light-dark-sidebar"] .search-box:focus-within {
+  background: var(--color-surface, #211f1b);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="dark"] .search-box input,
+[data-theme="light-dark-sidebar"] .search-box input {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .search-box input::placeholder,
+[data-theme="light-dark-sidebar"] .search-box input::placeholder {
+  color: #918b81;
+}
+
+[data-theme="dark"] .search-box .material-symbols-outlined,
+[data-theme="light-dark-sidebar"] .search-box .material-symbols-outlined {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+/* ---------- Buttons ---------- */
+
+[data-theme="dark"] .action-btn,
+[data-theme="light-dark-sidebar"] .action-btn {
+  background: var(--color-surface, #211f1b);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-on-surface, #f5f1e8);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .action-btn:hover,
+[data-theme="light-dark-sidebar"] .action-btn:hover {
+  background: var(--color-surface-container-low, #26231f);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ---------- Table ---------- */
+
+[data-theme="dark"] .table-wrapper,
+[data-theme="light-dark-sidebar"] .table-wrapper {
+  background: var(--color-surface, #211f1b);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .transactions-table thead,
+[data-theme="light-dark-sidebar"] .transactions-table thead {
+  background: var(--color-surface-container-low, #26231f);
+}
+
+[data-theme="dark"] .transactions-table th,
+[data-theme="light-dark-sidebar"] .transactions-table th {
+  color: var(--color-on-surface-variant, #aaa398);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .transactions-table td,
+[data-theme="light-dark-sidebar"] .transactions-table td {
+  color: var(--color-on-surface, #f5f1e8);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .transactions-table tbody tr:hover,
+[data-theme="light-dark-sidebar"] .transactions-table tbody tr:hover {
+  background: var(--color-surface-container-low, #26231f);
+}
+
+/* ---------- Transaction Details ---------- */
+
+[data-theme="dark"] .transaction-title,
+[data-theme="light-dark-sidebar"] .transaction-title {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .transaction-subtitle,
+[data-theme="light-dark-sidebar"] .transaction-subtitle {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+/* ---------- Category ---------- */
+
+[data-theme="dark"] .category-tag,
+[data-theme="light-dark-sidebar"] .category-tag {
+  background: var(--color-surface-container-low, #26231f);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+/* ---------- Amount ---------- */
+
+[data-theme="dark"] .amount,
+[data-theme="light-dark-sidebar"] .amount {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .amount.negative,
+[data-theme="light-dark-sidebar"] .amount.negative {
+  color: #f0aaa4;
+}
+
+[data-theme="dark"] .amount.positive,
+[data-theme="light-dark-sidebar"] .amount.positive {
+  color: #6ee7a0;
+}
+
+/* ---------- Pagination ---------- */
+
+[data-theme="dark"] .pagination-text,
+[data-theme="light-dark-sidebar"] .pagination-text {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+[data-theme="dark"] .page-btn,
+[data-theme="light-dark-sidebar"] .page-btn {
+  background: var(--color-surface, #211f1b);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .page-btn:hover,
+[data-theme="light-dark-sidebar"] .page-btn:hover {
+  background: var(--color-surface-container-low, #26231f);
+}
+
+/* =========================================================
+   DARK MODE MODAL
+   ========================================================= */
+
+[data-theme="dark"] .tx-modal-overlay,
+[data-theme="light-dark-sidebar"] .tx-modal-overlay {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+[data-theme="dark"] .tx-modal-box,
+[data-theme="light-dark-sidebar"] .tx-modal-box {
+  background: var(--color-surface-container-lowest, #1d1b18);
+  color: var(--color-on-surface, #f5f1e8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="dark"] .tx-modal-box h3,
+[data-theme="light-dark-sidebar"] .tx-modal-box h3 {
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .tx-modal-form label,
+[data-theme="light-dark-sidebar"] .tx-modal-form label {
+  color: var(--color-on-surface-variant, #aaa398);
+}
+
+[data-theme="dark"] .tx-modal-form input,
+[data-theme="light-dark-sidebar"] .tx-modal-form input {
+  background: var(--color-surface-container-low, #26231f);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .tx-modal-form input:focus,
+[data-theme="light-dark-sidebar"] .tx-modal-form input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .tx-modal-form input::placeholder,
+[data-theme="light-dark-sidebar"] .tx-modal-form input::placeholder {
+  color: #918b81;
+}
+
+[data-theme="dark"] .tx-modal-type-switch button,
+[data-theme="light-dark-sidebar"] .tx-modal-type-switch button {
+  background: var(--color-surface-container-low, #26231f);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-on-surface, #f5f1e8);
+}
+
+[data-theme="dark"] .tx-modal-type-switch button:hover,
+[data-theme="light-dark-sidebar"] .tx-modal-type-switch button:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="dark"] .tx-modal-type-switch button.active,
+[data-theme="light-dark-sidebar"] .tx-modal-type-switch button.active {
+  background: var(--color-primary, #f5f1e8);
+  color: var(--color-on-primary, #1a1815);
+  border-color: var(--color-primary, #f5f1e8);
+}
+
+[data-theme="dark"] .tx-primary-btn,
+[data-theme="light-dark-sidebar"] .tx-primary-btn {
+  background: var(--color-primary, #f5f1e8);
+  color: var(--color-on-primary, #1a1815);
+}
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
 @media (max-width: 900px) {
   .transactions-header {
     flex-direction: column;
@@ -417,6 +876,10 @@
   }
 }
 
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
 @media (max-width: 600px) {
   .transactions-title {
     font-size: 28px;
@@ -432,6 +895,7 @@
 
   .ledger-actions {
     flex-direction: column;
+    width: 100%;
   }
 
   .action-btn {
@@ -448,90 +912,36 @@
     gap: 16px;
     align-items: flex-start;
   }
-}
-/* --- Added: log-transaction modal for live data wiring --- */
-.tx-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+
+  .tx-modal-overlay {
+    padding: 16px;
+  }
+
+  .tx-modal-box {
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
 }
 
-.tx-modal-box {
-  background: var(--color-surface-container-lowest, #fff);
-  border-radius: 14px;
-  padding: 24px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+.toggle-btn:focus-visible,
+.action-btn:focus-visible,
+.page-btn:focus-visible,
+.tx-modal-type-switch button:focus-visible {
+  outline: 2px solid var(--color-primary, #1f1b16);
+  outline-offset: 2px;
 }
 
-.tx-modal-box h3 {
-  margin: 0 0 16px;
-}
-
-.tx-modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.tx-modal-form label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--color-on-surface-variant);
-  margin-top: 10px;
-}
-
-.tx-modal-form input {
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border-mid);
-  background: var(--color-surface-container-low);
-  color: var(--color-on-surface);
-  font-size: 0.9rem;
-}
-
-.tx-modal-type-switch {
-  display: flex;
-  gap: 8px;
-}
-
-.tx-modal-type-switch button {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border-mid);
-  background: var(--color-surface-container-low);
-  color: var(--color-on-surface);
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.tx-modal-type-switch button.active {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  border-color: var(--color-primary);
-}
-
-.tx-modal-error {
-  color: var(--color-error, #ba1a1a);
-  font-size: 0.8rem;
-  margin: 8px 0 0;
-}
-
-.tx-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.tx-primary-btn {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+[data-theme="dark"] .toggle-btn:focus-visible,
+[data-theme="dark"] .action-btn:focus-visible,
+[data-theme="dark"] .page-btn:focus-visible,
+[data-theme="dark"] .tx-modal-type-switch button:focus-visible,
+[data-theme="light-dark-sidebar"] .toggle-btn:focus-visible,
+[data-theme="light-dark-sidebar"] .action-btn:focus-visible,
+[data-theme="light-dark-sidebar"] .page-btn:focus-visible,
+[data-theme="light-dark-sidebar"] .tx-modal-type-switch button:focus-visible {
+  outline-color: #f5f1e8;
 }
