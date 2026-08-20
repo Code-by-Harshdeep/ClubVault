@@ -4,7 +4,7 @@ import "./Login.css";
 import { useTheme } from "../../ThemeContext";
 import { useClub } from "../../ClubContext";
 import { Sun, Moon } from "lucide-react";
-import SignupImage from "../../assets/signupImg.png";
+import LoginImage from "../../assets/LoginImg.jpg";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -168,7 +168,7 @@ const Login = () => {
       {/* Right Image Panel */}
       <div
         className="image-panel"
-        style={{ "--signup-image": `url(${SignupImage})` }}
+        style={{ "--signup-image": `url(${LoginImage})` }}
       >
         <div className="overlay"></div>
       </div>
