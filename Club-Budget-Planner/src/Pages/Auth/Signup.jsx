@@ -368,7 +368,7 @@ const Signup = () => {
               size={32}
             />
 
-            <span>ClubVault</span>
+           <a href="/" id="home"> <span>ClubVault</span></a>
           </div>
 
           <div className="signup-message">

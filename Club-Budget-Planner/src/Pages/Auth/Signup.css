@@ -645,3 +645,7 @@ html[data-theme="dark"]
     right: 20px;
   }
 }
+
+.signup-brand  #home {
+  text-decoration: none;
+}
