@@ -1,10 +1,4 @@
 require("dotenv").config();
-const dns = require("dns");
-
-// Force IPv4 first in Node.js DNS resolution (prevents ENETUNREACH on cloud environments like Render)
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder("ipv4first");
-}
 
 const app = require("./app");
 const connectDB = require("./config/db");

@@ -50,10 +50,12 @@ const signup = async (req, res) => {
       emailVerificationExpiresAt: expiresAt,
     });
 
-    // Send verification email asynchronously in background (non-blocking for fast UI response)
-    sendVerificationEmail(user.universityEmail, verificationCode, user.fullName).catch((emailErr) => {
+    // Send verification email using Gmail + Nodemailer
+    try {
+      await sendVerificationEmail(user.universityEmail, verificationCode, user.fullName);
+    } catch (emailErr) {
       console.error("Email delivery note (signup):", emailErr.message);
-    });
+    }
 
     const response = {
       message: "Account created! Please verify your email with the 6-digit OTP code sent to your inbox.",
@@ -216,11 +218,8 @@ const resendVerificationOTP = async (req, res) => {
     );
 
     if (!emailResult.success) {
-      console.error("Resend OTP failed:", emailResult.error);
       return res.status(500).json({
-        message:
-          emailResult.error ||
-          "Failed to send verification email. Please check server email credentials.",
+        message: "Failed to send verification email. Please try again later.",
       });
     }
 

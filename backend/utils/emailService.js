@@ -1,37 +1,22 @@
 const nodemailer = require("nodemailer");
-const dns = require("dns");
-
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder("ipv4first");
-}
 
 let _transporter = null;
 
-// Get or initialize Nodemailer transporter using Gmail (direct SSL port 465 with IPv4 for cloud reliability)
+// Get or initialize Nodemailer transporter using Gmail
 const getTransporter = () => {
   const emailUser = process.env.EMAIL_USER;
   const emailPass = (process.env.EMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
 
-  if (!emailUser || !emailPass) {
-    console.warn("⚠️ Warning: EMAIL_USER or EMAIL_APP_PASSWORD not configured in environment variables.");
-    return null;
-  }
-
   if (!_transporter || _transporter.user !== emailUser) {
+    if (!emailUser || !emailPass) {
+      console.warn("⚠️ Warning: EMAIL_USER or EMAIL_APP_PASSWORD not configured in environment variables.");
+    }
+
     _transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      family: 4, // Force IPv4 to avoid ENETUNREACH on Render/cloud networks
+      service: "gmail",
       auth: {
         user: emailUser,
         pass: emailPass,
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 8000,
-      socketTimeout: 15000,
-      tls: {
-        rejectUnauthorized: true,
       },
     });
     _transporter.user = emailUser;
@@ -41,215 +26,108 @@ const getTransporter = () => {
 };
 
 /**
- * Helper to send email via Brevo HTTPS API (formerly Sendinblue)
- * Free 300 emails/day, uses your existing personal Gmail (NO custom domain required!)
- */
-const sendViaBrevo = async (email, subject, html, text, fullName = "") => {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) return null;
-
-  const senderEmail = process.env.EMAIL_USER || "kennny207@gmail.com";
-  const senderName = "ClubVault";
-
-  try {
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "api-key": apiKey,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify({
-        sender: { name: senderName, email: senderEmail },
-        to: [{ email, name: fullName || "User" }],
-        subject,
-        htmlContent: html,
-        textContent: text,
-      }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      console.log("✅ Email sent via Brevo API:", data.messageId);
-      return { success: true, messageId: data.messageId };
-    } else {
-      console.warn("⚠️ Brevo API returned error:", data.message);
-      return { success: false, error: data.message };
-    }
-  } catch (err) {
-    console.error("❌ Brevo API fetch failed:", err.message);
-    return { success: false, error: err.message };
-  }
-};
-
-/**
- * Helper to send email via Resend HTTPS API
- */
-const sendViaResend = async (email, subject, html, text) => {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return null;
-
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM || "ClubVault <onboarding@resend.dev>",
-        to: [email],
-        subject,
-        html,
-        text,
-      }),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      console.log("✅ Email sent via Resend API:", data.id);
-      return { success: true, messageId: data.id };
-    } else {
-      console.warn("⚠️ Resend API returned error:", data.message);
-      return { success: false, error: data.message };
-    }
-  } catch (err) {
-    console.error("❌ Resend API fetch failed:", err.message);
-    return { success: false, error: err.message };
-  }
-};
-
-/**
  * Send a verification email with a verification code
  * @param {string} email - Recipient email address
  * @param {string} verificationCode - 6-digit or custom verification code
  * @param {string} [fullName] - Optional recipient full name
  */
 const sendVerificationEmail = async (email, verificationCode, fullName = "") => {
-  // Always log OTP prominently to server logs for debugging & fallback on cloud hosts
-  console.log("\n=======================================================");
-  console.log(`🔑 [CLUBVAULT OTP] Verification Code for ${email}: ${verificationCode}`);
-  console.log("=======================================================\n");
-
   try {
     const greeting = fullName ? `Hello ${fullName},` : "Hello,";
     const currentYear = new Date().getFullYear();
-    const subject = "Verify Your Email - ClubVault";
-    const text = `${greeting}\n\nThank you for registering with ClubVault. Your verification code is: ${verificationCode}\n\nThis code will expire soon.\n\nClubVault - Financial Clarity for Student Organizations`;
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Verify Your Email</title>
-      </head>
-      <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 30px 15px;">
-          <tr>
-            <td align="center">
-              <table role="presentation" width="100%" style="max-width: 560px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
-                
-                <!-- Header -->
-                <tr>
-                  <td style="padding: 28px 32px 20px 32px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); text-align: left;">
-                    <div style="font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                      🏛️ ClubVault
-                    </div>
-                    <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">
-                      Absolute financial clarity for student leaders
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Main Content -->
-                <tr>
-                  <td style="padding: 32px 32px 24px 32px;">
-                    <h2 style="font-size: 20px; font-weight: 600; color: #0f172a; margin: 0 0 12px 0;">
-                      Verify Your Email Address
-                    </h2>
-                    <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
-                      ${greeting}<br>
-                      Thank you for creating an account on <strong>ClubVault</strong>. Use the verification code below to confirm your university email address:
-                    </p>
-
-                    <!-- Code Box -->
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
-                      <tr>
-                        <td align="center" style="background-color: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 18px 24px;">
-                          <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 6px;">
-                            Your Verification Code
-                          </div>
-                          <div style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #3b82f6; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;">
-                            ${verificationCode}
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-
-                    <p style="font-size: 14px; line-height: 1.5; color: #64748b; margin: 0 0 16px 0;">
-                      ⏱️ This verification code is temporary and will expire shortly.
-                    </p>
-                    
-                    <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 20px;">
-                      <p style="font-size: 13px; line-height: 1.5; color: #94a3b8; margin: 0;">
-                        If you did not initiate this request, you can safely ignore this email.
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Footer -->
-                <tr>
-                  <td style="padding: 16px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
-                    <p style="font-size: 12px; color: #94a3b8; margin: 0;">
-                      &copy; ${currentYear} ClubVault. All rights reserved.
-                    </p>
-                  </td>
-                </tr>
-
-              </table>
-            </td>
-          </tr>
-        </table>
-      </body>
-      </html>
-    `;
-
-    // 1. Try Brevo HTTPS API (recommended for free Gmail with NO custom domain)
-    if (process.env.BREVO_API_KEY) {
-      const brevoResult = await sendViaBrevo(email, subject, html, text, fullName);
-      if (brevoResult && brevoResult.success) return brevoResult;
-    }
-
-    // 2. Try Resend HTTPS API if configured
-    if (process.env.RESEND_API_KEY) {
-      const resendResult = await sendViaResend(email, subject, html, text);
-      if (resendResult && resendResult.success) return resendResult;
-    }
-
-    // 3. Try Nodemailer Gmail SMTP
-    const transporter = getTransporter();
-    if (!transporter) {
-      console.warn("⚠️ SMTP credentials not configured. OTP printed to server logs above.");
-      return { success: true, loggedToConsole: true, message: "Code logged to server logs" };
-    }
 
     const mailOptions = {
       from: `"ClubVault" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject,
-      text,
-      html,
+      subject: "Verify Your Email - ClubVault",
+      text: `${greeting}\n\nThank you for registering with ClubVault. Your verification code is: ${verificationCode}\n\nThis code will expire soon.\n\nClubVault - Financial Clarity for Student Organizations`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verify Your Email</title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 30px 15px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="100%" style="max-width: 560px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="padding: 28px 32px 20px 32px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); text-align: left;">
+                      <div style="font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
+                        🏛️ ClubVault
+                      </div>
+                      <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">
+                        Absolute financial clarity for student leaders
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Main Content -->
+                  <tr>
+                    <td style="padding: 32px 32px 24px 32px;">
+                      <h2 style="font-size: 20px; font-weight: 600; color: #0f172a; margin: 0 0 12px 0;">
+                        Verify Your Email Address
+                      </h2>
+                      <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0 0 20px 0;">
+                        ${greeting}<br>
+                        Thank you for creating an account on <strong>ClubVault</strong>. Use the verification code below to confirm your university email address:
+                      </p>
+
+                      <!-- Code Box -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
+                        <tr>
+                          <td align="center" style="background-color: #f1f5f9; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 18px 24px;">
+                            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 6px;">
+                              Your Verification Code
+                            </div>
+                            <div style="font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #3b82f6; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;">
+                              ${verificationCode}
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="font-size: 14px; line-height: 1.5; color: #64748b; margin: 0 0 16px 0;">
+                        ⏱️ This verification code is temporary and will expire shortly.
+                      </p>
+                      
+                      <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 20px;">
+                        <p style="font-size: 13px; line-height: 1.5; color: #94a3b8; margin: 0;">
+                          If you did not initiate this request, you can safely ignore this email.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 16px 32px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
+                      <p style="font-size: 12px; color: #94a3b8; margin: 0;">
+                        &copy; ${currentYear} ClubVault. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Verification email sent successfully via SMTP:", info.messageId);
+    const info = await getTransporter().sendMail(mailOptions);
+    console.log("✅ Verification email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error("❌ Email delivery failed (Render may block SMTP):", error.message);
-    // Return success with loggedToConsole so the user is never blocked
-    return { success: true, loggedToConsole: true, error: error.message };
+    console.error("❌ Failed to send verification email:", error.message);
+    return { success: false, error: error.message };
   }
 };
 
@@ -309,13 +187,7 @@ const sendWelcomeEmail = async (email, fullName = "Member") => {
       `,
     };
 
-    const transporter = getTransporter();
-    if (!transporter) {
-      console.warn("⚠️ Cannot send welcome email: SMTP credentials not configured.");
-      return { success: false, error: "SMTP credentials not configured" };
-    }
-
-    const info = await transporter.sendMail(mailOptions);
+    const info = await getTransporter().sendMail(mailOptions);
     console.log("✅ Welcome email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -435,31 +307,12 @@ const sendPasswordResetEmail = async (email, resetCode, resetLink = "", fullName
       `,
     };
 
-    // 1. Try Brevo HTTPS API (recommended for free Gmail with NO custom domain)
-    if (process.env.BREVO_API_KEY) {
-      const brevoResult = await sendViaBrevo(email, "Password Reset Request - ClubVault", html, text, fullName);
-      if (brevoResult && brevoResult.success) return brevoResult;
-    }
-
-    // 2. Try Resend HTTPS API
-    if (process.env.RESEND_API_KEY) {
-      const resendResult = await sendViaResend(email, "Password Reset Request - ClubVault", html, text);
-      if (resendResult && resendResult.success) return resendResult;
-    }
-
-    // 3. Try Nodemailer SMTP
-    const transporter = getTransporter();
-    if (!transporter) {
-      console.warn("⚠️ Cannot send password reset email: SMTP credentials not configured. Code printed to console above.");
-      return { success: true, loggedToConsole: true, message: "Code logged to server logs" };
-    }
-
-    const info = await transporter.sendMail(mailOptions);
+    const info = await getTransporter().sendMail(mailOptions);
     console.log("✅ Password reset email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("❌ Failed to send password reset email:", error.message);
-    return { success: true, loggedToConsole: true, error: error.message };
+    return { success: false, error: error.message };
   }
 };
 
