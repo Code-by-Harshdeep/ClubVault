@@ -1,8 +1,13 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 let _transporter = null;
 
-// Get or initialize Nodemailer transporter using Gmail (direct SSL port 465 for cloud reliability)
+// Get or initialize Nodemailer transporter using Gmail (direct SSL port 465 with IPv4 for cloud reliability)
 const getTransporter = () => {
   const emailUser = process.env.EMAIL_USER;
   const emailPass = (process.env.EMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
@@ -16,14 +21,15 @@ const getTransporter = () => {
     _transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
-      secure: true, // direct SSL is significantly faster & more reliable on Render/cloud than 587 STARTTLS
+      secure: true,
+      family: 4, // Force IPv4 to avoid ENETUNREACH on Render/cloud networks
       auth: {
         user: emailUser,
         pass: emailPass,
       },
-      connectionTimeout: 8000,  // 8s timeout
-      greetingTimeout: 6000,    // 6s timeout
-      socketTimeout: 10000,     // 10s socket timeout
+      connectionTimeout: 10000,
+      greetingTimeout: 8000,
+      socketTimeout: 15000,
       tls: {
         rejectUnauthorized: true,
       },
