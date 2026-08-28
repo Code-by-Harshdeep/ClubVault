@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Landmark,
   Sun,
@@ -305,10 +305,41 @@ const Signup = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setServerError(
-          data.message ||
-            "Something went wrong. Please try again."
-        );
+        if (res.status === 409) {
+          setServerError(
+            <span>
+              An account with this email already exists.{" "}
+              <Link
+                to={`/verify-email?email=${encodeURIComponent(
+                  formData.universityEmail.trim(),
+                )}`}
+                style={{
+                  color: "#2563eb",
+                  fontWeight: "600",
+                  textDecoration: "underline",
+                }}
+              >
+                Verify OTP
+              </Link>{" "}
+              or{" "}
+              <Link
+                to="/login"
+                style={{
+                  color: "#2563eb",
+                  fontWeight: "600",
+                  textDecoration: "underline",
+                }}
+              >
+                Log In
+              </Link>
+            </span>,
+          );
+        } else {
+          setServerError(
+            data.message ||
+              "Something went wrong. Please try again."
+          );
+        }
 
         setLoading(false);
         return;
