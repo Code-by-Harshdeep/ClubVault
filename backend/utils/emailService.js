@@ -41,7 +41,49 @@ const getTransporter = () => {
 };
 
 /**
- * Helper to send email via Resend HTTPS API (bypasses Render/cloud SMTP blocks completely)
+ * Helper to send email via Brevo HTTPS API (formerly Sendinblue)
+ * Free 300 emails/day, uses your existing personal Gmail (NO custom domain required!)
+ */
+const sendViaBrevo = async (email, subject, html, text, fullName = "") => {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return null;
+
+  const senderEmail = process.env.EMAIL_USER || "kennny207@gmail.com";
+  const senderName = "ClubVault";
+
+  try {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: senderName, email: senderEmail },
+        to: [{ email, name: fullName || "User" }],
+        subject,
+        htmlContent: html,
+        textContent: text,
+      }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      console.log("✅ Email sent via Brevo API:", data.messageId);
+      return { success: true, messageId: data.messageId };
+    } else {
+      console.warn("⚠️ Brevo API returned error:", data.message);
+      return { success: false, error: data.message };
+    }
+  } catch (err) {
+    console.error("❌ Brevo API fetch failed:", err.message);
+    return { success: false, error: err.message };
+  }
+};
+
+/**
+ * Helper to send email via Resend HTTPS API
  */
 const sendViaResend = async (email, subject, html, text) => {
   const apiKey = process.env.RESEND_API_KEY;
@@ -174,13 +216,19 @@ const sendVerificationEmail = async (email, verificationCode, fullName = "") => 
       </html>
     `;
 
-    // 1. Try Resend HTTPS API if configured (immune to Render SMTP port blocks)
+    // 1. Try Brevo HTTPS API (recommended for free Gmail with NO custom domain)
+    if (process.env.BREVO_API_KEY) {
+      const brevoResult = await sendViaBrevo(email, subject, html, text, fullName);
+      if (brevoResult && brevoResult.success) return brevoResult;
+    }
+
+    // 2. Try Resend HTTPS API if configured
     if (process.env.RESEND_API_KEY) {
       const resendResult = await sendViaResend(email, subject, html, text);
       if (resendResult && resendResult.success) return resendResult;
     }
 
-    // 2. Try Nodemailer Gmail SMTP
+    // 3. Try Nodemailer Gmail SMTP
     const transporter = getTransporter();
     if (!transporter) {
       console.warn("⚠️ SMTP credentials not configured. OTP printed to server logs above.");
@@ -387,13 +435,19 @@ const sendPasswordResetEmail = async (email, resetCode, resetLink = "", fullName
       `,
     };
 
-    // 1. Try Resend HTTPS API
+    // 1. Try Brevo HTTPS API (recommended for free Gmail with NO custom domain)
+    if (process.env.BREVO_API_KEY) {
+      const brevoResult = await sendViaBrevo(email, "Password Reset Request - ClubVault", html, text, fullName);
+      if (brevoResult && brevoResult.success) return brevoResult;
+    }
+
+    // 2. Try Resend HTTPS API
     if (process.env.RESEND_API_KEY) {
       const resendResult = await sendViaResend(email, "Password Reset Request - ClubVault", html, text);
       if (resendResult && resendResult.success) return resendResult;
     }
 
-    // 2. Try Nodemailer SMTP
+    // 3. Try Nodemailer SMTP
     const transporter = getTransporter();
     if (!transporter) {
       console.warn("⚠️ Cannot send password reset email: SMTP credentials not configured. Code printed to console above.");
