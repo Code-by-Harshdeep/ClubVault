@@ -50,12 +50,10 @@ const signup = async (req, res) => {
       emailVerificationExpiresAt: expiresAt,
     });
 
-    // Send verification email using Gmail + Nodemailer
-    try {
-      await sendVerificationEmail(user.universityEmail, verificationCode, user.fullName);
-    } catch (emailErr) {
+    // Send verification email asynchronously in background (non-blocking for fast UI response)
+    sendVerificationEmail(user.universityEmail, verificationCode, user.fullName).catch((emailErr) => {
       console.error("Email delivery note (signup):", emailErr.message);
-    }
+    });
 
     const response = {
       message: "Account created! Please verify your email with the 6-digit OTP code sent to your inbox.",

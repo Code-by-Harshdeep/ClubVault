@@ -2,21 +2,30 @@ const nodemailer = require("nodemailer");
 
 let _transporter = null;
 
-// Get or initialize Nodemailer transporter using Gmail
+// Get or initialize Nodemailer transporter using Gmail (direct SSL port 465 for cloud reliability)
 const getTransporter = () => {
   const emailUser = process.env.EMAIL_USER;
   const emailPass = (process.env.EMAIL_APP_PASSWORD || "").replace(/\s+/g, "");
 
-  if (!_transporter || _transporter.user !== emailUser) {
-    if (!emailUser || !emailPass) {
-      console.warn("⚠️ Warning: EMAIL_USER or EMAIL_APP_PASSWORD not configured in environment variables.");
-    }
+  if (!emailUser || !emailPass) {
+    console.warn("⚠️ Warning: EMAIL_USER or EMAIL_APP_PASSWORD not configured in environment variables.");
+    return null;
+  }
 
+  if (!_transporter || _transporter.user !== emailUser) {
     _transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // direct SSL is significantly faster & more reliable on Render/cloud than 587 STARTTLS
       auth: {
         user: emailUser,
         pass: emailPass,
+      },
+      connectionTimeout: 8000,  // 8s timeout
+      greetingTimeout: 6000,    // 6s timeout
+      socketTimeout: 10000,     // 10s socket timeout
+      tls: {
+        rejectUnauthorized: true,
       },
     });
     _transporter.user = emailUser;
@@ -122,7 +131,13 @@ const sendVerificationEmail = async (email, verificationCode, fullName = "") => 
       `,
     };
 
-    const info = await getTransporter().sendMail(mailOptions);
+    const transporter = getTransporter();
+    if (!transporter) {
+      console.warn("⚠️ Cannot send verification email: SMTP credentials (EMAIL_USER / EMAIL_APP_PASSWORD) not configured.");
+      return { success: false, error: "SMTP credentials not configured in environment variables" };
+    }
+
+    const info = await transporter.sendMail(mailOptions);
     console.log("✅ Verification email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -187,7 +202,13 @@ const sendWelcomeEmail = async (email, fullName = "Member") => {
       `,
     };
 
-    const info = await getTransporter().sendMail(mailOptions);
+    const transporter = getTransporter();
+    if (!transporter) {
+      console.warn("⚠️ Cannot send welcome email: SMTP credentials not configured.");
+      return { success: false, error: "SMTP credentials not configured" };
+    }
+
+    const info = await transporter.sendMail(mailOptions);
     console.log("✅ Welcome email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
@@ -307,7 +328,13 @@ const sendPasswordResetEmail = async (email, resetCode, resetLink = "", fullName
       `,
     };
 
-    const info = await getTransporter().sendMail(mailOptions);
+    const transporter = getTransporter();
+    if (!transporter) {
+      console.warn("⚠️ Cannot send password reset email: SMTP credentials not configured.");
+      return { success: false, error: "SMTP credentials not configured" };
+    }
+
+    const info = await transporter.sendMail(mailOptions);
     console.log("✅ Password reset email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
