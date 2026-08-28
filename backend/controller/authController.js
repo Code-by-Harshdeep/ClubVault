@@ -216,8 +216,11 @@ const resendVerificationOTP = async (req, res) => {
     );
 
     if (!emailResult.success) {
+      console.error("Resend OTP failed:", emailResult.error);
       return res.status(500).json({
-        message: "Failed to send verification email. Please try again later.",
+        message:
+          emailResult.error ||
+          "Failed to send verification email. Please check server email credentials.",
       });
     }
 
