@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext(null);
 
-const THEMES = ["light", "dark", "light-dark-sidebar"];
+const THEMES = ["light", "dark"];
 
 function getInitialTheme() {
   const saved = localStorage.getItem("cv-theme");
@@ -11,7 +11,7 @@ function getInitialTheme() {
     return saved;
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
 }
@@ -24,15 +24,9 @@ export function ThemeProvider({ children }) {
     localStorage.setItem("cv-theme", theme);
   }, [theme]);
 
-  // Cycles:
-  // light → dark → light-dark-sidebar → light
+  // Simple, clean 2-way toggle: light <-> dark
   const toggleTheme = () => {
-    setTheme((currentTheme) => {
-      const currentIndex = THEMES.indexOf(currentTheme);
-      const nextIndex = (currentIndex + 1) % THEMES.length;
-
-      return THEMES[nextIndex];
-    });
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   };
 
   const setThemeMode = (newTheme) => {

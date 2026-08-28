@@ -193,8 +193,8 @@ export default function Support() {
             <div className="support-box-content">
               <h3>Live Chat</h3>
               <p>
-                Currently Unavailable due to no Agent is Present , Will be
-                Available Soon
+                Live chat is currently unavailable. Our support team will be
+                available soon.
               </p>
               <button className="chat-button">
                 <MessageCircle size={16} />

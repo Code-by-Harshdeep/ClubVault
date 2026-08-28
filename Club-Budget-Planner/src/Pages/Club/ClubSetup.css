@@ -31,7 +31,7 @@
 
 .club-setup-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 520px;
   background: var(--color-surface-container-lowest);
   border: 1px solid var(--color-border-soft);
   border-radius: 16px;
@@ -211,4 +211,75 @@
 
 .club-setup-logout {
   margin-top: 8px;
+}
+
+.club-setup-type-switch {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 4px;
+}
+
+.club-setup-type-switch button {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-mid);
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface-variant);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.club-setup-type-switch button.active {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
+
+.club-setup-exclusive-title {
+  margin: 16px 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-surface);
+}
+
+.club-setup-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.club-setup-feature {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 10px;
+  background: var(--color-surface-container-low);
+  cursor: pointer;
+}
+
+.club-setup-feature input {
+  margin-top: 3px;
+}
+
+.club-setup-feature span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.club-setup-feature strong {
+  font-size: 0.85rem;
+  color: var(--color-on-surface);
+}
+
+.club-setup-feature small {
+  font-size: 0.75rem;
+  color: var(--color-on-surface-variant);
+  line-height: 1.4;
 }

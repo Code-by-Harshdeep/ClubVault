@@ -5,6 +5,8 @@ import {
   ReceiptText,
   Calendar,
   BarChart3,
+  ClipboardCheck,
+  Building2,
   Users,
   Settings,
   HelpCircle,
@@ -14,14 +16,16 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useClub } from "../../ClubContext";
+import { hasFeature } from "../../features";
 import "./Sidebar.css";
 
 const MENU_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { label: "Budgets", icon: Wallet, href: "/budgets" },
   { label: "Transactions", icon: ReceiptText, href: "/transactions" },
-  { label: "Events", icon: Calendar, href: "/events" },
-  { label: "Analytics", icon: BarChart3, href: "/analytics" },
+  { label: "Events", icon: Calendar, href: "/events", feature: "events" },
+  { label: "Analytics", icon: BarChart3, href: "/analytics", feature: "analytics" },
+  { label: "Reimbursements", icon: ClipboardCheck, href: "/reimbursements", feature: "reimbursements" },
   { label: "Members", icon: Users, href: "/members" },
 ];
 
@@ -29,7 +33,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { club } = useClub();
+  const { club, clubs, selectClub } = useClub();
 
   // Close the mobile drawer whenever the route changes
   useEffect(() => {
@@ -69,8 +73,29 @@ export default function Sidebar() {
           </NavLink>
 
           <span className="cv-sidebar-sub">
-            {club?.name ? club.name.toUpperCase() : "STUDENT UNION"}
+            {club?.institutionName
+              ? club.institutionName.toUpperCase()
+              : club?.name
+                ? club.name.toUpperCase()
+                : "CLUB WORKSPACE"}
           </span>
+          {clubs.filter((item) => item.status === "approved").length > 1 && (
+            <label className="cv-club-switcher">
+              <span>Active club</span>
+              <select
+                value={club?._id || ""}
+                onChange={(event) => {
+                  selectClub(event.target.value);
+                  navigate("/dashboard");
+                }}
+                aria-label="Select active club"
+              >
+                {clubs.filter((item) => item.status === "approved").map((item) => (
+                  <option key={item._id} value={item._id}>{item.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
 
 
@@ -92,7 +117,7 @@ export default function Sidebar() {
 
           <nav className="cv-sidebar-nav">
 
-            {MENU_ITEMS.map((item) => {
+            {MENU_ITEMS.filter((item) => !item.feature || hasFeature(club, item.feature)).map((item) => {
               const Icon = item.icon;
 
               return (

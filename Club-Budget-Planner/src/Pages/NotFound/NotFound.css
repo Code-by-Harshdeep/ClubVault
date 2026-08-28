@@ -1,0 +1,123 @@
+/* =========================================================
+   ClubVault — Branded 404 Not Found Page Styles
+   ========================================================= */
+
+.cv-notfound-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: var(--color-background, #f8fafc);
+}
+
+.cv-notfound-card {
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border-soft, #e2e8f0);
+  border-radius: var(--radius-xl, 14px);
+  padding: 48px 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.cv-notfound-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-amber-bg, rgba(245, 158, 11, 0.1));
+  color: var(--color-amber-solid, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.cv-notfound-code {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-subtle, #94a3b8);
+}
+
+.cv-notfound-title {
+  font-family: var(--font-body, -apple-system, sans-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-on-surface, #0f172a);
+  margin: 8px 0 12px;
+}
+
+.cv-notfound-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-on-surface-variant, #64748b);
+  margin: 0 0 28px;
+}
+
+.cv-notfound-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cv-notfound-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.cv-notfound-btn-primary {
+  background: var(--color-primary, #0f172a);
+  color: var(--color-on-primary, #ffffff);
+  border: none;
+}
+
+.cv-notfound-btn-primary:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.cv-notfound-btn-secondary {
+  background: transparent;
+  color: var(--color-on-surface, #0f172a);
+  border: 1px solid var(--color-border-mid, #cbd5e1);
+}
+
+.cv-notfound-btn-secondary:hover {
+  background: var(--color-surface-container-low, #f1f5f9);
+}
+
+html[data-theme="dark"] .cv-notfound-card {
+  background: var(--color-surface, #121215);
+  border-color: var(--color-border-soft, #27272a);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .cv-notfound-btn-primary {
+  background: #f4f4f5;
+  color: #09090b;
+}
+
+html[data-theme="dark"] .cv-notfound-btn-primary:hover {
+  background: #ffffff;
+}
+
+html[data-theme="dark"] .cv-notfound-btn-secondary {
+  border-color: #3f3f46;
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] .cv-notfound-btn-secondary:hover {
+  background: #18181b;
+}

@@ -1,29 +1,84 @@
 const Club = require("../models/Club");
+const Budget = require("../models/Budget");
+const Campus = require("../models/Campus");
+const User = require("../models/User");
+const {
+  splitAnnualCap,
+  normalizeFeatures,
+  serializeClub,
+  EXCLUSIVE_FEATURE_KEYS,
+} = require("../utils/campusDefaults");
 
-// POST /api/clubs  — create a new club, creator becomes an approved admin
 const createClub = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const {
+      name,
+      description,
+      institutionType,
+      institutionName,
+      annualBudgetCap,
+      features,
+    } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Club name is required" });
     }
 
-    const alreadyInClub = await Club.findOne({
-      members: { $elemMatch: { user: req.user.id, status: "approved" } },
-    });
-
-    if (alreadyInClub) {
-      return res.status(409).json({
-        message: "You already belong to a club. Leave it before creating a new one.",
+    const cap = Number(annualBudgetCap);
+    if (!Number.isFinite(cap) || cap <= 0) {
+      return res.status(400).json({
+        message:
+          "A positive annual budget cap is required. Every campus must stay within it.",
       });
     }
+
+    const type = institutionType === "school" ? "school" : "college";
+    const enabledFeatures = normalizeFeatures(features);
+    const creator = await User.findById(req.user.id).select(
+      "universityEmail emailVerified",
+    );
+    if (!creator?.emailVerified) {
+      return res
+        .status(403)
+        .json({
+          message: "Verify your university email before creating a club",
+        });
+    }
+    const officialDomain = creator.universityEmail.split("@")[1]?.toLowerCase();
+    if (!officialDomain) {
+      return res
+        .status(400)
+        .json({ message: "A valid university email domain is required" });
+    }
+
+    const campusName =
+      String(institutionName || "").trim() || name;
+    const campus = await Campus.findOneAndUpdate(
+      { officialDomain },
+      {
+        $setOnInsert: {
+          name: campusName,
+          officialDomain,
+          institutionType: type,
+          createdBy: req.user.id,
+          admins: [req.user.id],
+          features: enabledFeatures,
+        },
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
 
     const clubId = await Club.generateUniqueClubId();
 
     const club = await Club.create({
       name,
       description,
+      institutionType: type,
+      institutionName: institutionName || name,
+      campus: campus._id,
+      annualBudgetCap: cap,
+      strictBudgets: true,
+      features: enabledFeatures,
       clubId,
       createdBy: req.user.id,
       members: [
@@ -38,13 +93,8 @@ const createClub = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: "Club created successfully",
-      club: {
-        _id: club._id,
-        name: club.name,
-        clubId: club.clubId,
-        description: club.description,
-      },
+      message: "Club workspace created successfully",
+      club: serializeClub(club),
     });
   } catch (error) {
     console.error(error);
@@ -52,7 +102,6 @@ const createClub = async (req, res) => {
   }
 };
 
-// POST /api/clubs/join  { clubId }  — request to join, goes into "pending"
 const joinClub = async (req, res) => {
   try {
     const { clubId } = req.body;
@@ -64,31 +113,28 @@ const joinClub = async (req, res) => {
     const club = await Club.findOne({ clubId: clubId.trim().toUpperCase() });
 
     if (!club) {
-      return res.status(404).json({ message: "No club found with that Club ID" });
+      return res
+        .status(404)
+        .json({ message: "No club found with that Club ID" });
     }
 
     const existingMembership = club.members.find(
-      (m) => m.user.toString() === req.user.id
+      (m) => m.user.toString() === req.user.id,
     );
 
     if (existingMembership) {
       if (existingMembership.status === "approved") {
-        return res.status(409).json({ message: "You are already a member of this club" });
+        return res
+          .status(409)
+          .json({ message: "You are already a member of this club" });
       }
       if (existingMembership.status === "pending") {
-        return res.status(409).json({ message: "Your request to join is already pending" });
+        return res
+          .status(409)
+          .json({ message: "Your request to join is already pending" });
       }
-      // was rejected before — allow re-request
       existingMembership.status = "pending";
     } else {
-      const alreadyInClub = await Club.findOne({
-        members: { $elemMatch: { user: req.user.id, status: "approved" } },
-      });
-
-      if (alreadyInClub) {
-        return res.status(409).json({ message: "You already belong to a club" });
-      }
-
       club.members.push({
         user: req.user.id,
         role: "member",
@@ -108,28 +154,31 @@ const joinClub = async (req, res) => {
   }
 };
 
-// GET /api/clubs/me — current user's club membership status
 const myClub = async (req, res) => {
   try {
-    const club = await Club.findOne({ "members.user": req.user.id });
+    const club = await Club.findOne({
+      members: {
+        $elemMatch: {
+          user: req.user.id,
+          status: { $in: ["approved", "pending", "rejected"] },
+        },
+      },
+    })
+      .populate("campus")
+      .sort({ updatedAt: -1 });
 
     if (!club) {
       return res.status(200).json({ status: "none" });
     }
 
     const membership = club.members.find(
-      (m) => m.user.toString() === req.user.id
+      (m) => m.user.toString() === req.user.id,
     );
 
     return res.status(200).json({
       status: membership.status,
       role: membership.role,
-      club: {
-        _id: club._id,
-        name: club.name,
-        clubId: club.clubId,
-        description: club.description,
-      },
+      club: serializeClub(club),
     });
   } catch (error) {
     console.error(error);
@@ -137,10 +186,12 @@ const myClub = async (req, res) => {
   }
 };
 
-// GET /api/clubs/:clubId/requests — admin only, pending join requests
 const listRequests = async (req, res) => {
   try {
-    const club = await req.club.populate("members.user", "fullName universityEmail");
+    const club = await req.club.populate(
+      "members.user",
+      "fullName universityEmail",
+    );
 
     const requests = club.members
       .filter((m) => m.status === "pending")
@@ -162,7 +213,7 @@ const approveRequest = async (req, res) => {
   try {
     const club = req.club;
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId
+      (m) => m.user.toString() === req.params.userId,
     );
 
     if (!member) {
@@ -184,7 +235,7 @@ const rejectRequest = async (req, res) => {
   try {
     const club = req.club;
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId
+      (m) => m.user.toString() === req.params.userId,
     );
 
     if (!member) {
@@ -201,10 +252,12 @@ const rejectRequest = async (req, res) => {
   }
 };
 
-// GET /api/clubs/:clubId/members — approved members list
 const listMembers = async (req, res) => {
   try {
-    const club = await req.club.populate("members.user", "fullName universityEmail");
+    const club = await req.club.populate(
+      "members.user",
+      "fullName universityEmail",
+    );
 
     const members = club.members
       .filter((m) => m.status === "approved")
@@ -233,11 +286,28 @@ const removeMember = async (req, res) => {
     const club = req.club;
 
     if (req.params.userId === req.user.id) {
-      return res.status(400).json({ message: "Admins can't remove themselves" });
+      return res
+        .status(400)
+        .json({ message: "Admins can't remove themselves" });
+    }
+
+    const member = club.members.find(
+      (m) => m.user.toString() === req.params.userId && m.status === "approved",
+    );
+    if (!member)
+      return res.status(404).json({ message: "Approved member not found" });
+    if (
+      member.role === "admin" &&
+      club.members.filter((m) => m.status === "approved" && m.role === "admin")
+        .length === 1
+    ) {
+      return res
+        .status(400)
+        .json({ message: "The club must keep at least one admin" });
     }
 
     club.members = club.members.filter(
-      (m) => m.user.toString() !== req.params.userId
+      (m) => m.user.toString() !== req.params.userId,
     );
     await club.save();
 
@@ -248,25 +318,87 @@ const removeMember = async (req, res) => {
   }
 };
 
-// PATCH /api/clubs/:clubId — admin only, update name/description
 const updateClub = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const {
+      name,
+      description,
+      institutionType,
+      institutionName,
+      annualBudgetCap,
+      features,
+      notificationPrefs,
+    } = req.body;
     const club = req.club;
+    const campus = club.campus;
 
     if (name !== undefined) club.name = name;
     if (description !== undefined) club.description = description;
+    if (institutionName !== undefined) {
+      club.institutionName = institutionName;
+      if (campus?.save) campus.name = String(institutionName).trim();
+    }
+    if (institutionType === "college" || institutionType === "school") {
+      club.institutionType = institutionType;
+      if (campus?.save) campus.institutionType = institutionType;
+    }
+
+    if (annualBudgetCap !== undefined) {
+      const cap = Number(annualBudgetCap);
+      if (!Number.isFinite(cap) || cap <= 0) {
+        return res
+          .status(400)
+          .json({ message: "Annual budget cap must be a positive number" });
+      }
+
+      const Budget = require("../models/Budget");
+      const {
+        totalAllocated,
+        assertWithinCap,
+      } = require("../utils/budgetGuard");
+      const allocated = await totalAllocated(club._id);
+      try {
+        assertWithinCap({ annualBudgetCap: cap }, allocated);
+      } catch (err) {
+        return res.status(err.status || 400).json({ message: err.message });
+      }
+      club.annualBudgetCap = cap;
+    }
+
+    if (features && typeof features === "object") {
+      const next = normalizeFeatures(club.features);
+      for (const key of EXCLUSIVE_FEATURE_KEYS) {
+        if (typeof features[key] === "boolean") next[key] = features[key];
+      }
+      club.features = next;
+      if (campus?.save) campus.features = next;
+    }
+
+    if (notificationPrefs && typeof notificationPrefs === "object") {
+      const nextPrefs = {
+        expenseApprovals:
+          notificationPrefs.expenseApprovals ??
+          club.notificationPrefs?.expenseApprovals ??
+          true,
+        budgetThreshold:
+          notificationPrefs.budgetThreshold ??
+          club.notificationPrefs?.budgetThreshold ??
+          true,
+        weeklySummary:
+          notificationPrefs.weeklySummary ??
+          club.notificationPrefs?.weeklySummary ??
+          false,
+      };
+      club.notificationPrefs = nextPrefs;
+      if (campus?.save) campus.notificationPrefs = nextPrefs;
+    }
 
     await club.save();
+    if (campus?.save) await campus.save();
 
     return res.status(200).json({
       message: "Club updated",
-      club: {
-        _id: club._id,
-        name: club.name,
-        clubId: club.clubId,
-        description: club.description,
-      },
+      club: serializeClub(club),
     });
   } catch (error) {
     console.error(error);
@@ -284,11 +416,22 @@ const updateMemberRole = async (req, res) => {
 
     const club = req.club;
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId
+      (m) => m.user.toString() === req.params.userId && m.status === "approved",
     );
 
     if (!member) {
       return res.status(404).json({ message: "Member not found" });
+    }
+
+    if (
+      member.role === "admin" &&
+      role === "member" &&
+      club.members.filter((m) => m.status === "approved" && m.role === "admin")
+        .length === 1
+    ) {
+      return res
+        .status(400)
+        .json({ message: "The club must keep at least one admin" });
     }
 
     member.role = role;
@@ -296,6 +439,57 @@ const updateMemberRole = async (req, res) => {
     await club.save();
 
     return res.status(200).json({ message: "Role updated" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const listMyClubs = async (req, res) => {
+  try {
+    const clubs = await Club.find({
+      members: {
+        $elemMatch: {
+          user: req.user.id,
+          status: { $in: ["approved", "pending", "rejected"] },
+        },
+      },
+    })
+      .populate("campus")
+      .sort({ updatedAt: -1 });
+
+    return res.status(200).json({
+      clubs: clubs.map((club) => {
+        const membership = club.members.find(
+          (member) => member.user.toString() === req.user.id,
+        );
+        return {
+          ...serializeClub(club),
+          status: membership.status,
+          role: membership.role,
+          campusAdmin: Boolean(
+            club.campus &&
+            (club.campus.createdBy?.toString() === req.user.id ||
+              club.campus.admins?.some(
+                (admin) => admin.toString() === req.user.id,
+              )),
+          ),
+        };
+      }),
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const listActivities = async (req, res) => {
+  try {
+    const Activity = require("../models/Activity");
+    const activities = await Activity.find({ club: req.club._id })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    return res.status(200).json({ activities });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
@@ -313,4 +507,7 @@ module.exports = {
   removeMember,
   updateMemberRole,
   updateClub,
+  listMyClubs,
+  listActivities,
 };
+

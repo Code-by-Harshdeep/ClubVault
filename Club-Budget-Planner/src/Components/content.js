@@ -117,30 +117,34 @@ export const FOOTER_COLUMNS = [
     links: [
       { label: "Features", href: "#features" },
       { label: "Pricing", href: "#pricing" },
-      { label: "Changelog", href: "#" },
+      { label: "Changelog", modalType: "changelog" },
     ],
   },
   {
     heading: "Company",
     links: [
       { label: "About", href: "#about" },
-      { label: "Careers", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: "Careers", modalType: "careers" },
+      { label: "Contact", modalType: "contact" },
     ],
   },
   {
     heading: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
-      { label: "University Guidelines", href: "#" },
-      { label: "GitHub", href: "#" },
+      { label: "Documentation", modalType: "guidelines" },
+      { label: "University Guidelines", modalType: "guidelines" },
+      {
+        label: "GitHub",
+        href: "https://github.com/Code-by-Harshdeep/ClubVault",
+        external: true,
+      },
     ],
   },
   {
     heading: "Legal",
     links: [
-      { label: "Privacy Policy", href: "#" },
-      { label: "Terms of Service", href: "#" },
+      { label: "Privacy Policy", modalType: "privacy" },
+      { label: "Terms of Service", modalType: "terms" },
     ],
   },
 ];

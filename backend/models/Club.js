@@ -34,7 +34,27 @@ const memberSchema = new mongoose.Schema(
       type: Date,
     },
   },
-  { _id: false, timestamps: true }
+  { _id: false, timestamps: true },
+);
+
+const featuresSchema = new mongoose.Schema(
+  {
+    events: { type: Boolean, default: false },
+    analytics: { type: Boolean, default: false },
+    reimbursements: { type: Boolean, default: false },
+    notifications: { type: Boolean, default: false },
+    integrations: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
+const notificationPrefsSchema = new mongoose.Schema(
+  {
+    expenseApprovals: { type: Boolean, default: true },
+    budgetThreshold: { type: Boolean, default: true },
+    weeklySummary: { type: Boolean, default: false },
+  },
+  { _id: false },
 );
 
 const clubSchema = new mongoose.Schema(
@@ -49,12 +69,44 @@ const clubSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    institutionType: {
+      type: String,
+      enum: ["college", "school"],
+      default: "college",
+    },
+    institutionName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    annualBudgetCap: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    strictBudgets: {
+      type: Boolean,
+      default: true,
+    },
+    features: {
+      type: featuresSchema,
+      default: () => ({}),
+    },
+    notificationPrefs: {
+      type: notificationPrefsSchema,
+      default: () => ({}),
+    },
     clubId: {
       type: String,
       required: true,
       unique: true,
       uppercase: true,
       trim: true,
+    },
+    campus: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Campus",
+      required: false,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -63,7 +115,7 @@ const clubSchema = new mongoose.Schema(
     },
     members: [memberSchema],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Generates a short unique club join code (retries on collision)

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Landmark, Sun, Moon, Clock, XCircle, LogOut } from "lucide-react";
+import { Landmark, Sun, Moon, Clock, XCircle, LogOut, ArrowLeft } from "lucide-react";
+import { EXCLUSIVE_FEATURES } from "../../features";
 import { useTheme } from "../../ThemeContext";
 import { useClub } from "../../ClubContext";
 import { api } from "../../api";
@@ -12,6 +13,7 @@ export default function ClubSetup() {
   const { status, club, refreshClub } = useClub();
 
   const [tab, setTab] = useState("join");
+  const [showOverrideForm, setShowOverrideForm] = useState(false);
 
   // Join form
   const [clubIdInput, setClubIdInput] = useState("");
@@ -22,15 +24,18 @@ export default function ClubSetup() {
   // Create form
   const [createName, setCreateName] = useState("");
   const [createDesc, setCreateDesc] = useState("");
+  const [institutionType, setInstitutionType] = useState("college");
+  const [institutionName, setInstitutionName] = useState("");
+  const [annualBudgetCap, setAnnualBudgetCap] = useState("");
+  const [exclusive, setExclusive] = useState({
+    events: false,
+    analytics: false,
+    reimbursements: false,
+    notifications: false,
+    integrations: false,
+  });
   const [createError, setCreateError] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
-
-  // If already approved, bounce straight to dashboard
-  useEffect(() => {
-    if (status === "approved") {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [status, navigate]);
 
   const handleJoin = async (e) => {
     e.preventDefault();
@@ -45,8 +50,9 @@ export default function ClubSetup() {
     setJoinLoading(true);
     try {
       const data = await api.post("/api/clubs/join", { clubId: clubIdInput.trim() });
-      setJoinMessage(data.message || "Request sent.");
+      setJoinMessage(data.message || "Request sent successfully.");
       await refreshClub();
+      navigate("/dashboard");
     } catch (err) {
       setJoinError(err.message);
     } finally {
@@ -62,10 +68,21 @@ export default function ClubSetup() {
       setCreateError("Please enter a club name.");
       return;
     }
+    if (!annualBudgetCap || Number(annualBudgetCap) <= 0) {
+      setCreateError("Set a positive annual budget cap.");
+      return;
+    }
 
     setCreateLoading(true);
     try {
-      await api.post("/api/clubs", { name: createName.trim(), description: createDesc.trim() });
+      await api.post("/api/clubs", {
+        name: createName.trim(),
+        description: createDesc.trim(),
+        institutionType,
+        institutionName: institutionName.trim() || createName.trim(),
+        annualBudgetCap: Number(annualBudgetCap),
+        features: exclusive,
+      });
       await refreshClub();
       navigate("/dashboard", { replace: true });
     } catch (err) {
@@ -79,6 +96,7 @@ export default function ClubSetup() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("club");
+    localStorage.removeItem("activeClubId");
     navigate("/login", { replace: true });
   };
 
@@ -89,6 +107,10 @@ export default function ClubSetup() {
       </div>
     );
   }
+
+  const isApproved = status === "approved";
+  const isPending = status === "pending" && !showOverrideForm;
+  const isRejected = status === "rejected" && !showOverrideForm;
 
   return (
     <div className="club-setup-page">
@@ -102,23 +124,50 @@ export default function ClubSetup() {
       </button>
 
       <div className="club-setup-card">
+        {isApproved && (
+          <div style={{ marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                background: "transparent",
+                border: "none",
+                fontSize: "13px",
+                fontWeight: "600",
+                color: "var(--color-primary)",
+                cursor: "pointer",
+              }}
+            >
+              <ArrowLeft size={16} /> Back to Dashboard
+            </button>
+            <span style={{ fontSize: "12px", color: "var(--color-on-surface-variant)" }}>
+              Active: <strong>{club?.name}</strong>
+            </span>
+          </div>
+        )}
+
         <div className="club-setup-brand">
           <Landmark size={28} />
           <span>ClubVault</span>
         </div>
 
-        {status === "pending" && (
+        {isPending && (
           <div className="club-setup-state">
             <Clock size={32} className="club-setup-state-icon pending" />
             <h2>Request pending</h2>
             <p>
               Your request to join <strong>{club?.name}</strong> (Club ID:{" "}
               <strong>{club?.clubId}</strong>) is waiting on admin approval.
-              You'll get access as soon as they accept it.
             </p>
             <div className="club-setup-state-actions">
               <button type="button" className="club-setup-secondary-btn" onClick={refreshClub}>
                 Check again
+              </button>
+              <button type="button" className="club-setup-secondary-btn" onClick={() => setShowOverrideForm(true)}>
+                Join or Create another club
               </button>
               <button type="button" className="club-setup-link-btn" onClick={handleLogout}>
                 <LogOut size={14} /> Log out
@@ -127,47 +176,35 @@ export default function ClubSetup() {
           </div>
         )}
 
-        {status === "rejected" && (
+        {isRejected && (
           <div className="club-setup-state">
             <XCircle size={32} className="club-setup-state-icon rejected" />
             <h2>Request declined</h2>
             <p>
               Your request to join <strong>{club?.name}</strong> wasn't accepted. You can try
-              joining a different club or another request to the same one below.
+              joining a different club or create your own organization below.
             </p>
             <div className="club-setup-state-actions">
               <button
                 type="button"
                 className="club-setup-secondary-btn"
-                onClick={() => {
-                  setClubIdInput(club?.clubId || "");
-                }}
+                onClick={() => setShowOverrideForm(true)}
               >
-                Retry same Club ID
+                Join or Create another club
               </button>
             </div>
-            <form className="club-setup-form" onSubmit={handleJoin}>
-              <label>Club ID</label>
-              <input
-                type="text"
-                placeholder="e.g. AB12CD"
-                value={clubIdInput}
-                onChange={(e) => setClubIdInput(e.target.value)}
-              />
-              {joinError && <p className="club-setup-error">{joinError}</p>}
-              {joinMessage && <p className="club-setup-success">{joinMessage}</p>}
-              <button className="club-setup-btn" type="submit" disabled={joinLoading}>
-                {joinLoading ? "Sending..." : "Send request"}
-              </button>
-            </form>
           </div>
         )}
 
-        {status === "none" && (
+        {(!isPending && !isRejected) && (
           <>
             <div className="club-setup-header">
-              <h2>You haven't joined a club yet</h2>
-              <p>Join an existing club with its Club ID, or create a new one.</p>
+              <h2>{isApproved ? "Join or Create Another Club" : "You haven't joined a club yet"}</h2>
+              <p>
+                {isApproved
+                  ? "Enter a 6-character Club ID to request access to another organization, or establish a brand-new club treasury."
+                  : "Every student organization starts with a clean financial ledger. Admins can configure custom budgets and exclusive features."}
+              </p>
             </div>
 
             <div className="club-setup-tabs">
@@ -189,52 +226,99 @@ export default function ClubSetup() {
 
             {tab === "join" && (
               <form className="club-setup-form" onSubmit={handleJoin}>
-                <label>Club ID</label>
+                <label>Club ID Code</label>
                 <input
                   type="text"
                   placeholder="e.g. AB12CD"
                   value={clubIdInput}
-                  onChange={(e) => setClubIdInput(e.target.value)}
+                  onChange={(e) => setClubIdInput(e.target.value.toUpperCase())}
+                  maxLength={10}
                 />
                 <p className="club-setup-hint">
-                  Ask your club admin for the Club ID — it's shown on their Members page.
+                  Ask your club president or treasurer for their 6-character Club ID.
                 </p>
                 {joinError && <p className="club-setup-error">{joinError}</p>}
                 {joinMessage && <p className="club-setup-success">{joinMessage}</p>}
                 <button className="club-setup-btn" type="submit" disabled={joinLoading}>
-                  {joinLoading ? "Sending..." : "Request to join"}
+                  {joinLoading ? "Sending request..." : "Send Join Request"}
                 </button>
               </form>
             )}
 
             {tab === "create" && (
               <form className="club-setup-form" onSubmit={handleCreate}>
-                <label>Club or organization name</label>
+                <label>Club Name *</label>
                 <input
                   type="text"
-                  placeholder="e.g. Debate Society"
+                  placeholder="e.g. Robotics & AI Club"
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
+                  required
                 />
-                <label>Description (optional)</label>
+
+                <label>Description</label>
                 <textarea
-                  rows={3}
-                  placeholder="What's this club about?"
+                  placeholder="What is the mission of this club?"
                   value={createDesc}
                   onChange={(e) => setCreateDesc(e.target.value)}
+                  rows={3}
                 />
+
+                <label>Institution Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Stanford University"
+                  value={institutionName}
+                  onChange={(e) => setInstitutionName(e.target.value)}
+                />
+
+                <label>Annual Approved Budget Cap (₹) *</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 250000"
+                  min="1"
+                  step="1"
+                  value={annualBudgetCap}
+                  onChange={(e) => setAnnualBudgetCap(e.target.value)}
+                  required
+                />
+                <p className="club-setup-hint">
+                  Total maximum annual budget authorized for all club activities.
+                </p>
+
+                <div className="club-setup-features-section">
+                  <h3>Optional Modular Features</h3>
+                  <p>You can also toggle any of these on or off later in Settings.</p>
+                  <div className="club-setup-features-grid">
+                    {EXCLUSIVE_FEATURES.map((feat) => (
+                      <label key={feat.key} className="club-setup-feature-item">
+                        <input
+                          type="checkbox"
+                          checked={!!exclusive[feat.key]}
+                          onChange={(e) =>
+                            setExclusive((prev) => ({
+                              ...prev,
+                              [feat.key]: e.target.checked,
+                            }))
+                          }
+                        />
+                        <div className="club-setup-feature-copy">
+                          <strong>{feat.label}</strong>
+                          <span>{feat.description}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 {createError && <p className="club-setup-error">{createError}</p>}
                 <button className="club-setup-btn" type="submit" disabled={createLoading}>
-                  {createLoading ? "Creating..." : "Create club"}
+                  {createLoading ? "Creating club..." : "Launch Club Treasury"}
                 </button>
               </form>
             )}
           </>
         )}
-
-        <button type="button" className="club-setup-link-btn club-setup-logout" onClick={handleLogout}>
-          <LogOut size={14} /> Log out
-        </button>
       </div>
     </div>
   );

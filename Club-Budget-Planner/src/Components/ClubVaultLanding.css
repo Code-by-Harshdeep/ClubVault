@@ -728,7 +728,7 @@ html[data-theme="dark"] .cv-glass-card {
   align-items: center;
 }
 
-.cv-editorial-row + .cv-editorial-row {
+.cv-editorial-row+.cv-editorial-row {
   margin-top: 128px;
 }
 
@@ -1495,7 +1495,7 @@ html[data-theme="dark"] .cv-glass-card {
 .cv-footer-brand-block {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .cv-footer-logo {
@@ -1506,6 +1506,7 @@ html[data-theme="dark"] .cv-glass-card {
   font-weight: 700;
   font-size: 24px;
   color: var(--color-primary);
+  text-decoration: none;
 }
 
 .cv-footer-logo .cv-logo-mark {
@@ -1514,43 +1515,48 @@ html[data-theme="dark"] .cv-glass-card {
 }
 
 .cv-footer-tagline {
-  font-size: 14px;
-  color: var(--color-on-surface-variant);
-  max-width: 26rem;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
+  max-width: 24rem;
   margin: 0;
 }
 
 .cv-footer-socials {
   display: flex;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 4px;
 }
 
-.cv-footer-socials a {
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
-  border: 1px solid var(--color-border-mid);
+.cv-footer-socials a,
+.cv-footer-socials .cv-social-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #64748b;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-on-surface-variant);
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-.cv-footer-socials a:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+.cv-footer-socials a:hover,
+.cv-footer-socials .cv-social-btn:hover {
+  color: #0f172a;
+  border-color: #0f172a;
+  background: #e2e8f0;
   transform: translateY(-2px);
 }
 
 .cv-footer-columns {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
+  gap: 28px;
 }
 
 @media (min-width: 500px) {
@@ -1560,11 +1566,12 @@ html[data-theme="dark"] .cv-glass-card {
 }
 
 .cv-footer-col h4 {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-on-surface);
-  margin: 0 0 16px;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+  margin: 0 0 14px;
 }
 
 .cv-footer-col ul {
@@ -1573,30 +1580,45 @@ html[data-theme="dark"] .cv-glass-card {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.cv-footer-col a {
-  font-size: 14px;
-  color: var(--color-on-surface-variant);
-  transition: color 0.2s ease;
+.cv-footer-col li a,
+.cv-footer-col li button,
+.cv-footer-col .cv-footer-link-btn {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155 !important;
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
 }
 
-.cv-footer-col a:hover {
-  color: var(--color-primary);
+.cv-footer-col li a:hover,
+.cv-footer-col li button:hover,
+.cv-footer-col .cv-footer-link-btn:hover {
+  color: #0f172a !important;
+  text-decoration: underline !important;
 }
 
 .cv-footer-newsletter h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-on-surface);
-  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
 }
 
 .cv-footer-newsletter p {
-  font-size: 13px;
-  color: var(--color-on-surface-variant);
-  margin: 0 0 16px;
+  font-size: 12.5px;
+  color: #334155;
+  margin: 0 0 14px;
+  line-height: 1.5;
 }
 
 .cv-newsletter-form {
@@ -1607,27 +1629,27 @@ html[data-theme="dark"] .cv-glass-card {
 .cv-newsletter-form input {
   flex: 1;
   min-width: 0;
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border-mid);
+  border: 1px solid #cbd5e1;
   background: var(--color-surface-container-lowest);
-  color: var(--color-on-surface);
-  font-size: 13px;
+  color: #0f172a;
+  font-size: 12.5px;
   outline: none;
   transition: border-color 0.2s ease;
 }
 
 .cv-newsletter-form input:focus {
-  border-color: var(--color-primary);
+  border-color: #0f172a;
 }
 
 .cv-newsletter-form button {
-  padding: 10px 18px;
+  padding: 9px 16px;
   border-radius: var(--radius-full);
   border: none;
-  background: var(--color-primary-container);
-  color: var(--color-on-primary);
-  font-size: 13px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -1635,7 +1657,7 @@ html[data-theme="dark"] .cv-glass-card {
 }
 
 .cv-newsletter-form button:hover {
-  background: var(--color-primary);
+  background: #1e293b;
 }
 
 .cv-footer-bottom {
@@ -1644,8 +1666,48 @@ html[data-theme="dark"] .cv-glass-card {
 }
 
 .cv-footer-bottom .cv-footer-copy {
-  font-size: 13px;
-  color: var(--color-on-surface-variant);
+  font-size: 12px;
+  color: #475569;
+}
+
+/* Dark mode footer overrides */
+html[data-theme="dark"] .cv-footer-tagline,
+html[data-theme="dark"] .cv-footer-newsletter p {
+  color: #d4d4d8;
+}
+
+html[data-theme="dark"] .cv-footer-col h4,
+html[data-theme="dark"] .cv-footer-newsletter h4 {
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] .cv-footer-col li a,
+html[data-theme="dark"] .cv-footer-col li button,
+html[data-theme="dark"] .cv-footer-col .cv-footer-link-btn {
+  color: #d4d4d8 !important;
+}
+
+html[data-theme="dark"] .cv-footer-col li a:hover,
+html[data-theme="dark"] .cv-footer-col li button:hover,
+html[data-theme="dark"] .cv-footer-col .cv-footer-link-btn:hover {
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] .cv-footer-socials a,
+html[data-theme="dark"] .cv-footer-socials .cv-social-btn {
+  border-color: #52525b;
+  color: #e4e4e7;
+}
+
+html[data-theme="dark"] .cv-footer-socials a:hover,
+html[data-theme="dark"] .cv-footer-socials .cv-social-btn:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  background: #27272a;
+}
+
+html[data-theme="dark"] .cv-footer-bottom .cv-footer-copy {
+  color: #a1a1aa;
 }
 
 /* =========================================================
@@ -1699,6 +1761,7 @@ html[data-theme="dark"] .cv-glass-card {
 /* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
+
   .cv-anim-word,
   .cv-fade-up-el,
   .cv-reveal,

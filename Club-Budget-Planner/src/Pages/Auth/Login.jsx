@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 import { useTheme } from "../../ThemeContext";
 import { useClub } from "../../ClubContext";
@@ -20,6 +20,15 @@ const Login = () => {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // If already logged in, redirect to dashboard
+  React.useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,6 +65,25 @@ const Login = () => {
       if (!res.ok) {
         if (res.status === 404) {
           setError("Login endpoint not found (404) — check the API route/URL.");
+        } else if (data.requiresVerification) {
+          setError(
+            <span>
+              {data.message}{" "}
+              <Link
+                to={`/verify-email?email=${encodeURIComponent(
+                  formData.universityEmail.trim(),
+                )}`}
+                style={{
+                  color: "#2563eb",
+                  fontWeight: "bold",
+                  textDecoration: "underline",
+                  marginLeft: "4px",
+                }}
+              >
+                Verify OTP Now &rarr;
+              </Link>
+            </span>,
+          );
         } else {
           setError(data.message || `Request failed (${res.status}).`);
         }
@@ -67,10 +95,13 @@ const Login = () => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Find out whether this user already belongs to a club before
-      // deciding where to send them — club-setup handles that routing.
-      await refreshClub();
-      navigate("/club-setup");
+      const clubStatus = await refreshClub();
+      if (clubStatus === "approved") {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/club-setup", { replace: true });
+      }
+
     } catch (err) {
       console.error(err);
       setError("Could not reach the server. Please try again.");
@@ -78,6 +109,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="login-page bounce-page">
@@ -128,7 +160,7 @@ const Login = () => {
               <div className="password-label">
                 <label>Password</label>
 
-                <a href="#">Forgot password?</a>
+                <Link to="/forgot-password">Forgot password?</Link>
               </div>
 
               <input

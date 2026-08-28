@@ -138,13 +138,16 @@ input:focus {
 }
 
 .password-label a {
-  color: var(--color-on-surface-variant);
-  font-size: 13px;
+  color: var(--color-primary, #3b82f6);
+  font-size: 13.5px;
+  font-weight: 500;
   text-decoration: none;
+  transition: opacity 0.2s ease, text-decoration 0.2s ease;
 }
 
 .password-label a:hover {
   text-decoration: underline;
+  opacity: 0.85;
 }
 
 /* BUTTON */
@@ -292,3 +295,4 @@ html[data-theme="dark"] .image-panel {
   border-radius: 0.375rem;
   margin: -8px 0 8px 0;
 }
+

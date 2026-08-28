@@ -9,6 +9,8 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 
 import Login from "./Pages/Auth/Login";
 import Signup from "./Pages/Auth/Signup";
+import ForgotPassword from "./Pages/Auth/ForgotPassword";
+import VerifyEmail from "./Pages/Auth/VerifyEmail";
 
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import ReportsAnalytics from "./Pages/Reports/ReportsAnalytics";
@@ -22,6 +24,9 @@ import { ThemeProvider } from "./ThemeContext";
 import { ClubProvider } from "./ClubContext";
 import ClubSetup from "./Pages/Club/ClubSetup";
 import RequireApprovedClub from "./Components/RequireApprovedClub";
+import RequireFeature from "./Components/RequireFeature";
+import Reimbursements from "./Pages/Features/Reimbursements";
+import NotFound from "./Pages/NotFound/NotFound";
 
 // Global Layout wrapper
 const DashboardLayout = () => {
@@ -56,6 +61,18 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
+    path: "/verify-email",
+    element: <VerifyEmail />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ForgotPassword />,
+  },
+  {
     path: "/club-setup",
     element: <ClubSetup />,
   },
@@ -73,7 +90,11 @@ const router = createBrowserRouter([
           },
           {
             path: "/analytics",
-            element: <ReportsAnalytics />,
+            element: (
+              <RequireFeature feature="analytics">
+                <ReportsAnalytics />
+              </RequireFeature>
+            ),
           },
           {
             path: "/budgets",
@@ -85,7 +106,15 @@ const router = createBrowserRouter([
           },
           {
             path: "/events",
-            element: <EventsPlanning />,
+            element: (
+              <RequireFeature feature="events">
+                <EventsPlanning />
+              </RequireFeature>
+            ),
+          },
+          {
+            path: "/reimbursements",
+            element: <Reimbursements />,
           },
           {
             path: "/members",
@@ -102,6 +131,10 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 

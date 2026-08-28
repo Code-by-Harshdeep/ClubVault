@@ -17,10 +17,28 @@ const transactionSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    receiptUrl: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    merchant: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     category: {
       type: String,
       required: true,
       trim: true,
+    },
+    budget: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Budget",
+    },
+    event: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Event",
     },
     type: {
       type: String,

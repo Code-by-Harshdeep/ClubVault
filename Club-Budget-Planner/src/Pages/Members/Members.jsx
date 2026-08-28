@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Users,
   Search,
   Copy,
   Check,
-  X,
   ShieldCheck,
+  ShieldAlert,
   MoreVertical,
+  UserCheck,
+  UserX,
+  Shield,
+  Trash2,
+  Building2,
+  X,
 } from "lucide-react";
 
 import { useClub } from "../../ClubContext";
@@ -25,57 +31,83 @@ function initialsOf(name) {
 
 function MemberRow({ member, isAdmin, onRoleChange, onRemove }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
   return (
-    <div className="member-row">
-      <div className="member-info">
-        <div className="avatar">{initialsOf(member.fullName)}</div>
+    <div className={`cv-member-row ${menuOpen ? "menu-active" : ""}`}>
+      <div className="cv-member-info">
+        <div className="cv-member-avatar">{initialsOf(member.fullName)}</div>
         <div>
           <h3>{member.fullName}</h3>
           <p>{member.email}</p>
         </div>
       </div>
 
-      <div className="role">
-        <span className={member.role === "member" ? "secondary-badge" : "badge"}>
+      <div className="cv-member-role-cell">
+        <span className={`cv-member-role-badge ${member.role}`}>
+          {member.role === "admin" ? <Shield size={12} /> : <Users size={12} />}
           {member.role === "admin" ? "Admin" : "Member"}
         </span>
       </div>
 
-      <div className="permissions">{member.permissions}</div>
+      <div className="cv-member-perm-cell">
+        <span className="cv-perm-tag">
+          {member.permissions || (member.role === "admin" ? "Full Access" : "View & Submit")}
+        </span>
+      </div>
 
-      {isAdmin ? (
-        <div style={{ position: "relative" }}>
-          <button className="more" onClick={() => setMenuOpen((v) => !v)}>
-            <MoreVertical size={18} />
-          </button>
-          {menuOpen && (
-            <div className="member-menu">
-              <button
-                onClick={() => {
-                  onRoleChange(member.userId, member.role === "admin" ? "member" : "admin");
-                  setMenuOpen(false);
-                }}
-              >
-                Make {member.role === "admin" ? "Member" : "Admin"}
-              </button>
-              <button
-                className="danger"
-                onClick={() => {
-                  onRemove(member.userId);
-                  setMenuOpen(false);
-                }}
-              >
-                Remove from club
-              </button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <button className="more" disabled style={{ opacity: 0.3 }}>
-          <MoreVertical size={18} />
-        </button>
-      )}
+      <div className="cv-member-actions-cell" ref={menuRef}>
+        {isAdmin ? (
+          <div className="cv-action-dropdown-wrapper">
+            <button
+              type="button"
+              className={`cv-member-more-btn ${menuOpen ? "active" : ""}`}
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Member actions"
+            >
+              <MoreVertical size={16} />
+            </button>
+            {menuOpen && (
+              <div className="cv-member-menu">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRoleChange(member.userId, member.role === "admin" ? "member" : "admin");
+                    setMenuOpen(false);
+                  }}
+                >
+                  <Shield size={14} />
+                  <span>Make {member.role === "admin" ? "Member" : "Admin"}</span>
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => {
+                    onRemove(member.userId);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <Trash2 size={14} />
+                  <span>Remove from club</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="cv-muted-dash">—</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -131,6 +163,7 @@ export default function Members() {
   };
 
   const handleRemove = async (userId) => {
+    if (!window.confirm("Are you sure you want to remove this member from the club?")) return;
     await api.delete(`/api/clubs/${club._id}/members/${userId}`);
     await load();
   };
@@ -138,7 +171,7 @@ export default function Members() {
   const copyClubId = () => {
     navigator.clipboard.writeText(club?.clubId || "");
     setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const filteredMembers = members.filter((m) => {
@@ -147,110 +180,144 @@ export default function Members() {
   });
 
   return (
-    <main className="members-page">
-      <header className="members-header">
-        <div>
-          <h1>Members</h1>
-          <p>Manage committee access and roles.</p>
-        </div>
-
-        <button className="invite-btn" onClick={copyClubId}>
-          {copied ? <Check size={17} /> : <Copy size={17} />}
-          {copied ? "Copied!" : `Club ID: ${club?.clubId || "—"}`}
-        </button>
-      </header>
-
-      {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
-
-      <section className="stats">
-        <div className="stat-card large">
-          <div className="stat-title">
-            <span>Active Members</span>
-            <Users size={18} />
-          </div>
-          <div className="stat-number">{members.length}</div>
-        </div>
-
-        <div className="stat-card">
-          <span>Pending Requests</span>
-          <strong>{requests.length}</strong>
-        </div>
-      </section>
-
-      {isAdmin && requests.length > 0 && (
-        <section className="members-box">
-          <div className="toolbar">
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <ShieldCheck size={18} />
-              <strong>Join requests awaiting your approval</strong>
+    <div className="cv-members-page">
+      <main className="cv-members-container">
+        <header className="cv-members-header">
+          <div>
+            <div className="cv-dash-club-badge">
+              <Building2 size={13} /> {club?.name || "Club Roster"}
             </div>
+            <h1 className="cv-members-title">Members &amp; Officers</h1>
+            <p className="cv-members-subtitle">
+              Manage committee roles, permissions, and incoming join requests.
+            </p>
           </div>
 
-          <div className="member-list">
-            {requests.map((r) => (
-              <div className="member-row" key={r.userId}>
-                <div className="member-info">
-                  <div className="avatar">{initialsOf(r.fullName)}</div>
-                  <div>
-                    <h3>{r.fullName}</h3>
-                    <p>{r.email}</p>
-                  </div>
-                </div>
-                <div className="role">
-                  <span className="secondary-badge">Pending</span>
-                </div>
-                <div className="permissions" />
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="approve-btn" onClick={() => handleApprove(r.userId)}>
-                    <Check size={16} /> Approve
-                  </button>
-                  <button className="reject-btn" onClick={() => handleReject(r.userId)}>
-                    <X size={16} /> Reject
-                  </button>
-                </div>
+          <button
+            type="button"
+            className={`cv-btn-copy-clubid ${copied ? "copied" : ""}`}
+            onClick={copyClubId}
+            title="Share this Club ID with students to let them join"
+          >
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+            <span>{copied ? "Club ID Copied!" : `Club ID: ${club?.clubId || "—"}`}</span>
+          </button>
+        </header>
+
+        {error && <p className="cv-members-error">{error}</p>}
+
+        <section className="cv-members-kpi-grid">
+          <div className="cv-member-kpi-card">
+            <div className="cv-kpi-head">
+              <span className="cv-kpi-label">ACTIVE MEMBERS</span>
+              <div className="cv-icon-bubble primary">
+                <Users size={16} />
               </div>
-            ))}
+            </div>
+            <p className="cv-kpi-value">{loading ? "…" : members.length}</p>
+            <span className="cv-kpi-sub">Approved officers &amp; members</span>
+          </div>
+
+          <div className="cv-member-kpi-card">
+            <div className="cv-kpi-head">
+              <span className="cv-kpi-label">PENDING JOIN REQUESTS</span>
+              <div className="cv-icon-bubble warning">
+                <ShieldAlert size={16} />
+              </div>
+            </div>
+            <p className="cv-kpi-value">{loading ? "…" : requests.length}</p>
+            <span className="cv-kpi-sub">
+              {requests.length > 0 ? "Awaiting admin confirmation" : "No pending requests"}
+            </span>
           </div>
         </section>
-      )}
 
-      <section className="members-box">
-        <div className="toolbar">
-          <div className="search">
-            <Search size={18} />
-            <input
-              placeholder="Search members..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
+        {isAdmin && requests.length > 0 && (
+          <section className="cv-requests-card">
+            <div className="cv-requests-header">
+              <ShieldCheck size={16} color="#2563eb" />
+              <h3>Join Requests Awaiting Review ({requests.length})</h3>
+            </div>
 
-        <div className="table-header">
-          <span>Name</span>
-          <span>Role</span>
-          <span>Permissions</span>
-          <span>Actions</span>
-        </div>
+            <div className="cv-requests-list">
+              {requests.map((r) => (
+                <div className="cv-request-item" key={r.userId}>
+                  <div className="cv-member-info">
+                    <div className="cv-member-avatar">{initialsOf(r.fullName)}</div>
+                    <div>
+                      <h3>{r.fullName}</h3>
+                      <p>{r.email}</p>
+                    </div>
+                  </div>
+                  <div className="cv-request-actions">
+                    <button
+                      type="button"
+                      className="cv-btn-approve"
+                      onClick={() => handleApprove(r.userId)}
+                    >
+                      <UserCheck size={14} /> Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="cv-btn-reject"
+                      onClick={() => handleReject(r.userId)}
+                    >
+                      <UserX size={14} /> Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-        <div className="member-list">
-          {loading ? (
-            <p style={{ padding: 16 }}>Loading members…</p>
-          ) : filteredMembers.length > 0 ? (
-            filteredMembers.map((member) => (
-              <MemberRow
-                key={member.userId}
-                member={member}
-                isAdmin={isAdmin}
-                onRoleChange={handleRoleChange}
-                onRemove={handleRemove}
+        <section className="cv-members-card">
+          <div className="cv-members-toolbar">
+            <div className="cv-members-search">
+              <Search size={14} className="cv-search-icon" />
+              <input
+                placeholder="Search name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-            ))
-          ) : (
-            <p style={{ padding: 16 }}>No members found.</p>
-          )}
-        </div>
-      </section>
-    </main>
+              {searchTerm && (
+                <button type="button" className="cv-clear-btn" onClick={() => setSearchTerm("")}>
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+            <span className="cv-members-count-badge">{filteredMembers.length} Members</span>
+          </div>
+
+          <div className="cv-members-table-head">
+            <span>MEMBER</span>
+            <span>ROLE</span>
+            <span>PERMISSIONS</span>
+            <span style={{ textAlign: "right" }}>ACTIONS</span>
+          </div>
+
+          <div className="cv-members-list">
+            {loading ? (
+              <div className="cv-members-empty">Loading roster…</div>
+            ) : filteredMembers.length > 0 ? (
+              filteredMembers.map((member) => (
+                <MemberRow
+                  key={member.userId}
+                  member={member}
+                  isAdmin={isAdmin}
+                  onRoleChange={handleRoleChange}
+                  onRemove={handleRemove}
+                />
+              ))
+            ) : (
+              <div className="cv-members-empty">
+                <Users size={28} />
+                <p>No members found matching your search.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }

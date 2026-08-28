@@ -1,59 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Search,
   Bell,
   Sun,
   Moon,
-  PanelsTopLeft,
 } from "lucide-react";
 import ProfileMenu from "../ProfileMenu/ProfileMenu";
 import { useTheme } from "../../ThemeContext";
+import Notification from "../Alerts/Notification";
 import "./Topbar.css";
 
 const Topbar = () => {
   const { theme, toggleTheme } = useTheme();
-
-  const getThemeIcon = () => {
-    switch (theme) {
-      case "dark":
-        return <Moon size={20} />;
-
-      case "light-dark-sidebar":
-        return <PanelsTopLeft size={20} />;
-
-      case "light":
-      default:
-        return <Sun size={20} />;
-    }
-  };
-
-  const getThemeLabel = () => {
-    switch (theme) {
-      case "dark":
-        return "Dark mode";
-
-      case "light-dark-sidebar":
-        return "Light mode with dark sidebar";
-
-      case "light":
-      default:
-        return "Light mode";
-    }
-  };
-
-  const getNextThemeLabel = () => {
-    switch (theme) {
-      case "light":
-        return "Switch to dark mode";
-
-      case "dark":
-        return "Switch to light mode with dark sidebar";
-
-      case "light-dark-sidebar":
-      default:
-        return "Switch to light mode";
-    }
-  };
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const isDark = theme === "dark";
 
   return (
     <header className="cv-topbar">
@@ -78,21 +38,26 @@ const Topbar = () => {
           type="button"
           className="cv-theme-toggle"
           onClick={toggleTheme}
-          title={`${getNextThemeLabel()} — Current: ${getThemeLabel()}`}
-          aria-label={getNextThemeLabel()}
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {getThemeIcon()}
+          {isDark ? <Sun size={19} /> : <Moon size={19} />}
         </button>
 
         {/* Notification Bell */}
-        <button
-          type="button"
-          className="cv-notification"
-          aria-label="Notifications"
-        >
-          <Bell size={20} />
-          <span />
-        </button>
+        <div className="cv-notification-wrap">
+          <button
+            type="button"
+            className="cv-notification"
+            aria-label="Notifications"
+            aria-expanded={notificationsOpen}
+            onClick={() => setNotificationsOpen((open) => !open)}
+          >
+            <Bell size={20} />
+            <span />
+          </button>
+          <Notification open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+        </div>
 
         {/* User Profile */}
         <ProfileMenu />

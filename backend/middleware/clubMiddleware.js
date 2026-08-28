@@ -11,14 +11,14 @@ const clubMember = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid club id" });
     }
 
-    const club = await Club.findById(clubId);
+    const club = await Club.findById(clubId).populate("campus");
 
     if (!club) {
       return res.status(404).json({ message: "Club not found" });
     }
 
     const membership = club.members.find(
-      (m) => m.user.toString() === req.user.id
+      (m) => m.user.toString() === req.user.id,
     );
 
     if (!membership || membership.status !== "approved") {
@@ -28,6 +28,7 @@ const clubMember = async (req, res, next) => {
     }
 
     req.club = club;
+    if (club.campus?.features) club.features = club.campus.features;
     req.membership = membership;
     next();
   } catch (error) {
@@ -44,4 +45,15 @@ const clubAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { clubMember, clubAdmin };
+// Must run after clubMember. Blocks exclusive features that this campus has not enabled.
+const requireFeature = (featureKey) => (req, res, next) => {
+  const features = req.club.campus?.features || req.club.features || {};
+  if (!features[featureKey]) {
+    return res.status(403).json({
+      message: `This campus has not enabled the ${featureKey} feature. An admin can turn it on in Settings.`,
+    });
+  }
+  next();
+};
+
+module.exports = { clubMember, clubAdmin, requireFeature };

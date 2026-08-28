@@ -3,6 +3,7 @@ const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
 const clubRoutes = require("./routes/clubRoutes");
+const campusRoutes = require("./routes/campusRoutes");
 
 const app = express();
 
@@ -11,16 +12,17 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-       "http://localhost:5174",
+      "http://localhost:5174",
       "https://club-vault-eosin.vercel.app",
     ],
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 
 // routes
 app.use("/api", authRoutes);
 app.use("/api/clubs", clubRoutes);
+app.use("/api/campuses", campusRoutes);
 
 module.exports = app;

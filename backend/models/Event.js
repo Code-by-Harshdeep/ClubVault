@@ -33,6 +33,10 @@ const eventSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    budgetRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Budget",
+    },
     spent: {
       type: Number,
       default: 0,

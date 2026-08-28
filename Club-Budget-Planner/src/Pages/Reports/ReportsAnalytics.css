@@ -1,768 +1,232 @@
-/* Google Fonts & Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700");
+/* =========================================================
+   Reports & Analytics — Clean & Professional SaaS Financial UI
+   ========================================================= */
 
-/* =========================
-   PAGE ROOT & BASE RESET
-   ========================= */
-.reports-page {
-  margin-top: -25px;
+.cv-reports-page {
   width: 100%;
-  min-height: 100%;
-  background: transparent;
-  color: var(--color-on-surface, #1f1b16);
-  font-family: var(--font-body, "Inter", sans-serif);
-  -webkit-font-smoothing: antialiased;
   position: relative;
-}
-
-.reports-page *,
-.reports-page *::before,
-.reports-page *::after {
-  box-sizing: border-box;
-}
-
-.reports-page a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.reports-page button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-/* =========================
-   MAIN CONTENT AREA
-   ========================= */
-
-.reports-page .main-content {
-  margin-left: 0;
   min-height: 100%;
-  padding: 0 0 40px;
+  padding-bottom: 40px;
+}
+
+.cv-reports-container {
   position: relative;
+  z-index: 1;
 }
 
-.reports-page .page-container {
-  width: 100%;
-  max-width: 100%;
-  margin: auto;
-}
-
-/* =========================
-   PAGE HEADER
-   ========================= */
-
-.reports-page .page-header {
+.cv-reports-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 30px;
-  padding-bottom: 24px;
-  margin-top: 0;
-  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
-}
-
-.reports-page .header-left h1 {
-  font-family: var(--font-headline, "Playfair Display", serif);
-  font-size: 40px;
-  margin-bottom: 8px;
-  font-weight: 700;
-  color: var(--color-primary, #1f1b16);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.reports-page .header-left p {
-  font-size: 14px;
-  color: var(--color-on-surface-variant, #6b6459);
-  max-width: 650px;
-  margin: 0;
-}
-
-.reports-page .header-actions {
-  display: flex;
-  gap: 10px;
+  margin-bottom: 24px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
-.reports-page .filter-btn,
-.reports-page .export-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-full, 9999px);
-  color: var(--color-primary, #1f1b16);
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-}
-
-.reports-page .filter-btn:hover,
-.reports-page .export-btn:hover {
-  background: var(--color-surface-container-low, #f8f6f0);
-  border-color: var(--color-primary, #1f1b16);
-  transform: translateY(-1px);
-}
-
-.reports-page .pdf-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  background: var(--color-primary-container, #2c2620);
-  color: var(--color-on-primary, #ffffff);
-  border: none;
-  border-radius: var(--radius-full, 9999px);
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.reports-page .pdf-btn:hover {
-  background: var(--color-primary, #1f1b16);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* =========================
-   ANALYTICS GRID
-   ========================= */
-
-.reports-page .analytics-grid {
-  margin-top: 32px;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 24px;
-}
-
-/* =========================
-   KPI SECTION (GLASSMORPHISM)
-   ========================= */
-
-.reports-page .kpi-grid {
-  grid-column: span 12;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-
-.reports-page .kpi-card {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-xl, 20px);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-height: 200px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
-  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  position: relative;
-}
-
-.reports-page .kpi-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.1);
-  border-color: var(--color-primary, #1f1b16);
-}
-
-.reports-page .kpi-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.reports-page .kpi-top h3 {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-on-surface-variant, #6b6459);
-  font-weight: 700;
-  margin: 0;
-}
-
-.reports-page .kpi-top .material-symbols-outlined {
-  color: var(--color-on-surface-variant, #6b6459);
-}
-
-.reports-page .kpi-card h2 {
-  font-family: var(--font-headline, "Playfair Display", serif);
-  font-size: 38px;
+.cv-reports-title {
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-primary, #1f1b16);
-  margin: 0;
-  font-variant-numeric: tabular-nums;
+  color: var(--color-on-surface, #0f172a);
+  margin: 0 0 4px 0;
+  line-height: 1.2;
 }
 
-.reports-page .kpi-footer {
-  margin-top: auto;
+.cv-reports-subtitle {
+  font-size: 13.5px;
+  color: var(--color-on-surface-variant, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cv-reports-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 12px;
-  color: var(--color-on-surface-variant, #6b6459);
-  font-weight: 500;
 }
 
-.reports-page .badge {
-  display: inline-flex;
+.cv-reports-error {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 13.5px;
+  margin-bottom: 20px;
+}
+
+/* KPI Cards */
+.cv-reports-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.cv-report-kpi-card {
+  background: var(--color-surface-container-lowest, #ffffff);
+  border: 1px solid var(--color-border-soft, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cv-report-kpi-card .cv-kpi-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cv-report-kpi-card .cv-kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant, #64748b);
+}
+
+.cv-report-kpi-card .cv-kpi-value {
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-on-surface, #0f172a);
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-report-kpi-card .cv-kpi-sub {
+  font-size: 12.5px;
+  color: var(--color-on-surface-variant, #64748b);
+  display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
-  font-size: 11px;
-  border-radius: var(--radius-full, 9999px);
-  font-weight: 700;
 }
 
-.reports-page .badge .material-symbols-outlined {
-  font-size: 14px;
-}
-
-.reports-page .badge.danger {
-  background: rgba(217, 119, 6, 0.12);
-  color: #b45309;
-}
-
-.reports-page .badge.success {
-  background: rgba(34, 197, 94, 0.12);
+.cv-live-icon {
   color: #15803d;
 }
 
-/* Progress Bar */
-
-.reports-page .progress {
-  height: 6px;
-  background: var(--color-surface-container-high, #e8e4db);
-  width: 100%;
-  border-radius: var(--radius-full, 9999px);
-  position: relative;
-  overflow: hidden;
-}
-
-.reports-page .progress-fill {
-  height: 100%;
-  background: var(--color-primary-container, #2c2620);
-  border-radius: var(--radius-full, 9999px);
-}
-
-.reports-page .progress-text {
-  font-size: 12px;
-  color: var(--color-on-surface-variant, #6b6459);
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-/* =========================
-   LINE CHART CARD
-   ========================= */
-
-.reports-page .line-chart-card {
-  grid-column: span 8;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-xl, 20px);
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
-}
-
-.reports-page .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
-}
-
-.reports-page .card-header h2 {
-  font-family: var(--font-headline, "Playfair Display", serif);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-primary, #1f1b16);
-  margin: 0;
-}
-
-.reports-page .card-header p {
-  margin-top: 4px;
-  font-size: 13px;
-  color: var(--color-on-surface-variant, #6b6459);
-}
-
-.reports-page .icon-btn {
-  color: var(--color-on-surface-variant, #6b6459);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.reports-page .icon-btn:hover {
-  color: var(--color-primary, #1f1b16);
-}
-
-/* =========================
-   CHART AREA
-   ========================= */
-
-.reports-page .chart-area {
-  height: 320px;
-  position: relative;
-  margin-left: 35px;
-}
-
-.reports-page .chart-grid {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.reports-page .grid-line {
-  height: 1px;
-  width: 100%;
-  border-top: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.06));
-  position: relative;
-}
-
-.reports-page .grid-line span {
-  position: absolute;
-  left: -35px;
-  top: -10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-on-surface-variant, #6b6459);
-}
-
-/* SVG Lines */
-
-.reports-page .line-chart {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.reports-page .projected-line {
-  stroke: var(--color-on-surface-variant, #6b6459);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 4;
-}
-
-.reports-page .actual-line {
-  stroke: var(--color-primary, #1f1b16);
-  stroke-width: 2.5;
-}
-
-.reports-page .point {
-  fill: var(--color-primary, #1f1b16);
-}
-
-/* X Axis */
-
-.reports-page .x-axis {
-  position: absolute;
-  bottom: -30px;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-on-surface-variant, #6b6459);
-}
-
-/* =========================
-   CHART LEGEND
-   ========================= */
-
-.reports-page .chart-legend {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-}
-
-.reports-page .legend-item {
+.cv-kpi-footer-prog {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-on-surface-variant, #6b6459);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-on-surface-variant, #64748b);
 }
 
-.reports-page .legend-line {
-  width: 18px;
-  height: 2px;
-  display: inline-block;
-  border-radius: 2px;
-}
-
-.reports-page .legend-line.actual {
-  background: var(--color-primary, #1f1b16);
-}
-
-.reports-page .legend-line.projected {
-  border-top: 2px dashed var(--color-on-surface-variant, #6b6459);
-}
-
-/* =========================
-   DONUT CHART CARD
-   ========================= */
-
-.reports-page .donut-card {
-  grid-column: span 4;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-xl, 20px);
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
-}
-
-.reports-page .donut-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
+.cv-report-prog-bar {
   flex: 1;
+  height: 5px;
+  background: var(--color-surface-container-low, #f1f5f9);
+  border-radius: 999px;
+  overflow: hidden;
 }
 
-/* Donut */
+.cv-report-prog-fill {
+  height: 100%;
+  background: #15803d;
+  border-radius: 999px;
+}
 
-.reports-page .donut-chart {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #2c2620 0% 45%,
-    #6b6459 45% 70%,
-    #a39c90 70% 85%,
-    #e8e4db 85% 100%
-  );
+/* Charts Grid */
+.cv-charts-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 18px;
+}
+
+.cv-chart-card {
+  background: var(--color-surface-container-lowest, #ffffff);
+  border: 1px solid var(--color-border-soft, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cv-chart-head {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.08);
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
-.reports-page .donut-center {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  background: var(--color-surface, #ffffff);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
-}
-
-.reports-page .donut-center strong {
-  font-family: var(--font-headline, "Playfair Display", serif);
-  font-size: 28px;
+.cv-chart-head h2 {
+  font-size: 15px;
   font-weight: 700;
-  color: var(--color-primary, #1f1b16);
+  color: var(--color-on-surface, #0f172a);
+  margin: 0 0 2px 0;
 }
 
-.reports-page .donut-center span {
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-on-surface-variant, #6b6459);
-  font-weight: 700;
+.cv-chart-head p {
+  font-size: 12.5px;
+  color: var(--color-on-surface-variant, #64748b);
+  margin: 0;
 }
 
-/* =========================
-   CATEGORY LEGEND
-   ========================= */
-
-.reports-page .category-list {
+.cv-chart-box {
   width: 100%;
+  height: 260px;
+}
+
+.cv-donut-wrap {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.reports-page .category-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-}
-
-.reports-page .category-name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-on-surface-variant, #6b6459);
-  font-weight: 500;
-}
-
-.reports-page .category-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.reports-page .dot-events {
-  background: #2c2620;
-}
-
-.reports-page .dot-marketing {
-  background: #6b6459;
-}
-
-.reports-page .dot-office {
-  background: #a39c90;
-}
-
-.reports-page .dot-other {
-  background: #e8e4db;
-}
-
-.reports-page .category-percent {
-  font-weight: 700;
-  color: var(--color-primary, #1f1b16);
-}
-
-/* =========================
-   TRANSACTIONS TABLE CARD
-   ========================= */
-
-.reports-page .transaction-card {
-  grid-column: span 12;
-  background: var(--color-surface, #ffffff);
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-xl, 20px);
-  margin-top: 8px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
-}
-
-.reports-page .transaction-header {
-  padding: 24px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
-}
-
-.reports-page .transaction-header h3 {
-  font-family: var(--font-headline, "Playfair Display", serif);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-primary, #1f1b16);
-  margin: 0;
-}
-
-.reports-page .transaction-header p {
-  margin-top: 3px;
-  font-size: 13px;
-  color: var(--color-on-surface-variant, #6b6459);
-}
-
-.reports-page .ledger-btn {
-  padding: 8px 16px;
-  border: 1px solid var(--color-border-mid, rgba(0, 0, 0, 0.08));
-  border-radius: var(--radius-full, 9999px);
-  background: var(--color-surface, #ffffff);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-primary, #1f1b16);
-  transition: all 0.2s ease;
-}
-
-.reports-page .ledger-btn:hover {
-  background: var(--color-surface-container-low, #f8f6f0);
-  border-color: var(--color-primary, #1f1b16);
-}
-
-/* TABLE */
-
-.reports-page .table-wrapper {
-  overflow-x: auto;
-}
-
-.reports-page .transaction-table {
-  min-width: 800px;
+.cv-pie-box {
   width: 100%;
-  border-collapse: collapse;
+  height: 180px;
 }
 
-.reports-page .transaction-table th {
-  background: var(--color-surface-container-low, #f8f6f0);
-  padding: 14px 20px;
-  text-align: left;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 700;
-  color: var(--color-on-surface-variant, #6b6459);
-  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
+.cv-pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-soft, #f1f5f9);
 }
 
-.reports-page .transaction-table td {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
-  font-size: 13px;
-  color: var(--color-primary, #1f1b16);
-  vertical-align: middle;
+.cv-pie-legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
 }
 
-.reports-page .transaction-table tbody tr {
-  transition: background 0.2s ease;
+.cv-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
 }
 
-.reports-page .transaction-table tbody tr:hover {
-  background: var(--color-surface-container-low, #f8f6f0);
+.cv-legend-name {
+  flex: 1;
+  color: var(--color-on-surface-variant, #64748b);
 }
 
-.reports-page .amount-cell {
-  text-align: right;
-  font-weight: 700;
+.cv-legend-pct {
+  color: var(--color-on-surface, #0f172a);
   font-variant-numeric: tabular-nums;
 }
 
-.reports-page .receipt-cell {
+.cv-chart-empty {
   text-align: center;
+  padding: 60px 20px;
+  color: var(--color-on-surface-variant, #94a3b8);
+  font-size: 13px;
 }
 
-.reports-page .category-tag {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: var(--radius-full, 9999px);
-  background: var(--color-surface-container-low, #f8f6f0);
-  border: 1px solid var(--color-border-soft, rgba(0, 0, 0, 0.05));
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-on-surface-variant, #6b6459);
-}
-
-/* =========================
-   CUSTOM SCROLLBAR
-   ========================= */
-
-.reports-page .custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-}
-
-.reports-page .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.reports-page .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-border-mid, rgba(0, 0, 0, 0.12));
-  border-radius: var(--radius-full, 9999px);
-}
-
-/* =========================
-   RESPONSIVE TABLET
-   ========================= */
-
-@media (max-width: 1024px) {
-  .reports-page .main-content {
-    padding: 0 0 30px;
-  }
-
-  .reports-page .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .reports-page .line-chart-card {
-    grid-column: span 12;
-  }
-
-  .reports-page .donut-card {
-    grid-column: span 12;
-  }
-}
-
-/* =========================
-   MOBILE
-   ========================= */
-
-@media (max-width: 768px) {
-  .reports-page .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .reports-page .header-left h1 {
-    font-size: 32px;
-  }
-
-  .reports-page .kpi-grid {
+@media (max-width: 900px) {
+  .cv-reports-kpi-grid {
     grid-template-columns: 1fr;
   }
-
-  .reports-page .analytics-grid {
-    display: flex;
-    flex-direction: column;
+  .cv-charts-grid {
+    grid-template-columns: 1fr;
   }
-
-  .reports-page .kpi-card,
-  .reports-page .line-chart-card,
-  .reports-page .donut-card,
-  .reports-page .transaction-card {
-    width: 100%;
-  }
-
-  .reports-page .chart-area {
-    height: 250px;
-  }
-
-  .reports-page .transaction-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-}
-/* --- Added: real recharts donut replaces the old static conic-gradient --- */
-.reports-page .donut-chart.live {
-  background: none;
-  box-shadow: none;
-  position: relative;
-  display: block; /* was inheriting display:flex from .donut-chart, which
-                      fought with the SVG for space and could let content
-                      spill into the legend below it */
-}
-
-.reports-page .donut-chart.live .donut-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none; /* clicks/hovers pass through to the chart below */
-  z-index: 1; /* stays under .recharts-tooltip-wrapper (z-index: 50 below)
-                 so the hover tooltip is never hidden behind this label */
-}
-
-/* Keep the hover tooltip above surrounding card content. */
-.reports-page .recharts-tooltip-wrapper {
-  z-index: 50;
-}
-
-/* --- Added: recharts renders its own axis labels, old left offset not needed --- */
-.reports-page .chart-area {
-  margin-left: 0;
 }

@@ -1,67 +1,67 @@
-/* Global theme tokens — imported ONCE in App.jsx.
-   Every page/component should read colors via var(--color-*)
-   instead of hardcoding hex values, so all pages follow the
-   same light/dark switch. */
+/* =========================================================
+   ClubVault Design System — Slate & Emerald (Option 1)
+   Restored exact landing page typography, radii & layout
+   ========================================================= */
 
 :root {
-  --color-on-secondary-fixed-variant: #404754;
-  --color-on-primary-fixed-variant: #4b4642;
-  --color-on-background: #191c1d;
-  --color-surface-container-highest: #e1e3e4;
-  --color-on-secondary-fixed: #151c27;
-  --color-on-secondary-container: #5e6572;
-  --color-on-primary: #ffffff;
-  --color-inverse-primary: #cdc5c0;
-  --color-tertiary-container: #292a2c;
-  --color-primary-container: #2d2926;
-  --color-inverse-on-surface: #f0f1f2;
-  --color-primary-fixed: #e9e1dc;
-  --color-on-surface: #191c1d;
-  --color-tertiary: #151618;
+  /* Surface & Background */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-bright: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-primary-fixed-dim: #cdc5c0;
-  --color-outline-variant: #cfc4bd;
-  --color-error: #ba1a1a;
-  --color-surface-bright: #f8f9fa;
-  --color-on-tertiary-container: #919193;
-  --color-secondary-fixed-dim: #c0c7d6;
-  --color-on-surface-variant: #4d4540;
-  --color-on-tertiary-fixed-variant: #464749;
-  --color-surface-container-high: #e7e8e9;
-  --color-primary: #181512;
-  --color-outline: #7e756f;
-  --color-surface-dim: #d9dadb;
-  --color-surface-container-low: #f3f4f5;
-  --color-surface: #f8f9fa;
-  --color-on-tertiary: #ffffff;
-  --color-surface-variant: #e1e3e4;
-  --color-on-primary-container: #96908b;
-  --color-background: #f8f9fa;
-  --color-surface-container: #edeeef;
-  --color-on-error-container: #93000a;
-  --color-tertiary-fixed-dim: #c7c6c8;
-  --color-secondary-container: #dce2f3;
+  --color-surface-container-low: #f1f5f9;
+  --color-surface-container: #e2e8f0;
+  --color-surface-container-high: #cbd5e1;
+  --color-surface-container-highest: #94a3b8;
+  --color-surface-dim: #f1f5f9;
+  --color-surface-variant: #f8fafc;
+
+  /* Typography & Main Inks */
+  --color-primary: #0f172a;
+  --color-primary-container: #0f172a;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #ffffff;
+
+  --color-on-background: #0f172a;
+  --color-on-surface: #0f172a;
+  --color-on-surface-variant: #64748b;
+  --color-on-surface-subtle: #94a3b8;
+
+  /* Borders & Navigation */
+  --color-border-soft: #e2e8f0;
+  --color-border-mid: #cbd5e1;
+  --color-border-strong: #94a3b8;
+  --color-outline: #cbd5e1;
+  --color-outline-variant: #e2e8f0;
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
+
+  /* Semantic Accents — Emerald, Rose, Amber, Indigo */
+  --color-emerald-bg: rgba(16, 185, 129, 0.08);
+  --color-emerald-text: #059669;
+  --color-emerald-border: rgba(16, 185, 129, 0.25);
+  --color-emerald-solid: #10b981;
+
+  --color-rose-bg: rgba(239, 68, 68, 0.08);
+  --color-rose-text: #dc2626;
+  --color-rose-border: rgba(239, 68, 68, 0.25);
+  --color-rose-solid: #ef4444;
+
+  --color-amber-bg: rgba(245, 158, 11, 0.08);
+  --color-amber-text: #b45309;
+  --color-amber-border: rgba(245, 158, 11, 0.25);
+  --color-amber-solid: #f59e0b;
+
+  --color-indigo-bg: rgba(37, 99, 235, 0.08);
+  --color-indigo-text: #2563eb;
+  --color-indigo-border: rgba(37, 99, 235, 0.25);
+  --color-indigo-solid: #3b82f6;
+
+  --color-error: #dc2626;
   --color-on-error: #ffffff;
-  --color-inverse-surface: #2e3132;
-  --color-on-primary-fixed: #1e1b18;
-  --color-tertiary-fixed: #e3e2e4;
-  --color-on-tertiary-fixed: #1a1c1d;
-  --color-on-secondary: #ffffff;
-  --color-secondary: #585f6c;
-  --color-error-container: #ffdad6;
-  --color-secondary-fixed: #dce2f3;
-  --color-surface-tint: #635d5a;
+  --color-error-container: #fee2e2;
+  --color-on-error-container: #991b1b;
 
-  --color-border-soft: rgba(207, 196, 189, 0.2);
-  --color-border-mid: rgba(207, 196, 189, 0.3);
-  --color-border-strong: rgba(207, 196, 189, 0.5);
-  --color-nav-bg: rgba(248, 249, 250, 0.8);
-
-  --radius-default: 0.125rem;
-  --radius-lg: 0.25rem;
-  --radius-xl: 0.5rem;
-  --radius-full: 0.75rem;
-
+  /* Layout, Spacing & Container Tokens */
   --space-unit: 8px;
   --space-container-max: 1600px;
   --space-stack-lg: 48px;
@@ -71,187 +71,116 @@
   --space-gutter: 24px;
   --space-margin-mobile: 16px;
 
-  --font-headline: "Newsreader", serif;
-  --font-body: "Geist", sans-serif;
+  /* Border Radii (Original Landing Proportion) */
+  --radius-default: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+
+  /* Typography — Editorial Serif Headlines + Inter Body */
+  --font-headline: "Newsreader", "Playfair Display", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* ---------- Dark theme ---------- */
-/* Toggled by data-theme="dark" on <html> (set by ThemeProvider) */
+/* =========================================================
+   DARK THEME (Deep Zinc & Emerald Accents)
+   ========================================================= */
 
 html[data-theme="dark"] {
-  --color-background: #14100e;
-  --color-surface: #1a1512;
-  --color-surface-bright: #1f1a16;
-  --color-surface-container-lowest: #100c0a;
-  --color-surface-container-low: #1a1512;
-  --color-surface-container: #221c18;
-  --color-surface-container-high: #2a231e;
-  --color-surface-container-highest: #332b24;
-  --color-surface-dim: #14100e;
-  --color-surface-variant: #2a231e;
+  --color-background: #09090b;
+  --color-surface: #121215;
+  --color-surface-bright: #18181b;
+  --color-surface-container-lowest: #121215;
+  --color-surface-container-low: #18181b;
+  --color-surface-container: #27272a;
+  --color-surface-container-high: #3f3f46;
+  --color-surface-container-highest: #52525b;
+  --color-surface-dim: #09090b;
+  --color-surface-variant: #18181b;
 
-  --color-on-background: #efe9e4;
-  --color-on-surface: #efe9e4;
-  --color-on-surface-variant: #b8ada4;
+  --color-on-background: #f4f4f5;
+  --color-on-surface: #f4f4f5;
+  --color-on-surface-variant: #a1a1aa;
+  --color-on-surface-subtle: #71717a;
 
-  --color-primary: #efe9e4;
-  --color-primary-container: #e0793d;
-  --color-on-primary: #14100e;
-  --color-on-primary-container: #f3e3d6;
+  --color-primary: #f4f4f5;
+  --color-primary-container: #f4f4f5;
+  --color-on-primary: #09090b;
+  --color-on-primary-container: #09090b;
 
-  --color-outline: #6f655c;
-  --color-outline-variant: #4a4038;
+  --color-border-soft: #27272a;
+  --color-border-mid: #3f3f46;
+  --color-border-strong: #52525b;
+  --color-outline: #3f3f46;
+  --color-outline-variant: #27272a;
+  --color-nav-bg: rgba(18, 18, 21, 0.85);
 
-  --color-inverse-primary: #e0793d;
-  --color-inverse-surface: #efe9e4;
-  --color-inverse-on-surface: #221c18;
+  --color-emerald-bg: rgba(16, 185, 129, 0.14);
+  --color-emerald-text: #34d399;
+  --color-emerald-border: rgba(16, 185, 129, 0.35);
 
-  --color-error: #ffb4ab;
-  --color-on-error: #690005;
-  --color-error-container: #93000a;
-  --color-on-error-container: #ffdad6;
+  --color-rose-bg: rgba(239, 68, 68, 0.14);
+  --color-rose-text: #f87171;
+  --color-rose-border: rgba(239, 68, 68, 0.35);
 
-  --color-border-soft: rgba(239, 233, 228, 0.08);
-  --color-border-mid: rgba(239, 233, 228, 0.12);
-  --color-border-strong: rgba(239, 233, 228, 0.18);
-  --color-nav-bg: rgba(20, 16, 14, 0.75);
+  --color-amber-bg: rgba(245, 158, 11, 0.14);
+  --color-amber-text: #fbbf24;
+  --color-amber-border: rgba(245, 158, 11, 0.35);
+
+  --color-indigo-bg: rgba(59, 130, 246, 0.14);
+  --color-indigo-text: #60a5fa;
+  --color-indigo-border: rgba(59, 130, 246, 0.35);
+
+  --color-error: #f87171;
+  --color-on-error: #09090b;
+  --color-error-container: rgba(239, 68, 68, 0.2);
+  --color-on-error-container: #fca5a5;
 }
 
 /* =========================================================
-   LIGHT MODE + DARK SIDEBAR
-   ---------------------------------------------------------
-   The application stays in LIGHT mode.
-   Only the dashboard sidebar becomes dark.
-   ========================================================= */
-
-html[data-theme="light-dark-sidebar"] {
-  /* Keep all normal light-mode tokens */
-  --color-background: #f8f9fa;
-  --color-surface: #f8f9fa;
-  --color-surface-bright: #f8f9fa;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f3f4f5;
-  --color-surface-container: #edeeef;
-  --color-surface-container-high: #e7e8e9;
-  --color-surface-container-highest: #e1e3e4;
-
-  --color-on-background: #191c1d;
-  --color-on-surface: #191c1d;
-  --color-on-surface-variant: #4d4540;
-
-  --color-primary: #181512;
-  --color-primary-container: #2d2926;
-  --color-on-primary: #ffffff;
-
-  --color-outline: #7e756f;
-  --color-outline-variant: #cfc4bd;
-
-  --color-border-soft: rgba(207, 196, 189, 0.2);
-  --color-border-mid: rgba(207, 196, 189, 0.3);
-  --color-border-strong: rgba(207, 196, 189, 0.5);
-
-  --color-nav-bg: rgba(248, 249, 250, 0.8);
-}
-
-
-/* =========================================================
-   THIRD MODE — SIDEBAR ONLY
-   ========================================================= */
-
-html[data-theme="light-dark-sidebar"] .cv-sidebar {
-  --sidebar-background: #1a1613;
-  --sidebar-text: #f5f0eb;
-  --sidebar-muted: #b8ada4;
-
-  --sidebar-hover-background: #28221d;
-  --sidebar-active-background: #f5f0eb;
-  --sidebar-active-text: #1a1613;
-
-  --sidebar-border: rgba(245, 240, 235, 0.10);
-
-  --sidebar-shadow: 4px 0 28px rgba(0, 0, 0, 0.30);
-}
-
-
-/* =========================================================
-   NORMAL LIGHT + DARK MODE SIDEBAR VARIABLES
+   SIDEBAR THEME VARIABLES
    ========================================================= */
 
 .cv-sidebar {
   --sidebar-background: #ffffff;
-  --sidebar-text: var(--color-on-surface);
-  --sidebar-muted: var(--color-on-surface-variant);
-
-  --sidebar-hover-background: var(--color-surface-container-low);
-  --sidebar-active-background: var(--color-primary);
-  --sidebar-active-text: var(--color-on-primary);
-
-  --sidebar-border: var(--color-border-mid);
-
-  --sidebar-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+  --sidebar-text: var(--color-on-surface, #0f172a);
+  --sidebar-muted: var(--color-on-surface-variant, #64748b);
+  --sidebar-hover-background: var(--color-surface-container-low, #f1f5f9);
+  --sidebar-active-background: #0f172a;
+  --sidebar-active-text: #ffffff;
+  --sidebar-border: var(--color-border-soft, #e2e8f0);
+  --sidebar-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
 }
-
-
-/* Dark mode sidebar variables */
 
 html[data-theme="dark"] .cv-sidebar {
-  --sidebar-background: #1a1613;
-  --sidebar-text: #f5f0eb;
-  --sidebar-muted: #b8ada4;
-
-  --sidebar-hover-background: #28221d;
-  --sidebar-active-background: #f5f0eb;
-  --sidebar-active-text: #1a1613;
-
-  --sidebar-border: rgba(245, 240, 235, 0.10);
-
-  --sidebar-shadow: 4px 0 28px rgba(0, 0, 0, 0.35);
+  --sidebar-background: #121215;
+  --sidebar-text: #f4f4f5;
+  --sidebar-muted: #a1a1aa;
+  --sidebar-hover-background: #18181b;
+  --sidebar-active-background: #f4f4f5;
+  --sidebar-active-text: #09090b;
+  --sidebar-border: #27272a;
+  --sidebar-shadow: 1px 0 5px rgba(0, 0, 0, 0.4);
 }
 
-/* Smooth crossfade site-wide when the theme flips */
-body,
-body * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+/* Base Body Styles */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body, body * {
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body,
-  body * {
+  body, body * {
     transition: none;
   }
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-/* =========================================================
-   DASHBOARD-ONLY DARK MODE OVERRIDES
-   Scoped strictly to .dashboard-layout-container so Landing,
-   Login, and Signup pages remain 100% untouched.
-   ========================================================= */
-
-html[data-theme="dark"] .dashboard-layout-container {
-  /* Scope sidebar background to deep charcoal instead of global primary accent */
-  --color-primary-container: #1c1714;
-  
-  /* High contrast surfaces for dashboard cards */
-  --color-surface: #1a1613;
-  --color-surface-container-low: #181411;
-  --color-surface-container: #201b17;
-  --color-surface-container-high: #28221d;
-  
-  /* Crisp readable text for dashboard metrics */
-  --color-primary: #f5f0eb;
-  --color-on-surface: #f5f0eb;
-  --color-on-surface-variant: #a89c92;
-  
-  /* Soft subtle borders for glassmorphism cards */
-  --color-border-soft: rgba(245, 240, 235, 0.08);
-  --color-border-mid: rgba(245, 240, 235, 0.14);
 }

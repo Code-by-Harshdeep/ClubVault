@@ -1,37 +1,80 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import {
+  Plus,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Search,
+  FileSpreadsheet,
+  ReceiptText,
+  CheckCircle2,
+  Clock,
+  X,
+  Tag,
+  Wallet,
+  Building2,
+} from "lucide-react";
 import { useClub } from "../../ClubContext";
 import { api } from "../../api";
 import "./Transactions.css";
 
 function formatMoney(n) {
   const num = Number(n) || 0;
-  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `₹${num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 function formatDate(d) {
   if (!d) return "";
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+  return new Date(d).toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 }
 
-function NewTransactionModal({ onClose, onSubmit, defaultType }) {
+function NewTransactionModal({ onClose, onSubmit, defaultType, budgets }) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [type, setType] = useState(defaultType || "expense");
+  const [budgetId, setBudgetId] = useState(budgets[0]?._id || "");
+  const [type, setType] = useState(defaultType === "income" ? "income" : "expense");
   const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const selected = budgets.find((b) => b._id === budgetId);
+  const remaining = selected
+    ? Number(selected.remaining ?? selected.allocated - selected.spent)
+    : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!title || !category || !amount) {
+    if (!title || !amount) {
       setError("Please fill in all fields.");
+      return;
+    }
+    if (type === "expense" && !budgetId) {
+      setError("Choose a budget line. Expenses cannot be logged outside an allocation.");
+      return;
+    }
+    if (type === "expense" && remaining != null && Number(amount) > remaining + 0.009) {
+      setError(`Only ₹${remaining.toLocaleString("en-IN")} remains on this budget line.`);
       return;
     }
     setLoading(true);
     try {
-      await onSubmit({ title, category, type, amount: Number(amount) });
+      await onSubmit({
+        title,
+        category: type === "expense" ? selected?.category || category || "General" : category || "Income",
+        type,
+        amount: Number(amount),
+        date: date ? new Date(date) : new Date(),
+        budgetId: type === "expense" ? budgetId : undefined,
+      });
       onClose();
     } catch (err) {
       setError(err.message);
@@ -41,30 +84,94 @@ function NewTransactionModal({ onClose, onSubmit, defaultType }) {
   };
 
   return (
-    <div className="tx-modal-overlay" onClick={onClose}>
-      <div className="tx-modal-box" onClick={(e) => e.stopPropagation()}>
-        <h3>Log Transaction</h3>
-        <form onSubmit={handleSubmit} className="tx-modal-form">
+    <div className="cv-tx-modal-overlay" onClick={onClose}>
+      <div className="cv-tx-modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="cv-tx-modal-header">
+          <h3>Log New Transaction</h3>
+          <button type="button" className="cv-tx-modal-close" onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="cv-tx-modal-form">
           <label>Type</label>
-          <div className="tx-modal-type-switch">
-            <button type="button" className={type === "income" ? "active" : ""} onClick={() => setType("income")}>
-              Income
+          <div className="cv-tx-type-switch">
+            <button
+              type="button"
+              className={type === "expense" ? "active expense" : ""}
+              onClick={() => setType("expense")}
+            >
+              <ArrowDownLeft size={14} /> Expense
             </button>
-            <button type="button" className={type === "expense" ? "active" : ""} onClick={() => setType("expense")}>
-              Expense
+            <button
+              type="button"
+              className={type === "income" ? "active income" : ""}
+              onClick={() => setType("income")}
+            >
+              <ArrowUpRight size={14} /> Income
             </button>
           </div>
+
           <label>Description</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Fall Festival Catering" />
-          <label>Category</label>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Events" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Fall Festival Catering, Domain License"
+          />
+
+          <label>Transaction Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+
+          {type === "expense" ? (
+            <>
+              <label>Charge to Budget Line</label>
+              {budgets.length === 0 ? (
+                <p className="cv-tx-modal-hint warning">
+                  No budgets exist. Create a budget line in Budgets before logging expenses.
+                </p>
+              ) : (
+                <select value={budgetId} onChange={(e) => setBudgetId(e.target.value)}>
+                  {budgets.map((b) => (
+                    <option key={b._id} value={b._id}>
+                      {b.title} — ₹{Number(b.remaining ?? b.allocated - b.spent).toLocaleString("en-IN")} left
+                    </option>
+                  ))}
+                </select>
+              )}
+            </>
+          ) : (
+            <>
+              <label>Income Category</label>
+              <input
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="e.g. Member Dues, Sponsorship"
+              />
+            </>
+          )}
+
           <label>Amount (₹)</label>
-          <input type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
-          {error && <p className="tx-modal-error">{error}</p>}
-          <div className="tx-modal-actions">
-            <button type="button" className="action-btn" onClick={onClose}>Cancel</button>
-            <button type="submit" className="action-btn tx-primary-btn" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+          />
+
+          {error && <p className="cv-tx-modal-error">{error}</p>}
+
+          <div className="cv-tx-modal-actions">
+            <button type="button" className="cv-tx-cancel-btn" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="cv-tx-submit-btn" disabled={loading}>
+              {loading ? "Saving…" : "Save Transaction"}
             </button>
           </div>
         </form>
@@ -73,21 +180,19 @@ function NewTransactionModal({ onClose, onSubmit, defaultType }) {
   );
 }
 
-const Transactions = () => {
+export default function Transactions() {
   const { club } = useClub();
   const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
+  const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState("income");
+  const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
 
-  // Support being deep-linked here with ?new=1 (e.g. the sidebar's
-  // "New Expense" button) so it opens straight into the add form.
   useEffect(() => {
     if (searchParams.get("new") === "1") {
-      setFilter("expense");
       setShowModal(true);
       searchParams.delete("new");
       setSearchParams(searchParams, { replace: true });
@@ -100,8 +205,12 @@ const Transactions = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await api.get(`/api/clubs/${club._id}/transactions`);
-      setTransactions(data.transactions || []);
+      const [txData, budgetData] = await Promise.all([
+        api.get(`/api/clubs/${club._id}/transactions`),
+        api.get(`/api/clubs/${club._id}/budgets`),
+      ]);
+      setTransactions(txData.transactions || []);
+      setBudgets(budgetData.budgets || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -129,135 +238,243 @@ const Transactions = () => {
   );
   const netFlow = totalIncome - totalExpenses;
 
-  const filtered = transactions
-    .filter((t) => t.type === filter)
-    .filter((t) => `${t.title} ${t.category}`.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filtered = useMemo(() => {
+    return transactions
+      .filter((t) => filter === "all" || t.type === filter)
+      .filter((t) => `${t.title} ${t.category}`.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [transactions, filter, searchTerm]);
+
+  const handleExportCsv = () => {
+    const rows = [
+      ["Date", "Description", "Category", "Type", "Status", "Amount (INR)"],
+      ...filtered.map((t) => [
+        formatDate(t.date),
+        `"${(t.title || "").replace(/"/g, '""')}"`,
+        `"${(t.category || "").replace(/"/g, '""')}"`,
+        t.type || "expense",
+        t.status || "Cleared",
+        t.amount,
+      ]),
+    ];
+    const csv = rows.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(club?.name || "club").toLowerCase().replace(/\s+/g, "-")}-transactions.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="transactions-page">
-      <main className="transactions-container">
-        {showModal && (
-          <NewTransactionModal
-            onClose={() => setShowModal(false)}
-            onSubmit={handleCreate}
-            defaultType={filter}
-          />
-        )}
+    <div className="cv-tx-page">
+      {showModal && (
+        <NewTransactionModal
+          onClose={() => setShowModal(false)}
+          onSubmit={handleCreate}
+          defaultType={filter === "income" ? "income" : "expense"}
+          budgets={budgets}
+        />
+      )}
 
-        <section className="transactions-header">
+      <main className="cv-tx-container">
+        <header className="cv-tx-header">
           <div>
-            <h1 className="transactions-title">Income &amp; Expenses</h1>
-            <p className="transactions-subtitle">{club?.name || "Ledger overview"}</p>
+            <div className="cv-dash-club-badge">
+              <Building2 size={13} /> {club?.name || "Club Ledger"}
+            </div>
+            <h1 className="cv-tx-title">Ledger &amp; Transactions</h1>
+            <p className="cv-tx-subtitle">
+              Comprehensive record of club income, expenses, and reimbursement payouts.
+            </p>
           </div>
 
-          <div className="transactions-toggle">
+          <div className="cv-tx-header-actions">
             <button
-              className={`toggle-btn ${filter === "income" ? "active" : ""}`}
-              onClick={() => setFilter("income")}
+              type="button"
+              className="cv-btn-secondary"
+              onClick={handleExportCsv}
             >
-              Income
+              <FileSpreadsheet size={14} />
+              <span>Export CSV</span>
             </button>
             <button
-              className={`toggle-btn ${filter === "expense" ? "active" : ""}`}
-              onClick={() => setFilter("expense")}
+              type="button"
+              className="cv-btn-primary"
+              onClick={() => setShowModal(true)}
             >
-              Expenses
+              <Plus size={15} />
+              <span>Log Transaction</span>
             </button>
           </div>
-        </section>
+        </header>
 
-        {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        {error && <p className="cv-tx-error">{error}</p>}
 
-        <section className="transactions-kpi-grid">
-          <div className="transactions-kpi-card">
-            <span className="kpi-label">Total Income</span>
-            <h2>{loading ? "…" : formatMoney(totalIncome)}</h2>
-          </div>
-
-          <div className="transactions-kpi-card">
-            <span className="kpi-label">Total Expenses</span>
-            <h2>{loading ? "…" : formatMoney(totalExpenses)}</h2>
-          </div>
-
-          <div className="transactions-kpi-card">
-            <span className="kpi-label">Net Cash Flow</span>
-            <h2>{loading ? "…" : formatMoney(netFlow)}</h2>
-            <p className="kpi-muted">{netFlow >= 0 ? "Positive margin" : "Negative margin"}</p>
-          </div>
-        </section>
-
-        <section className="transactions-ledger">
-          <div className="ledger-header">
-            <h2>Transaction Ledger</h2>
-
-            <div className="ledger-actions">
-              <div className="search-box">
-                <span className="material-symbols-outlined">search</span>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+        <section className="cv-tx-kpi-grid">
+          <div className="cv-tx-kpi-card">
+            <div className="cv-tx-kpi-head">
+              <span className="cv-tx-kpi-label">TOTAL INCOME</span>
+              <div className="cv-tx-icon-bubble income">
+                <ArrowUpRight size={15} />
               </div>
+            </div>
+            <p className="cv-tx-kpi-value">{loading ? "…" : formatMoney(totalIncome)}</p>
+            <span className="cv-tx-kpi-sub">Inbound dues &amp; grants</span>
+          </div>
 
-              <button className="action-btn" onClick={() => setShowModal(true)}>
-                <span className="material-symbols-outlined">add</span>
-                Add
-              </button>
+          <div className="cv-tx-kpi-card">
+            <div className="cv-tx-kpi-head">
+              <span className="cv-tx-kpi-label">TOTAL EXPENSES</span>
+              <div className="cv-tx-icon-bubble expense">
+                <ArrowDownLeft size={15} />
+              </div>
+            </div>
+            <p className="cv-tx-kpi-value">{loading ? "…" : formatMoney(totalExpenses)}</p>
+            <span className="cv-tx-kpi-sub">All-time disbursements</span>
+          </div>
+
+          <div className="cv-tx-kpi-card">
+            <div className="cv-tx-kpi-head">
+              <span className="cv-tx-kpi-label">NET CASH FLOW</span>
+              <div className="cv-tx-icon-bubble balance">
+                <Wallet size={15} />
+              </div>
+            </div>
+            <p className="cv-tx-kpi-value">{loading ? "…" : formatMoney(netFlow)}</p>
+            <span className={`cv-tx-badge-trend ${netFlow >= 0 ? "positive" : "negative"}`}>
+              {netFlow >= 0 ? "✓ Positive margin" : "⚠️ Incurring net deficit"}
+            </span>
+          </div>
+        </section>
+
+        <section className="cv-tx-ledger-card">
+          <div className="cv-tx-ledger-toolbar">
+            <div className="cv-tx-filter-tabs">
+              {[
+                { id: "all", label: "All Records" },
+                { id: "expense", label: "Expenses" },
+                { id: "income", label: "Income" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`cv-tx-tab-btn ${filter === tab.id ? "active" : ""}`}
+                  onClick={() => setFilter(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="cv-tx-search-bar">
+              <Search size={14} className="cv-tx-search-icon" />
+              <input
+                type="text"
+                placeholder="Search description, category..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button type="button" className="cv-tx-clear-btn" onClick={() => setSearchTerm("")}>
+                  <X size={12} />
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="table-wrapper">
-            <table className="transactions-table">
+          <div className="cv-tx-table-wrapper">
+            <table className="cv-tx-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Description</th>
-                  <th>Category</th>
-                  <th className="amount-column">Amount</th>
+                  <th>DESCRIPTION</th>
+                  <th>CATEGORY</th>
+                  <th>DATE</th>
+                  <th>STATUS</th>
+                  <th style={{ textAlign: "right" }}>AMOUNT</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="4">Loading…</td>
+                    <td colSpan="5" className="cv-tx-empty-state">Loading transactions…</td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan="4">No transactions yet.</td>
+                    <td colSpan="5" className="cv-tx-empty-state">
+                      <div className="cv-tx-empty-box">
+                        <ReceiptText size={28} />
+                        <h4>No transactions found</h4>
+                        <p>
+                          {searchTerm
+                            ? `No records matching "${searchTerm}".`
+                            : filter === "expense"
+                            ? "No expense transactions logged yet."
+                            : filter === "income"
+                            ? "No income transactions logged yet."
+                            : "Your club ledger is clean. Log a transaction to get started."}
+                        </p>
+                        <button
+                          type="button"
+                          className="cv-btn-primary"
+                          onClick={() => setShowModal(true)}
+                        >
+                          <Plus size={14} /> Log Transaction
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ) : (
-                  filtered.map((t) => (
-                    <tr key={t._id}>
-                      <td>{formatDate(t.date)}</td>
-                      <td>
-                        <div className="transaction-title">{t.title}</div>
-                        <div className="transaction-subtitle">{t.status}</div>
-                      </td>
-                      <td>
-                        <span className="category-tag">{t.category}</span>
-                      </td>
-                      <td className={`amount ${t.type === "income" ? "positive" : "negative"}`}>
-                        {t.type === "income" ? "+" : "-"}
-                        {formatMoney(t.amount)}
-                      </td>
-                    </tr>
-                  ))
+                  filtered.map((t) => {
+                    const statusType =
+                      t.status === "Pending Bill"
+                        ? "warning"
+                        : t.status === "Reimbursed"
+                        ? "neutral"
+                        : "success";
+
+                    return (
+                      <tr key={t._id} className="cv-tx-table-row">
+                        <td>
+                          <div className="cv-tx-title-col">
+                            <strong>{t.title}</strong>
+                            {t.description && <span className="cv-tx-desc-hint">{t.description}</span>}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="cv-tx-tag">
+                            <Tag size={10} /> {t.category}
+                          </span>
+                        </td>
+                        <td className="cv-tx-date">{formatDate(t.date)}</td>
+                        <td>
+                          <span className={`cv-tx-status-pill ${statusType}`}>
+                            {statusType === "success" && <CheckCircle2 size={12} />}
+                            {statusType === "warning" && <Clock size={12} />}
+                            {t.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "right" }} className={`cv-tx-amount ${t.type}`}>
+                          <span className={`cv-tx-amount-chip ${t.type}`}>
+                            {t.type === "income" ? "+" : "-"}
+                            {formatMoney(t.amount)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
 
-          <div className="transactions-pagination">
-            <span className="pagination-text">
-              Showing {filtered.length} of {transactions.filter((t) => t.type === filter).length} transactions
+          <div className="cv-tx-footer-bar">
+            <span>
+              Showing {filtered.length} of {transactions.length} total entries
             </span>
           </div>
         </section>
       </main>
     </div>
   );
-};
-
-export default Transactions;
+}

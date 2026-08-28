@@ -46,11 +46,17 @@ const Signup = () => {
   const [success, setSuccess] = useState(false);
 
   // ----------------------------------------
-  // AUTO FOCUS
+  // AUTO FOCUS & ALREADY LOGGED IN CHECK
   // ----------------------------------------
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
     fullNameRef.current?.focus();
-  }, []);
+  }, [navigate]);
+
 
   // ----------------------------------------
   // VALIDATE SINGLE FIELD
@@ -308,13 +314,16 @@ const Signup = () => {
         return;
       }
 
-      // Signup successful
+      // Signup successful - navigate to OTP verification screen
       setSuccess(true);
 
-      // Redirect to login
       setTimeout(() => {
-        navigate("/login");
-      }, 1200);
+        navigate(
+          `/verify-email?email=${encodeURIComponent(
+            formData.universityEmail.trim(),
+          )}`,
+        );
+      }, 1000);
     } catch (err) {
       console.error(err);
 
@@ -422,8 +431,7 @@ const Signup = () => {
               <CheckCircle2 size={20} />
 
               <span>
-                Account created! Redirecting to
-                login…
+                Account created! Redirecting to login…
               </span>
             </div>
           ) : (

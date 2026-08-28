@@ -18,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useClub } from "../../ClubContext";
 import { api } from "../../api";
+import { hasFeature } from "../../features";
 import "./Dashboard.css";
 
 function MiniSparkline({ values, tone }) {
@@ -40,26 +41,52 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
 }
 
-// Quick "Request Reimbursement" form — posts a pending expense transaction
-function ReimbursementModal({ onClose, onSubmit }) {
+// Quick "Request Reimbursement" form — posts a pending expense transaction charged to a valid budget line
+function ReimbursementModal({ onClose, onSubmit, budgets = [] }) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [merchant, setMerchant] = useState("");
+  const [receiptUrl, setReceiptUrl] = useState("");
+  const [budgetId, setBudgetId] = useState(budgets[0]?._id || "");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const selectedBudget = budgets.find((b) => b._id === budgetId);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Receipt image must be under 2MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setReceiptUrl(reader.result);
+      setError("");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!title || !category || !amount) {
-      setError("Please fill in all fields.");
+    if (!title || !amount) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    if (!budgetId) {
+      setError("Please select a budget line. Expenses cannot be logged outside an allocation.");
       return;
     }
     setLoading(true);
     try {
       await onSubmit({
         title,
-        category,
+        merchant,
+        receiptUrl,
+        category: selectedBudget?.category || "General",
+        budgetId,
         type: "expense",
         amount: Number(amount),
         status: "Pending Bill",
@@ -74,27 +101,99 @@ function ReimbursementModal({ onClose, onSubmit }) {
 
   return (
     <div className="cv-modal-overlay" onClick={onClose}>
-      <div className="cv-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="cv-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "480px" }}>
         <h3>Request Reimbursement</h3>
-        <form onSubmit={handleSubmit} className="cv-modal-form">
-          <label>Description</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Printing costs" />
-          <label>Category</label>
-          <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Operations" />
-          <label>Amount (₹)</label>
-          <input type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
-          {error && <p className="cv-modal-error">{error}</p>}
-          <div className="cv-modal-actions">
-            <button type="button" className="cv-btn-secondary-sm" onClick={onClose}>Cancel</button>
-            <button type="submit" className="cv-btn-secondary-sm cv-btn-primary-sm" disabled={loading}>
-              {loading ? "Submitting..." : "Submit"}
+        {budgets.length === 0 ? (
+          <div style={{ padding: "16px 0", textAlign: "center" }}>
+            <p className="cv-modal-error" style={{ marginBottom: "16px" }}>
+              No active budget lines found. An admin must create a budget category in Budgets before submitting expense claims.
+            </p>
+            <button type="button" className="cv-btn-secondary-sm cv-btn-primary-sm" onClick={onClose}>
+              Got It
             </button>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="cv-modal-form">
+            <label>Item / Expense Title *</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Workshop Materials & Stationery"
+              required
+            />
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label>Merchant / Vendor</label>
+                <input
+                  value={merchant}
+                  onChange={(e) => setMerchant(e.target.value)}
+                  placeholder="e.g. Amazon, Local Store"
+                />
+              </div>
+              <div>
+                <label>Amount (₹) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+            </div>
+
+            <label>Charge To Budget Line *</label>
+            <select value={budgetId} onChange={(e) => setBudgetId(e.target.value)}>
+              {budgets.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.title} (₹{Number(b.remaining ?? b.allocated - b.spent).toLocaleString("en-IN")} remaining)
+                </option>
+              ))}
+            </select>
+
+            <label>Receipt Bill / Proof of Purchase (Upload or URL)</label>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" }}>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ fontSize: "12px", flex: 1, padding: "6px" }}
+              />
+            </div>
+            <input
+              type="url"
+              value={receiptUrl && !receiptUrl.startsWith("data:") ? receiptUrl : ""}
+              onChange={(e) => setReceiptUrl(e.target.value)}
+              placeholder="Or paste receipt image link (https://...)"
+            />
+
+            {receiptUrl && (
+              <div style={{ marginTop: "8px", padding: "8px", border: "1px solid var(--color-border-soft)", borderRadius: "6px", display: "flex", alignItems: "center", gap: "10px" }}>
+                <img src={receiptUrl} alt="Receipt preview" style={{ width: "40px", height: "40px", objectFit: "cover", borderRadius: "4px" }} />
+                <span style={{ fontSize: "12px", color: "var(--color-on-surface-variant)" }}>Receipt attached</span>
+                <button type="button" onClick={() => setReceiptUrl("")} style={{ marginLeft: "auto", fontSize: "11px", color: "var(--color-rose-text)", background: "none", border: "none", cursor: "pointer" }}>Remove</button>
+              </div>
+            )}
+
+            {error && <p className="cv-modal-error">{error}</p>}
+            <div className="cv-modal-actions" style={{ marginTop: "16px" }}>
+              <button type="button" className="cv-btn-secondary-sm" onClick={onClose}>
+                Cancel
+              </button>
+              <button type="submit" className="cv-btn-secondary-sm cv-btn-primary-sm" disabled={loading}>
+                {loading ? "Submitting..." : "Submit Claim"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
 }
+
 
 export default function Dashboard() {
   const { club } = useClub();
@@ -153,12 +252,47 @@ export default function Dashboard() {
     return matchesTab && matchesSearch;
   });
 
+  const reimbursementsEnabled = hasFeature(club, "reimbursements");
+  const eventsEnabled = hasFeature(club, "events");
+
+  const handleExportCsv = async () => {
+    try {
+      let exportRows = entries;
+      if (club?._id) {
+        const fullTx = await api.get(`/api/clubs/${club._id}/transactions`);
+        if (fullTx?.transactions?.length) {
+          exportRows = fullTx.transactions;
+        }
+      }
+      const rows = [
+        ["Description", "Category", "Date", "Status", "Type", "Amount"],
+        ...exportRows.map((e) => [
+          `"${(e.title || "").replace(/"/g, '""')}"`,
+          `"${(e.category || "").replace(/"/g, '""')}"`,
+          formatDate(e.date),
+          e.status || "Cleared",
+          e.type || "expense",
+          e.amount,
+        ]),
+      ];
+      const csv = rows.map((r) => r.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(club?.name || "club").toLowerCase().replace(/\s+/g, "-")}-audit-ledger.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export error:", err);
+    }
+  };
+
   return (
     <div className="cv-dash-page">
-      <div className="cv-dash-orb" />
-
       {showReimbursement && (
         <ReimbursementModal
+          budgets={summary?.budgets || []}
           onClose={() => setShowReimbursement(false)}
           onSubmit={handleAddTransaction}
         />
@@ -166,30 +300,18 @@ export default function Dashboard() {
 
       <div className="cv-dash-page-header">
         <div>
-          <span className="cv-dash-eyebrow-badge">
-            <Sparkles size={12} className="cv-sparkle-icon" /> {club?.name || "Treasury Workspace"}
-          </span>
-          <h1 className="cv-dash-title">Club Financial Standing</h1>
+          <div className="cv-dash-club-badge">
+            <Building2 size={13} /> {club?.name || "Club Treasury"}
+          </div>
+          <h1 className="cv-dash-title">Financial Overview</h1>
+          <p className="cv-dash-subtitle">Track your club's available funds, budgets, and recent transactions.</p>
         </div>
 
         <div className="cv-header-actions">
           <button
             type="button"
             className="cv-btn-secondary-sm"
-            onClick={() => {
-              const rows = [
-                ["Description", "Category", "Date", "Status", "Amount"],
-                ...entries.map((e) => [e.title, e.category, formatDate(e.date), e.status, e.amount]),
-              ];
-              const csv = rows.map((r) => r.join(",")).join("\n");
-              const blob = new Blob([csv], { type: "text/csv" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = "audit-log.csv";
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
+            onClick={handleExportCsv}
           >
             <FileSpreadsheet size={14} /> Export Audit Sheet
           </button>
@@ -202,18 +324,26 @@ export default function Dashboard() {
         <div className="cv-glass-stat-card primary-highlight">
           <div className="cv-stat-accent-bar primary" />
           <div className="cv-stat-header">
-            <span className="cv-stat-label">TOTAL VAULT BALANCE</span>
+            <span className="cv-stat-label">AVAILABLE TREASURY FUNDS</span>
             <div className="cv-icon-bubble primary">
               <Building2 size={18} />
             </div>
           </div>
           <p className="cv-stat-value">
-            {loading ? "…" : formatMoney(summary?.totalBalance)}
+            {loading ? "…" : formatMoney(summary?.availableFunds ?? summary?.remainingBudget ?? summary?.totalBalance)}
           </p>
           <div className="cv-card-footer-info">
-            <span>{summary?.memberCount ?? 0} members</span>
+            <span>
+              {(summary?.totalAllocated || 0) > 0 ? (
+                <>Allocated: ₹{Number(summary.totalAllocated).toLocaleString("en-IN")} · Spent: ₹{Number(summary.totalBudgetSpent || 0).toLocaleString("en-IN")}</>
+              ) : (
+                <>{summary?.memberCount ?? 0} member{summary?.memberCount === 1 ? "" : "s"} · Live ledger</>
+              )}
+              {(summary?.pendingExpenses || 0) > 0 && ` · ₹${summary.pendingExpenses.toLocaleString("en-IN")} pending`}
+            </span>
           </div>
         </div>
+
 
         <div className="cv-glass-stat-card">
           <div className="cv-stat-accent-bar info" />
@@ -225,9 +355,15 @@ export default function Dashboard() {
           </div>
           <div className="cv-stat-value-row">
             <p className="cv-stat-value">{loading ? "…" : summary?.activeBudgets ?? 0}</p>
-            <MiniSparkline values={[45, 60, 50, 75, 65, 85]} tone="info" />
+            {(summary?.activeBudgets || 0) > 0 && (
+              <MiniSparkline values={[45, 60, 50, 75, 65, 85]} tone="info" />
+            )}
           </div>
-          <p className="cv-stat-sub">Across this club</p>
+          <p className="cv-stat-sub">
+            {(summary?.activeBudgets || 0) > 0
+              ? `${summary.activeBudgets} active categor${summary.activeBudgets === 1 ? "y" : "ies"}`
+              : "No budgets created yet"}
+          </p>
         </div>
 
         <div className="cv-glass-stat-card warning-highlight">
@@ -240,12 +376,20 @@ export default function Dashboard() {
           </div>
           <div className="cv-stat-value-row">
             <p className="cv-stat-value">{loading ? "…" : summary?.pendingReimbursements ?? 0}</p>
-            <MiniSparkline values={[30, 55, 40, 70, 85, 95]} tone="warning" />
+            {(summary?.pendingReimbursements || 0) > 0 && (
+              <MiniSparkline values={[30, 55, 40, 70, 85, 95]} tone="warning" />
+            )}
           </div>
           <div className="cv-warning-footer">
-            <span className="cv-badge-trend warning">
-              <AlertCircle size={12} /> Requires Treasurer Review
-            </span>
+            {(summary?.pendingReimbursements || 0) > 0 ? (
+              <span className="cv-badge-trend warning">
+                <AlertCircle size={12} /> Requires Treasurer Review
+              </span>
+            ) : (
+              <span className="cv-badge-trend success">
+                <CheckCircle2 size={12} /> All claims settled
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -341,7 +485,15 @@ export default function Dashboard() {
                 ) : (
                   <tr>
                     <td colSpan="5" className="cv-empty-state">
-                      No ledger entries yet. Add one from Transactions.
+                      {searchTerm
+                        ? `No ledger entries found matching "${searchTerm}".`
+                        : activeTab === "expense"
+                        ? "No expense entries recorded yet."
+                        : activeTab === "income"
+                        ? "No income entries recorded yet."
+                        : activeTab === "pending"
+                        ? "No pending reimbursement claims."
+                        : "No ledger entries yet. Log a transaction to get started."}
                     </td>
                   </tr>
                 )}
@@ -353,59 +505,77 @@ export default function Dashboard() {
         <div className="cv-actions-stack">
           <div className="cv-actions-header">
             <h3>Executive Operations</h3>
-            <p>Direct treasurer actions</p>
+            <p>Direct treasurer &amp; officer actions</p>
           </div>
 
-          <button
-            type="button"
-            className="cv-quick-action-pill highlight"
-            onClick={() => setShowReimbursement(true)}
-          >
-            <div className="cv-action-left">
-              <div className="cv-action-icon accent">
-                <Plus size={18} />
+          <div className="cv-actions-list">
+            <button
+              type="button"
+              className="cv-quick-action-pill highlight"
+              onClick={() => {
+                if (reimbursementsEnabled) {
+                  setShowReimbursement(true);
+                } else {
+                  alert("Reimbursements are currently disabled. An admin can enable them in Settings.");
+                }
+              }}
+            >
+              <div className="cv-action-left">
+                <div className="cv-action-icon accent">
+                  <Plus size={18} />
+                </div>
+                <div className="cv-action-text-box">
+                  <span className="cv-action-title">Request Reimbursement</span>
+                  <span className="cv-action-sub">
+                    {reimbursementsEnabled ? "Submit expense claim" : "Feature disabled in Settings"}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="cv-action-title">Request Reimbursement</span>
-                <span className="cv-action-sub">Submit expense claim</span>
-              </div>
-            </div>
-            <ArrowUpRight size={16} className="cv-action-arrow" />
-          </button>
+              <ArrowUpRight size={16} className="cv-action-arrow" />
+            </button>
 
-          <button
-            type="button"
-            className="cv-quick-action-pill"
-            onClick={() => navigate("/transactions")}
-          >
-            <div className="cv-action-left">
-              <div className="cv-action-icon">
-                <Upload size={18} />
+            <button
+              type="button"
+              className="cv-quick-action-pill"
+              onClick={() => navigate("/transactions?new=1")}
+            >
+              <div className="cv-action-left">
+                <div className="cv-action-icon">
+                  <Upload size={18} />
+                </div>
+                <div className="cv-action-text-box">
+                  <span className="cv-action-title">Log a Transaction</span>
+                  <span className="cv-action-sub">Record income or expense</span>
+                </div>
               </div>
-              <div>
-                <span className="cv-action-title">Log a Transaction</span>
-                <span className="cv-action-sub">Add income or expense</span>
-              </div>
-            </div>
-            <ArrowUpRight size={16} className="cv-action-arrow" />
-          </button>
+              <ArrowUpRight size={16} className="cv-action-arrow" />
+            </button>
 
-          <button
-            type="button"
-            className="cv-quick-action-pill"
-            onClick={() => navigate("/events")}
-          >
-            <div className="cv-action-left">
-              <div className="cv-action-icon">
-                <CalendarCheck2 size={18} />
+            <button
+              type="button"
+              className="cv-quick-action-pill"
+              onClick={() => {
+                if (eventsEnabled) {
+                  navigate("/events");
+                } else {
+                  alert("Events Planning is currently disabled. An admin can enable it in Settings.");
+                }
+              }}
+            >
+              <div className="cv-action-left">
+                <div className="cv-action-icon">
+                  <CalendarCheck2 size={18} />
+                </div>
+                <div className="cv-action-text-box">
+                  <span className="cv-action-title">Plan an Event</span>
+                  <span className="cv-action-sub">
+                    {eventsEnabled ? "Allocate event budget" : "Feature disabled in Settings"}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="cv-action-title">Plan an Event</span>
-                <span className="cv-action-sub">Set up a micro-budget</span>
-              </div>
-            </div>
-            <ArrowUpRight size={16} className="cv-action-arrow" />
-          </button>
+              <ArrowUpRight size={16} className="cv-action-arrow" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -504,3 +504,31 @@
     transition: none;
   }
 }
+
+.cv-club-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 16px;
+}
+
+.cv-club-switcher span {
+  color: var(--sidebar-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.cv-club-switcher select {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 8px;
+  background: var(--sidebar-hover-background);
+  color: var(--sidebar-text);
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}

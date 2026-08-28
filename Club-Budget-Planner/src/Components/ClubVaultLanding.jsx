@@ -26,6 +26,7 @@ import {
 
 import { NAV_LINKS, FEATURES, PLANS, FOOTER_COLUMNS } from "./content";
 import DemoModal from "./WatchDemo/DemoModal";
+import InfoModal from "./InfoModal/InfoModal";
 import { useReveal } from "./UserReveal/useReveal";
 import { useCountUp } from "./hooks/useCountUp";
 import { useTheme } from "../ThemeContext";
@@ -36,6 +37,7 @@ import { useTheme } from "../ThemeContext";
 
 export default function ClubVaultLanding() {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [infoModalType, setInfoModalType] = useState(null);
 
   // NEW
   const [menuOpen, setMenuOpen] = useState(false);
@@ -97,13 +99,20 @@ export default function ClubVaultLanding() {
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            <a href="/login" className="cv-link-login">
-              Log In
-            </a>
-
-            <a href="/signup" className="cv-btn-nav-cta">
-              Get Started
-            </a>
+            {localStorage.getItem("token") ? (
+              <a href="/dashboard" className="cv-btn-nav-cta">
+                Dashboard &rarr;
+              </a>
+            ) : (
+              <>
+                <a href="/login" className="cv-link-login">
+                  Log In
+                </a>
+                <a href="/signup" className="cv-btn-nav-cta">
+                  Get Started
+                </a>
+              </>
+            )}
 
             {/* Mobile Menu Button */}
 
@@ -133,17 +142,29 @@ export default function ClubVaultLanding() {
               </a>
             ))}
 
-            <a href="/login" onClick={() => setMenuOpen(false)}>
-              Log In
-            </a>
+            {localStorage.getItem("token") ? (
+              <a
+                href="/dashboard"
+                className="cv-mobile-cta"
+                onClick={() => setMenuOpen(false)}
+              >
+                Go to Dashboard
+              </a>
+            ) : (
+              <>
+                <a href="/login" onClick={() => setMenuOpen(false)}>
+                  Log In
+                </a>
 
-            <a
-              href="/signup"
-              className="cv-mobile-cta"
-              onClick={() => setMenuOpen(false)}
-            >
-              Get Started
-            </a>
+                <a
+                  href="/signup"
+                  className="cv-mobile-cta"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Get Started
+                </a>
+              </>
+            )}
           </div>
         )}
       </nav>
@@ -166,8 +187,11 @@ export default function ClubVaultLanding() {
             </p>
 
             <div className="cv-hero-actions">
-              <a href="/signup" className="cv-btn-primary">
-                Start Your Vault
+              <a
+                href={localStorage.getItem("token") ? "/dashboard" : "/signup"}
+                className="cv-btn-primary"
+              >
+                {localStorage.getItem("token") ? "Go to Dashboard" : "Start Your Vault"}
               </a>
 
               <button
@@ -179,6 +203,7 @@ export default function ClubVaultLanding() {
               </button>
             </div>
           </div>
+
 
           <div className="cv-hero-visual" ref={heroRef}>
             <div className="cv-hero-backcard" />
@@ -542,6 +567,7 @@ export default function ClubVaultLanding() {
                   {plan.name === "Council" ? (
                     <button
                       className="cv-btn-secondary"
+                      onClick={() => setInfoModalType("contact")}
                       style={{
                         width: "100%",
                       }}
@@ -550,7 +576,7 @@ export default function ClubVaultLanding() {
                     </button>
                   ) : (
                     <a
-                      href="#"
+                      href="/signup"
                       className={
                         plan.featured ? "cv-btn-primary" : "cv-btn-secondary"
                       }
@@ -588,16 +614,34 @@ export default function ClubVaultLanding() {
               </p>
 
               <div className="cv-footer-socials">
-                <a href="#" aria-label="Website">
+                <a
+                  href="https://club-vault-eosin.vercel.app"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Website"
+                >
                   <Globe size={17} />
                 </a>
-                <a href="#" aria-label="Community">
+                <button
+                  type="button"
+                  onClick={() => setInfoModalType("contact")}
+                  aria-label="Community Support"
+                  className="cv-social-btn"
+                >
                   <MessageCircle size={17} />
-                </a>
-                <a href="#" aria-label="Blog">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInfoModalType("changelog")}
+                  aria-label="Release Changelog"
+                  className="cv-social-btn"
+                >
                   <Rss size={17} />
-                </a>
-                <a href="#" aria-label="Email">
+                </button>
+                <a
+                  href="mailto:support@clubvault.edu"
+                  aria-label="Email Support"
+                >
                   <Mail size={17} />
                 </a>
               </div>
@@ -610,7 +654,23 @@ export default function ClubVaultLanding() {
                   <ul>
                     {col.links.map((link) => (
                       <li key={link.label}>
-                        <a href={link.href}>{link.label}</a>
+                        {link.modalType ? (
+                          <button
+                            type="button"
+                            className="cv-footer-link-btn"
+                            onClick={() => setInfoModalType(link.modalType)}
+                          >
+                            {link.label}
+                          </button>
+                        ) : (
+                          <a
+                            href={link.href}
+                            target={link.external ? "_blank" : undefined}
+                            rel={link.external ? "noreferrer" : undefined}
+                          >
+                            {link.label}
+                          </a>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -624,9 +684,16 @@ export default function ClubVaultLanding() {
 
               <form
                 className="cv-newsletter-form"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  alert("Thank you for subscribing to ClubVault updates!");
+                }}
               >
-                <input type="email" placeholder="you@university.edu" />
+                <input
+                  type="email"
+                  placeholder="you@university.edu"
+                  required
+                />
                 <button type="submit">Subscribe</button>
               </form>
             </div>
@@ -641,8 +708,13 @@ export default function ClubVaultLanding() {
       </footer>
 
       {/* Demo Modal */}
-
       <DemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
+
+      {/* Info / Legal Modal */}
+      <InfoModal
+        openType={infoModalType}
+        onClose={() => setInfoModalType(null)}
+      />
     </div>
   );
 }

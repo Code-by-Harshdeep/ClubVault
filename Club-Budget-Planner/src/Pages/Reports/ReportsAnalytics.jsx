@@ -12,17 +12,26 @@ import {
   Cell,
   Sector,
 } from "recharts";
+import {
+  FileSpreadsheet,
+  Wallet,
+  PiggyBank,
+  ArrowUpRight,
+  TrendingUp,
+  PieChart as PieIcon,
+  CheckCircle2,
+  Building2,
+  History,
+  Activity as ActivityIcon,
+  ShieldCheck,
+} from "lucide-react";
 import { useClub } from "../../ClubContext";
 import { useTheme } from "../../ThemeContext";
 import { api } from "../../api";
 import "./ReportsAnalytics.css";
 
-const DOT_CLASSES = ["dot-events", "dot-marketing", "dot-office", "dot-other"];
-const PIE_COLORS = ["#2c2620", "#6b6459", "#a39c90", "#e8e4db", "#8a7f6d", "#c9c2b4"];
+const PIE_COLORS = ["#0f172a", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"];
 
-// Recharts auto-enlarges the hovered slice by default when a Tooltip is
-// present. Rendering an identical-geometry active shape keeps the hover
-// state (for the tooltip) without the slice visually "popping" bigger.
 function renderStableSlice(props) {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props;
   return (
@@ -48,7 +57,11 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
 }
 
-// last 6 calendar months, oldest first
+function formatTime(d) {
+  if (!d) return "";
+  return new Date(d).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+}
+
 function lastSixMonthKeys() {
   const keys = [];
   const now = new Date();
@@ -59,337 +72,395 @@ function lastSixMonthKeys() {
   return keys;
 }
 
-const ReportsAnalytics = () => {
+export default function ReportsAnalytics() {
   const { club } = useClub();
   const { theme } = useTheme();
-  const [transactions, setTransactions] = useState([]);
+
+  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "audit"
   const [budgets, setBudgets] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const load = async () => {
+    if (!club?._id) return;
+    setLoading(true);
+    setError("");
+    try {
+      const [bRes, tRes, aRes] = await Promise.all([
+        api.get(`/api/clubs/${club._id}/budgets`),
+        api.get(`/api/clubs/${club._id}/transactions`),
+        api.get(`/api/clubs/${club._id}/activities`).catch(() => ({ activities: [] })),
+      ]);
+      setBudgets(bRes.budgets || []);
+      setSummary(bRes.summary || null);
+      setTransactions(tRes.transactions || []);
+      setActivities(aRes.activities || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      if (!club?._id) return;
-      setLoading(true);
-      setError("");
-      try {
-        const [txData, budgetData] = await Promise.all([
-          api.get(`/api/clubs/${club._id}/transactions`),
-          api.get(`/api/clubs/${club._id}/budgets`),
-        ]);
-        setTransactions(txData.transactions || []);
-        setBudgets(budgetData.budgets || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [club?._id]);
 
-  const totalExpenditures = useMemo(
-    () => transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0),
-    [transactions]
-  );
-  const totalIncome = useMemo(
-    () => transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0),
-    [transactions]
-  );
-  const totalAllocated = useMemo(() => budgets.reduce((s, b) => s + (b.allocated || 0), 0), [budgets]);
-  const totalSpentOnBudgets = useMemo(() => budgets.reduce((s, b) => s + (b.spent || 0), 0), [budgets]);
-  const remainingBudget = totalAllocated - totalSpentOnBudgets;
-  const remainingPct = totalAllocated ? Math.max(0, Math.min(100, (remainingBudget / totalAllocated) * 100)) : 0;
+  const totalExpenditures = useMemo(() => {
+    if (summary?.totalSpent != null) return summary.totalSpent;
+    return transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  }, [summary, transactions]);
+
+  const totalIncome = useMemo(() => {
+    return transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  }, [transactions]);
+
+  const remainingBudget = useMemo(() => {
+    if (summary?.remaining != null) return summary.remaining;
+    const allocated = budgets.reduce((s, b) => s + (Number(b.allocated) || 0), 0);
+    return allocated - totalExpenditures;
+  }, [summary, budgets, totalExpenditures]);
+
+  const totalAllocated = useMemo(() => {
+    return summary?.totalAllocated ?? budgets.reduce((s, b) => s + (Number(b.allocated) || 0), 0);
+  }, [summary, budgets]);
+
+  const remainingPct = totalAllocated > 0 ? Math.max(0, Math.min(100, (remainingBudget / totalAllocated) * 100)) : 0;
 
   const categoryBreakdown = useMemo(() => {
-    const map = {};
-    transactions
-      .filter((t) => t.type === "expense")
-      .forEach((t) => {
-        map[t.category] = (map[t.category] || 0) + t.amount;
-      });
-    const total = Object.values(map).reduce((s, v) => s + v, 0);
-    return Object.entries(map)
-      .map(([category, amount]) => ({
-        category,
-        amount,
-        pct: total ? Math.round((amount / total) * 100) : 0,
-      }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 6);
-  }, [transactions]);
+    const byCat = {};
+    for (const b of budgets) {
+      const cat = b.category || "General";
+      byCat[cat] = (byCat[cat] || 0) + (Number(b.spent) || 0);
+    }
+    const entries = Object.entries(byCat).map(([name, value]) => ({ name, value }));
+    const total = entries.reduce((s, e) => s + e.value, 0);
+    return entries.map((e) => ({
+      ...e,
+      pct: total > 0 ? ((e.value / total) * 100).toFixed(1) : "0.0",
+    }));
+  }, [budgets]);
 
   const monthlyExpense = useMemo(() => {
+    const buckets = {};
     const months = lastSixMonthKeys();
-    const totals = months.map(({ key, label }) => {
-      const sum = transactions
-        .filter((t) => t.type === "expense")
-        .filter((t) => {
-          const d = new Date(t.date);
-          return `${d.getFullYear()}-${d.getMonth()}` === key;
-        })
-        .reduce((s, t) => s + t.amount, 0);
-      return { label, sum };
-    });
-    const max = Math.max(1, ...totals.map((t) => t.sum));
-    return { totals, max };
+    for (const m of months) buckets[m.key] = { label: m.label, sum: 0 };
+    for (const t of transactions) {
+      if (t.type !== "expense") continue;
+      const d = new Date(t.date || t.createdAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (buckets[key]) buckets[key].sum += t.amount || 0;
+    }
+    const totals = months.map((m) => buckets[m.key]);
+    return { totals };
   }, [transactions]);
 
-  const significantTransactions = useMemo(
-    () =>
-      transactions
-        .filter((t) => t.type === "expense")
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 6),
-    [transactions]
-  );
-
-  const tooltipStyle =
-    theme === "dark"
-      ? {
-          background: "var(--color-surface-container-lowest, #1e1e1e)",
-          border: "1px solid var(--color-border-mid, #2a2a2a)",
-          borderRadius: "8px",
-          color: "#e5e7eb",
-          fontSize: "13px",
-        }
-      : {
-          background: "#ffffff",
-          border: "1px solid #dcdcdc",
-          borderRadius: "8px",
-          color: "#374151",
-          fontSize: "13px",
-        };
+  const isDark = theme === "dark";
+  const tooltipStyle = isDark
+    ? {
+        background: "#18181b",
+        border: "1px solid #27272a",
+        borderRadius: "8px",
+        color: "#f4f4f5",
+        fontSize: "13px",
+      }
+    : {
+        background: "#ffffff",
+        border: "1px solid #e2e8f0",
+        borderRadius: "8px",
+        color: "#0f172a",
+        fontSize: "13px",
+      };
 
   const exportCsv = () => {
     const rows = [
-      ["Date", "Reference", "Category", "Amount"],
-      ...significantTransactions.map((t) => [formatDate(t.date), t.title, t.category, t.amount]),
+      ["Date", "Title / Description", "Category", "Type", "Status", "Amount (INR)"],
+      ...transactions.map((t) => [
+        formatDate(t.date),
+        `"${(t.title || "").replace(/"/g, '""')}"`,
+        `"${(t.category || "").replace(/"/g, '""')}"`,
+        t.type || "expense",
+        t.status || "Cleared",
+        t.amount,
+      ]),
     ];
     const csv = rows.map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "reports.csv";
+    a.download = `${(club?.name || "club").toLowerCase().replace(/\s+/g, "-")}-financial-report.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="reports-page">
-      <main className="main-content">
-        <div className="page-container">
-          <section className="page-header">
-            <div className="header-left">
-              <h1>Reports &amp; Analytics</h1>
-              <p>Comprehensive overview of financial performance and categorical spending.</p>
+    <div className="cv-reports-page">
+      <main className="cv-reports-container">
+        <header className="cv-reports-header">
+          <div>
+            <div className="cv-dash-club-badge">
+              <Building2 size={13} /> {club?.name || "Analytics"}
             </div>
+            <h1 className="cv-reports-title">Reports &amp; Analytics</h1>
+            <p className="cv-reports-subtitle">Financial performance overview, spend trends, and verifiable governance audit trail.</p>
+          </div>
 
-            <div className="header-actions">
-              <button className="export-btn" onClick={exportCsv}>
-                <span className="material-symbols-outlined">download</span>
-                <span>CSV</span>
-              </button>
-            </div>
-          </section>
+          <div className="cv-reports-actions">
+            <button type="button" className="cv-btn-secondary" onClick={exportCsv}>
+              <FileSpreadsheet size={14} />
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </header>
 
-          {error && <p style={{ color: "var(--color-error)" }}>{error}</p>}
+        {/* Tab Switcher */}
+        <div style={{ display: "flex", gap: "8px", borderBottom: "1px solid var(--color-border-soft)", paddingBottom: "12px", marginBottom: "20px" }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab("overview")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 14px",
+              fontSize: "13px",
+              fontWeight: "600",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+              background: activeTab === "overview" ? "var(--color-primary)" : "transparent",
+              color: activeTab === "overview" ? "var(--color-on-primary)" : "var(--color-on-surface-variant)",
+            }}
+          >
+            <TrendingUp size={14} /> Financial Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("audit")}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 14px",
+              fontSize: "13px",
+              fontWeight: "600",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+              background: activeTab === "audit" ? "var(--color-primary)" : "transparent",
+              color: activeTab === "audit" ? "var(--color-on-primary)" : "var(--color-on-surface-variant)",
+            }}
+          >
+            <History size={14} /> Audit Trail &amp; Governance
+          </button>
+        </div>
 
-          <div className="analytics-grid">
-            <div className="kpi-grid">
-              <div className="kpi-card">
-                <div className="kpi-top">
-                  <h3>Total Expenditures</h3>
-                  <span className="material-symbols-outlined">account_balance_wallet</span>
-                </div>
-                <h2>{loading ? "…" : formatMoney(totalExpenditures)}</h2>
-                <div className="kpi-footer">
-                  <span>All-time, this club</span>
-                </div>
-              </div>
+        {error && <p className="cv-reports-error">{error}</p>}
 
-              <div className="kpi-card">
-                <div className="kpi-top">
-                  <h3>Remaining Budget</h3>
-                  <span className="material-symbols-outlined">savings</span>
-                </div>
-                <h2>{loading ? "…" : formatMoney(remainingBudget)}</h2>
-                <div className="kpi-footer">
-                  <div className="progress">
-                    <div className="progress-fill" style={{ width: `${remainingPct}%` }}></div>
-                  </div>
-                  <span className="progress-text">{remainingPct.toFixed(0)}% Left</span>
-                </div>
-              </div>
-
-              <div className="kpi-card">
-                <div className="kpi-top">
-                  <h3>Fund Inflow</h3>
-                  <span className="material-symbols-outlined">arrow_insert</span>
-                </div>
-                <h2>{loading ? "…" : formatMoney(totalIncome)}</h2>
-                <div className="kpi-footer">
-                  <span className="badge success">
-                    <span className="material-symbols-outlined">check_circle</span>
-                    Live
-                  </span>
-                  <span>All-time inflow</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="line-chart-card">
-              <div className="card-header">
-                <div>
-                  <h2>Fund Utilization Trend</h2>
-                  <p>Monthly expenditure over the last 6 months.</p>
-                </div>
-              </div>
-
-              <div className="chart-area">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyExpense.totals} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-mid, #e5e0d8)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `₹${v}`} width={60} />
-                    <Tooltip formatter={(value) => formatMoney(value)} contentStyle={tooltipStyle} itemStyle={{ color: tooltipStyle.color }} isAnimationActive={false} />
-                    <Line
-                      type="monotone"
-                      dataKey="sum"
-                      name="Actual Spend"
-                      stroke="#2c2620"
-                      strokeWidth={2.5}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
-                      isAnimationActive={true}
-                      animationDuration={800}
-                      animationEasing="ease-out"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="chart-legend">
-                <div className="legend-item">
-                  <span className="legend-line actual"></span>
-                  <span>Actual Spend</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="donut-card">
-              <div className="card-header">
-                <div>
-                  <h2>Spending by Category</h2>
-                  <p>Distribution of expenses, all-time.</p>
-                </div>
-              </div>
-
-              <div className="donut-wrapper">
-                <div className="donut-chart live" style={{ width: 200, height: 200, position: "relative" }}>
-                  {categoryBreakdown.length > 0 && (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={categoryBreakdown}
-                          dataKey="amount"
-                          nameKey="category"
-                          innerRadius={62}
-                          outerRadius={98}
-                          paddingAngle={categoryBreakdown.length > 1 ? 2 : 0}
-                          stroke="none"
-                          activeShape={renderStableSlice}
-                          isAnimationActive={true}
-                          animationDuration={800}
-                          animationEasing="ease-out"
-                        >
-                          {categoryBreakdown.map((entry, i) => (
-                            <Cell key={entry.category} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          formatter={(value) => formatMoney(value)}
-                          contentStyle={tooltipStyle}
-                          itemStyle={{ color: tooltipStyle.color }}
-                          isAnimationActive={false}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  )}
-                  <div className="donut-center">
-                    <strong>{categoryBreakdown.length}</strong>
-                    <span>Categories</span>
+        {activeTab === "overview" ? (
+          <>
+            <section className="cv-reports-kpi-grid">
+              <div className="cv-report-kpi-card">
+                <div className="cv-kpi-head">
+                  <span className="cv-kpi-label">TOTAL EXPENDITURES</span>
+                  <div className="cv-icon-bubble expense">
+                    <Wallet size={16} />
                   </div>
                 </div>
+                <p className="cv-kpi-value">{loading ? "…" : formatMoney(totalExpenditures)}</p>
+                <span className="cv-kpi-sub">All-time charged disbursements</span>
+              </div>
 
-                <div className="category-list">
-                  {categoryBreakdown.length === 0 ? (
-                    <p>No expenses recorded yet.</p>
+              <div className="cv-report-kpi-card">
+                <div className="cv-kpi-head">
+                  <span className="cv-kpi-label">REMAINING BUDGET</span>
+                  <div className="cv-icon-bubble success">
+                    <PiggyBank size={16} />
+                  </div>
+                </div>
+                <p className="cv-kpi-value">{loading ? "…" : formatMoney(remainingBudget)}</p>
+                <div className="cv-kpi-footer-prog">
+                  <div className="cv-report-prog-bar">
+                    <div className="cv-report-prog-fill" style={{ width: `${remainingPct}%` }} />
+                  </div>
+                  <span>{remainingPct.toFixed(0)}% Left</span>
+                </div>
+              </div>
+
+              <div className="cv-report-kpi-card">
+                <div className="cv-kpi-head">
+                  <span className="cv-kpi-label">TOTAL FUND INFLOW</span>
+                  <div className="cv-icon-bubble income">
+                    <ArrowUpRight size={16} />
+                  </div>
+                </div>
+                <p className="cv-kpi-value">{loading ? "…" : formatMoney(totalIncome)}</p>
+                <span className="cv-kpi-sub">
+                  <CheckCircle2 size={12} className="cv-live-icon" /> Live audited ledger
+                </span>
+              </div>
+            </section>
+
+            <section className="cv-charts-grid">
+              <div className="cv-chart-card">
+                <div className="cv-chart-head">
+                  <div>
+                    <h2>Fund Utilization Trend</h2>
+                    <p>Monthly expenditure over the last 6 months</p>
+                  </div>
+                  <TrendingUp size={18} color="#64748b" />
+                </div>
+
+                <div className="cv-chart-box">
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={monthlyExpense.totals} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-soft, #e2e8f0)" />
+                      <XAxis dataKey="label" tick={{ fontSize: 12, fill: "var(--color-on-surface-variant, #64748b)" }} />
+                      <YAxis tick={{ fontSize: 12, fill: "var(--color-on-surface-variant, #64748b)" }} tickFormatter={(v) => `₹${v}`} width={60} />
+                      <Tooltip formatter={(value) => formatMoney(value)} contentStyle={tooltipStyle} itemStyle={{ color: tooltipStyle.color }} isAnimationActive={false} />
+                      <Line
+                        type="monotone"
+                        dataKey="sum"
+                        name="Actual Spend"
+                        stroke="var(--color-primary, #0f172a)"
+                        strokeWidth={2.5}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                        isAnimationActive={true}
+                        animationDuration={600}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="cv-chart-card">
+                <div className="cv-chart-head">
+                  <div>
+                    <h2>Category Distribution</h2>
+                    <p>Expenditure breakdown by category</p>
+                  </div>
+                  <PieIcon size={18} color="#64748b" />
+                </div>
+
+                <div className="cv-donut-wrap">
+                  {categoryBreakdown.length === 0 || categoryBreakdown.every((c) => c.value === 0) ? (
+                    <div className="cv-chart-empty">No category spend recorded yet</div>
                   ) : (
-                    categoryBreakdown.map((c, i) => (
-                      <div className="category-item" key={c.category}>
-                        <div className="category-name">
-                          <span className={`category-dot ${DOT_CLASSES[i % DOT_CLASSES.length]}`}></span>
-                          <span>{c.category}</span>
-                        </div>
-                        <span className="category-percent">{c.pct}%</span>
+                    <>
+                      <div className="cv-pie-box">
+                        <ResponsiveContainer width="100%" height={180}>
+                          <PieChart>
+                            <Pie
+                              data={categoryBreakdown.filter((c) => c.value > 0)}
+                              dataKey="value"
+                              nameKey="name"
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={45}
+                              outerRadius={75}
+                              paddingAngle={3}
+                              activeShape={renderStableSlice}
+                              isAnimationActive={false}
+                            >
+                              {categoryBreakdown
+                                .filter((c) => c.value > 0)
+                                .map((entry, index) => (
+                                  <Cell key={`cell-${entry.name}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip formatter={(v) => formatMoney(v)} contentStyle={tooltipStyle} isAnimationActive={false} />
+                          </PieChart>
+                        </ResponsiveContainer>
                       </div>
-                    ))
+
+                      <div className="cv-pie-legend">
+                        {categoryBreakdown.map((item, idx) => (
+                          <div className="cv-pie-legend-row" key={item.name}>
+                            <span className="cv-legend-dot" style={{ background: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                            <span className="cv-legend-name">{item.name}</span>
+                            <strong className="cv-legend-pct">{item.pct}%</strong>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
+            </section>
+          </>
+        ) : (
+          /* Audit Trail Tab */
+          <section className="cv-chart-card" style={{ padding: "24px" }}>
+            <div className="cv-chart-head" style={{ marginBottom: "20px" }}>
+              <div>
+                <h2>Verifiable Treasury Audit Log</h2>
+                <p>Immutable history of budget allocations, disbursements, claims, and role changes.</p>
+              </div>
+              <ShieldCheck size={20} color="var(--color-emerald-solid)" />
             </div>
 
-            <div className="transaction-card">
-              <div className="transaction-header">
-                <div>
-                  <h3>Significant Transactions</h3>
-                  <p>Most recent expenses for this club.</p>
-                </div>
+            {loading ? (
+              <div className="cv-chart-empty">Loading audit trail...</div>
+            ) : activities.length === 0 ? (
+              <div className="cv-chart-empty" style={{ padding: "48px 0" }}>
+                <ActivityIcon size={32} style={{ marginBottom: "8px", opacity: 0.5 }} />
+                <p>No recent treasury activity recorded yet. Events will appear here as transactions and budgets are created.</p>
               </div>
-
-              <div className="table-wrapper custom-scrollbar">
-                <table className="transaction-table">
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
                   <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Reference</th>
-                      <th>Category</th>
-                      <th className="amount-cell">Amount</th>
+                    <tr style={{ borderBottom: "1px solid var(--color-border-soft)", textAlign: "left" }}>
+                      <th style={{ padding: "10px 12px", color: "var(--color-on-surface-variant)", fontWeight: "600" }}>Timestamp</th>
+                      <th style={{ padding: "10px 12px", color: "var(--color-on-surface-variant)", fontWeight: "600" }}>Actor</th>
+                      <th style={{ padding: "10px 12px", color: "var(--color-on-surface-variant)", fontWeight: "600" }}>Category</th>
+                      <th style={{ padding: "10px 12px", color: "var(--color-on-surface-variant)", fontWeight: "600" }}>Action / Event</th>
+                      <th style={{ padding: "10px 12px", color: "var(--color-on-surface-variant)", fontWeight: "600" }}>Details</th>
                     </tr>
                   </thead>
-
                   <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan="4">Loading…</td>
-                      </tr>
-                    ) : significantTransactions.length === 0 ? (
-                      <tr>
-                        <td colSpan="4">No expenses recorded yet.</td>
-                      </tr>
-                    ) : (
-                      significantTransactions.map((t) => (
-                        <tr key={t._id}>
-                          <td>{formatDate(t.date)}</td>
-                          <td>{t.title}</td>
-                          <td>
-                            <span className="category-tag">{t.category}</span>
+                    {activities.map((act) => {
+                      const isFinance = act.category === "Finance";
+                      const isBudget = act.category === "Budget";
+                      const isMember = act.category === "Membership";
+                      const bg = isFinance ? "var(--color-emerald-bg)" : isBudget ? "var(--color-indigo-bg)" : "var(--color-amber-bg)";
+                      const color = isFinance ? "var(--color-emerald-text)" : isBudget ? "var(--color-indigo-text)" : "var(--color-amber-text)";
+
+                      return (
+                        <tr key={act._id} style={{ borderBottom: "1px solid var(--color-border-soft)" }}>
+                          <td style={{ padding: "12px", color: "var(--color-on-surface-variant)", whiteSpace: "nowrap" }}>
+                            {formatDate(act.createdAt)} <span style={{ fontSize: "11px", opacity: 0.7 }}>{formatTime(act.createdAt)}</span>
                           </td>
-                          <td className="amount-cell">-{formatMoney(t.amount)}</td>
+                          <td style={{ padding: "12px", fontWeight: "600", color: "var(--color-primary)" }}>
+                            {act.actorName || "Member"}
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <span style={{ fontSize: "11px", fontWeight: "700", padding: "2px 8px", borderRadius: "4px", background: bg, color: color }}>
+                              {act.category}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px", fontWeight: "600", color: "var(--color-primary)" }}>
+                            {act.title}
+                          </td>
+                          <td style={{ padding: "12px", color: "var(--color-on-surface-variant)" }}>
+                            {act.details || "—"}
+                          </td>
                         </tr>
-                      ))
-                    )}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        </div>
+            )}
+          </section>
+        )}
       </main>
     </div>
   );
-};
-
-export default ReportsAnalytics;
+}
