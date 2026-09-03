@@ -86,19 +86,20 @@ function ReimbursementsContent() {
       setFormError("Please enter title and amount.");
       return;
     }
-    if (!claimBudgetId) {
+    const finalBudgetId = claimBudgetId || budgets[0]?._id || budgets[0]?.id || "";
+    if (!finalBudgetId) {
       setFormError("Please select a budget line.");
       return;
     }
     setSubmitting(true);
     try {
-      const selectedBudget = budgets.find((b) => b._id === claimBudgetId);
+      const selectedBudget = budgets.find((b) => (b._id || b.id) === finalBudgetId);
       await api.post(`/api/clubs/${club._id}/transactions`, {
         title: claimTitle,
         merchant: claimMerchant,
         receiptUrl: claimReceiptUrl,
         category: selectedBudget?.category || "General",
-        budgetId: claimBudgetId,
+        budgetId: finalBudgetId,
         type: "expense",
         amount: Number(claimAmount),
         status: "Pending Bill",
@@ -287,12 +288,19 @@ function ReimbursementsContent() {
                 </div>
 
                 <label>Charge To Budget Line *</label>
-                <select value={claimBudgetId} onChange={(e) => setClaimBudgetId(e.target.value)}>
-                  {budgets.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.title} (₹{Number(b.remaining ?? b.allocated - b.spent).toLocaleString("en-IN")} remaining)
-                    </option>
-                  ))}
+                <select
+                  value={claimBudgetId || budgets[0]?._id || budgets[0]?.id || ""}
+                  onChange={(e) => setClaimBudgetId(e.target.value)}
+                >
+                  {budgets.map((b) => {
+                    const id = b._id || b.id;
+                    const remainingVal = Number(b.remaining ?? b.allocated - (b.spent || 0));
+                    return (
+                      <option key={id} value={id}>
+                        {b.title} (₹{remainingVal.toLocaleString("en-IN")} remaining)
+                      </option>
+                    );
+                  })}
                 </select>
 
                 <label>Receipt Proof (Image Upload or Link)</label>

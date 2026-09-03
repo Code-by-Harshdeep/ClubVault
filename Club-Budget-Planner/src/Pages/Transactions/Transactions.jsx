@@ -35,19 +35,27 @@ function formatDate(d) {
   });
 }
 
-function NewTransactionModal({ onClose, onSubmit, defaultType, budgets }) {
+function NewTransactionModal({ onClose, onSubmit, defaultType, budgets = [] }) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [budgetId, setBudgetId] = useState(budgets[0]?._id || "");
+  const [budgetId, setBudgetId] = useState(budgets[0]?._id || budgets[0]?.id || "");
   const [type, setType] = useState(defaultType === "income" ? "income" : "expense");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const selected = budgets.find((b) => b._id === budgetId);
+  // Sync budgetId if budgets load asynchronously
+  useEffect(() => {
+    if (!budgetId && budgets.length > 0) {
+      setBudgetId(budgets[0]._id || budgets[0].id || "");
+    }
+  }, [budgets, budgetId]);
+
+  const activeBudgetId = budgetId || budgets[0]?._id || budgets[0]?.id || "";
+  const selected = budgets.find((b) => (b._id || b.id) === activeBudgetId);
   const remaining = selected
-    ? Number(selected.remaining ?? selected.allocated - selected.spent)
+    ? Number(selected.remaining ?? (selected.allocated - (selected.spent || 0)))
     : null;
 
   const handleSubmit = async (e) => {
@@ -57,7 +65,8 @@ function NewTransactionModal({ onClose, onSubmit, defaultType, budgets }) {
       setError("Please fill in all fields.");
       return;
     }
-    if (type === "expense" && !budgetId) {
+    const finalBudgetId = budgetId || budgets[0]?._id || budgets[0]?.id || "";
+    if (type === "expense" && !finalBudgetId) {
       setError("Choose a budget line. Expenses cannot be logged outside an allocation.");
       return;
     }
@@ -73,7 +82,7 @@ function NewTransactionModal({ onClose, onSubmit, defaultType, budgets }) {
         type,
         amount: Number(amount),
         date: date ? new Date(date) : new Date(),
-        budgetId: type === "expense" ? budgetId : undefined,
+        budgetId: type === "expense" ? finalBudgetId : undefined,
       });
       onClose();
     } catch (err) {
@@ -134,12 +143,19 @@ function NewTransactionModal({ onClose, onSubmit, defaultType, budgets }) {
                   No budgets exist. Create a budget line in Budgets before logging expenses.
                 </p>
               ) : (
-                <select value={budgetId} onChange={(e) => setBudgetId(e.target.value)}>
-                  {budgets.map((b) => (
-                    <option key={b._id} value={b._id}>
-                      {b.title} — ₹{Number(b.remaining ?? b.allocated - b.spent).toLocaleString("en-IN")} left
-                    </option>
-                  ))}
+                <select
+                  value={activeBudgetId}
+                  onChange={(e) => setBudgetId(e.target.value)}
+                >
+                  {budgets.map((b) => {
+                    const id = b._id || b.id;
+                    const remainingVal = Number(b.remaining ?? (b.allocated - (b.spent || 0)));
+                    return (
+                      <option key={id} value={id}>
+                        {b.title} — ₹{remainingVal.toLocaleString("en-IN")} left
+                      </option>
+                    );
+                  })}
                 </select>
               )}
             </>

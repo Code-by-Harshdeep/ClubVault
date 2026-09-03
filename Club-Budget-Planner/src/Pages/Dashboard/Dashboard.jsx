@@ -46,12 +46,19 @@ function ReimbursementModal({ onClose, onSubmit, budgets = [] }) {
   const [title, setTitle] = useState("");
   const [merchant, setMerchant] = useState("");
   const [receiptUrl, setReceiptUrl] = useState("");
-  const [budgetId, setBudgetId] = useState(budgets[0]?._id || "");
+  const [budgetId, setBudgetId] = useState(budgets[0]?._id || budgets[0]?.id || "");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const selectedBudget = budgets.find((b) => b._id === budgetId);
+  useEffect(() => {
+    if (!budgetId && budgets.length > 0) {
+      setBudgetId(budgets[0]._id || budgets[0].id || "");
+    }
+  }, [budgets, budgetId]);
+
+  const activeBudgetId = budgetId || budgets[0]?._id || budgets[0]?.id || "";
+  const selectedBudget = budgets.find((b) => (b._id || b.id) === activeBudgetId);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -75,7 +82,8 @@ function ReimbursementModal({ onClose, onSubmit, budgets = [] }) {
       setError("Please fill in all required fields.");
       return;
     }
-    if (!budgetId) {
+    const finalBudgetId = budgetId || budgets[0]?._id || budgets[0]?.id || "";
+    if (!finalBudgetId) {
       setError("Please select a budget line. Expenses cannot be logged outside an allocation.");
       return;
     }
@@ -86,7 +94,7 @@ function ReimbursementModal({ onClose, onSubmit, budgets = [] }) {
         merchant,
         receiptUrl,
         category: selectedBudget?.category || "General",
-        budgetId,
+        budgetId: finalBudgetId,
         type: "expense",
         amount: Number(amount),
         status: "Pending Bill",
@@ -118,17 +126,17 @@ function ReimbursementModal({ onClose, onSubmit, budgets = [] }) {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Workshop Materials & Stationery"
+              placeholder="e.g. Workshop Supplies, Snacks"
               required
             />
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
               <div>
                 <label>Merchant / Vendor</label>
                 <input
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
-                  placeholder="e.g. Amazon, Local Store"
+                  placeholder="e.g. Amazon, Stationery"
                 />
               </div>
               <div>
@@ -146,12 +154,19 @@ function ReimbursementModal({ onClose, onSubmit, budgets = [] }) {
             </div>
 
             <label>Charge To Budget Line *</label>
-            <select value={budgetId} onChange={(e) => setBudgetId(e.target.value)}>
-              {budgets.map((b) => (
-                <option key={b._id} value={b._id}>
-                  {b.title} (₹{Number(b.remaining ?? b.allocated - b.spent).toLocaleString("en-IN")} remaining)
-                </option>
-              ))}
+            <select
+              value={activeBudgetId}
+              onChange={(e) => setBudgetId(e.target.value)}
+            >
+              {budgets.map((b) => {
+                const id = b._id || b.id;
+                const remainingVal = Number(b.remaining ?? b.allocated - (b.spent || 0));
+                return (
+                  <option key={id} value={id}>
+                    {b.title} (₹{remainingVal.toLocaleString("en-IN")} remaining)
+                  </option>
+                );
+              })}
             </select>
 
             <label>Receipt Bill / Proof of Purchase (Upload or URL)</label>
