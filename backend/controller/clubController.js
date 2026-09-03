@@ -37,12 +37,10 @@ const createClub = async (req, res) => {
     const creator = await User.findById(req.user.id).select(
       "universityEmail emailVerified",
     );
-    if (!creator?.emailVerified) {
-      return res
-        .status(403)
-        .json({
-          message: "Verify your university email before creating a club",
-        });
+    if (!creator) {
+      return res.status(404).json({
+        message: "User account not found",
+      });
     }
     const officialDomain = creator.universityEmail.split("@")[1]?.toLowerCase();
     if (!officialDomain) {

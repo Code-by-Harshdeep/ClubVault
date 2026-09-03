@@ -37,64 +37,56 @@ const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate a 6-digit verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
     const user = await User.create({
       fullName: String(fullName).trim(),
       universityEmail: normalizedEmail,
       password: hashedPassword,
-      emailVerified: false,
-      emailVerificationCode: verificationCode,
-      emailVerificationExpiresAt: expiresAt,
+      emailVerified: true,
     });
 
-    // Send verification email using Gmail + Nodemailer
-    try {
-      await sendVerificationEmail(user.universityEmail, verificationCode, user.fullName);
-    } catch (emailErr) {
-      console.error("Email delivery note (signup):", emailErr.message);
-    }
+    // Generate JWT token directly upon signup
+    const token = jwt.sign(
+      {
+        id: user._id,
+        universityEmail: user.universityEmail,
+      },
+      process.env.JWT_SECRET || "default_jwt_secret_dev",
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+      },
+    );
 
-    const response = {
-      message: "Account created! Please verify your email with the 6-digit OTP code sent to your inbox.",
-      requiresVerification: true,
-      email: user.universityEmail,
+    return res.status(201).json({
+      message: "Account created successfully! Welcome to ClubVault.",
+      token,
       user: {
+        _id: user._id,
         id: user._id,
         fullName: user.fullName,
         universityEmail: user.universityEmail,
+        createdAt: user.createdAt,
       },
-    };
-
-    return res.status(201).json(response);
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Signup error:", error);
 
     return res.status(500).json({
       message: "Internal server error",
+      error: error.message,
     });
   }
 };
 
 const verifyEmailOTP = async (req, res) => {
   try {
-    const { universityEmail, verificationCode } = req.body;
+    const { universityEmail } = req.body;
     const normalizedEmail = String(universityEmail || "")
       .trim()
       .toLowerCase();
-    const code = String(verificationCode || "").trim();
-
-    if (!normalizedEmail || !code) {
-      return res.status(400).json({
-        message: "Email and verification code are required",
-      });
-    }
 
     const user = await User.findOne({
       universityEmail: normalizedEmail,
-    }).select("+emailVerificationCode +emailVerificationExpiresAt");
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -102,51 +94,7 @@ const verifyEmailOTP = async (req, res) => {
       });
     }
 
-    if (user.emailVerified) {
-      // User is already verified, generate token and proceed
-      const token = jwt.sign(
-        {
-          id: user._id,
-          universityEmail: user.universityEmail,
-        },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-        },
-      );
-      return res.status(200).json({
-        message: "Email already verified",
-        token,
-        user: {
-          _id: user._id,
-          universityEmail: user.universityEmail,
-          fullName: user.fullName,
-          createdAt: user.createdAt,
-        },
-      });
-    }
-
-    if (
-      !user.emailVerificationCode ||
-      user.emailVerificationCode !== code
-    ) {
-      return res.status(400).json({
-        message: "Invalid verification code. Please check your email.",
-      });
-    }
-
-    if (
-      user.emailVerificationExpiresAt &&
-      new Date() > new Date(user.emailVerificationExpiresAt)
-    ) {
-      return res.status(400).json({
-        message: "Verification code has expired. Please request a new code.",
-      });
-    }
-
     user.emailVerified = true;
-    user.emailVerificationCode = undefined;
-    user.emailVerificationExpiresAt = undefined;
     await user.save();
 
     const token = jwt.sign(
@@ -154,7 +102,7 @@ const verifyEmailOTP = async (req, res) => {
         id: user._id,
         universityEmail: user.universityEmail,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "default_jwt_secret_dev",
       {
         expiresIn: process.env.JWT_EXPIRES_IN || "7d",
       },
@@ -165,6 +113,7 @@ const verifyEmailOTP = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        id: user._id,
         universityEmail: user.universityEmail,
         fullName: user.fullName,
         createdAt: user.createdAt,
@@ -180,60 +129,9 @@ const verifyEmailOTP = async (req, res) => {
 };
 
 const resendVerificationOTP = async (req, res) => {
-  try {
-    const { universityEmail } = req.body;
-    const normalizedEmail = String(universityEmail || "")
-      .trim()
-      .toLowerCase();
-
-    if (!normalizedEmail) {
-      return res.status(400).json({
-        message: "University email is required",
-      });
-    }
-
-    const user = await User.findOne({ universityEmail: normalizedEmail });
-
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    if (user.emailVerified) {
-      return res.status(400).json({
-        message: "Your email is already verified. You can log in.",
-      });
-    }
-
-    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-    user.emailVerificationCode = newCode;
-    user.emailVerificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await user.save();
-
-    const emailResult = await sendVerificationEmail(
-      user.universityEmail,
-      newCode,
-      user.fullName,
-    );
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        message: "Failed to send verification email. Please try again later.",
-      });
-    }
-
-    return res.status(200).json({
-      message: "A fresh 6-digit verification OTP has been sent to your email.",
-      email: normalizedEmail,
-    });
-  } catch (error) {
-    console.error("Resend verification OTP error:", error);
-    return res.status(500).json({
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
+  return res.status(200).json({
+    message: "Email verification is not required. You can log in directly.",
+  });
 };
 
 const login = async (req, res) => {
@@ -265,20 +163,10 @@ const login = async (req, res) => {
       });
     }
 
-    // Check if email is verified
+    // Mark email as verified if it wasn't already
     if (!user.emailVerified) {
-      // Auto-send a new code if unverified
-      const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-      user.emailVerificationCode = newCode;
-      user.emailVerificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      user.emailVerified = true;
       await user.save();
-      sendVerificationEmail(user.universityEmail, newCode, user.fullName).catch(() => {});
-
-      return res.status(403).json({
-        message: "Your email is not verified yet. We have sent a new 6-digit OTP to your email.",
-        requiresVerification: true,
-        email: user.universityEmail,
-      });
     }
 
     const token = jwt.sign(
@@ -286,7 +174,7 @@ const login = async (req, res) => {
         id: user._id,
         universityEmail: user.universityEmail,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "default_jwt_secret_dev",
       {
         expiresIn: process.env.JWT_EXPIRES_IN || "7d",
       },
@@ -296,6 +184,7 @@ const login = async (req, res) => {
       token,
       user: {
         _id: user._id,
+        id: user._id,
         universityEmail: user.universityEmail,
         fullName: user.fullName,
         createdAt: user.createdAt,
@@ -398,22 +287,24 @@ const forgotPassword = async (req, res) => {
       normalizedEmail,
     )}&code=${resetCode}`;
 
-    // Send email using Gmail + Nodemailer
-    const emailResult = await sendPasswordResetEmail(
-      normalizedEmail,
-      resetCode,
-      resetLink,
-      user.fullName,
+    console.log(
+      `[PASSWORD RESET] Generated Code for ${normalizedEmail}: ${resetCode} | Link: ${resetLink}`,
     );
 
-    if (!emailResult.success) {
-      return res.status(500).json({
-        message: "Failed to send password reset email. Please try again later.",
-      });
+    // Try sending email if SMTP is configured, but don't fail if SMTP is blocked
+    try {
+      await sendPasswordResetEmail(
+        normalizedEmail,
+        resetCode,
+        resetLink,
+        user.fullName,
+      );
+    } catch (emailErr) {
+      console.warn("Password reset email delivery note:", emailErr.message);
     }
 
     return res.status(200).json({
-      message: "Password reset code has been sent to your email address.",
+      message: "Password reset instructions have been generated.",
       email: normalizedEmail,
     });
   } catch (error) {

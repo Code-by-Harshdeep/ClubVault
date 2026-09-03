@@ -65,25 +65,6 @@ const Login = () => {
       if (!res.ok) {
         if (res.status === 404) {
           setError("Login endpoint not found (404) — check the API route/URL.");
-        } else if (data.requiresVerification) {
-          setError(
-            <span>
-              {data.message}{" "}
-              <Link
-                to={`/verify-email?email=${encodeURIComponent(
-                  formData.universityEmail.trim(),
-                )}`}
-                style={{
-                  color: "#2563eb",
-                  fontWeight: "bold",
-                  textDecoration: "underline",
-                  marginLeft: "4px",
-                }}
-              >
-                Verify OTP Now &rarr;
-              </Link>
-            </span>,
-          );
         } else {
           setError(data.message || `Request failed (${res.status}).`);
         }

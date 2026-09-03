@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { useTheme } from "../../ThemeContext";
+import { useClub } from "../../ClubContext";
 import "./Signup.css";
 import SignupImage from "../../assets/signupImg.png";
 
@@ -26,6 +27,7 @@ const passwordChecks = (password) => ({
 const Signup = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { refreshClub } = useClub();
 
   const fullNameRef = useRef(null);
 
@@ -314,15 +316,29 @@ const Signup = () => {
         return;
       }
 
-      // Signup successful - navigate to OTP verification screen
+      // Signup successful - store session & redirect directly
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
       setSuccess(true);
 
-      setTimeout(() => {
-        navigate(
-          `/verify-email?email=${encodeURIComponent(
-            formData.universityEmail.trim(),
-          )}`,
-        );
+      setTimeout(async () => {
+        let clubStatus = "none";
+        if (refreshClub) {
+          try {
+            clubStatus = await refreshClub();
+          } catch {}
+        }
+
+        if (clubStatus === "approved") {
+          navigate("/dashboard", { replace: true });
+        } else {
+          navigate("/club-setup", { replace: true });
+        }
       }, 1000);
     } catch (err) {
       console.error(err);
@@ -431,7 +447,7 @@ const Signup = () => {
               <CheckCircle2 size={20} />
 
               <span>
-                Account created! Redirecting to login…
+                Account created successfully! Redirecting…
               </span>
             </div>
           ) : (

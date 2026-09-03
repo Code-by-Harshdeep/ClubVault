@@ -34,9 +34,9 @@ export const INFO_MODAL_CONTENTS = {
           </p>
         </section>
         <section>
-          <h4>3. Email & Two-Factor Authentication</h4>
+          <h4>3. Account Security & Verification</h4>
           <p>
-            Your email is used solely for essential transactional notifications, including 6-digit OTP verification codes and password recovery links dispatched through secure SMTP protocols.
+            Your email is used to uniquely identify student leaders and maintain verified organizational authority across budget management and club proposals.
           </p>
         </section>
         <section>

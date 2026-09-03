@@ -37,6 +37,14 @@ const VerifyEmail = () => {
 
   const inputRefs = useRef([]);
 
+  // If already logged in, redirect to dashboard
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
   // Auto-fill from query params if code is present
   useEffect(() => {
     if (queryEmail) setEmail(queryEmail);
