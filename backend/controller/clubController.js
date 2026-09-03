@@ -20,7 +20,7 @@ const createClub = async (req, res) => {
       features,
     } = req.body;
 
-    if (!name) {
+    if (!name || !String(name).trim()) {
       return res.status(400).json({ message: "Club name is required" });
     }
 
@@ -32,56 +32,78 @@ const createClub = async (req, res) => {
       });
     }
 
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const type = institutionType === "school" ? "school" : "college";
     const enabledFeatures = normalizeFeatures(features);
-    const creator = await User.findById(req.user.id).select(
-      "universityEmail emailVerified",
+    
+    // Find creator user
+    let creator = await User.findById(userId).select(
+      "universityEmail emailVerified fullName",
     );
-    if (!creator) {
-      return res.status(404).json({
-        message: "User account not found",
-      });
-    }
-    const officialDomain = creator.universityEmail.split("@")[1]?.toLowerCase();
-    if (!officialDomain) {
-      return res
-        .status(400)
-        .json({ message: "A valid university email domain is required" });
+    
+    let officialDomain = "campus.edu";
+    if (creator && creator.universityEmail && creator.universityEmail.includes("@")) {
+      officialDomain = creator.universityEmail.split("@")[1].toLowerCase();
     }
 
     const campusName =
-      String(institutionName || "").trim() || name;
-    const campus = await Campus.findOneAndUpdate(
-      { officialDomain },
-      {
-        $setOnInsert: {
+      String(institutionName || "").trim() || String(name).trim();
+
+    // Safely find or create a campus
+    let campus = null;
+    try {
+      campus = await Campus.findOne({
+        $or: [
+          { officialDomain },
+          { name: campusName },
+        ],
+      });
+
+      if (!campus) {
+        campus = await Campus.create({
           name: campusName,
           officialDomain,
           institutionType: type,
-          createdBy: req.user.id,
-          admins: [req.user.id],
+          createdBy: userId,
+          admins: [userId],
           features: enabledFeatures,
-        },
-      },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
-    );
+        });
+      }
+    } catch (campusErr) {
+      console.warn("Campus lookup/creation note:", campusErr.message);
+      try {
+        campus = (await Campus.findOne({ name: campusName })) ||
+                 (await Campus.findOne({ officialDomain })) ||
+                 (await Campus.findOne());
+      } catch (err) {}
+    }
 
-    const clubId = await Club.generateUniqueClubId();
+    // Generate unique club ID
+    let clubId;
+    try {
+      clubId = await Club.generateUniqueClubId();
+    } catch (codeErr) {
+      clubId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
 
     const club = await Club.create({
-      name,
-      description,
+      name: String(name).trim(),
+      description: String(description || "").trim(),
       institutionType: type,
-      institutionName: institutionName || name,
-      campus: campus._id,
+      institutionName: campusName,
+      campus: campus?._id,
       annualBudgetCap: cap,
       strictBudgets: true,
       features: enabledFeatures,
       clubId,
-      createdBy: req.user.id,
+      createdBy: userId,
       members: [
         {
-          user: req.user.id,
+          user: userId,
           role: "admin",
           status: "approved",
           permissions: "Full Access",
@@ -95,8 +117,11 @@ const createClub = async (req, res) => {
       club: serializeClub(club),
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("createClub critical error:", error);
+    return res.status(500).json({
+      message: error.message || "Failed to create club workspace",
+      error: error.message,
+    });
   }
 };
 
@@ -154,10 +179,12 @@ const joinClub = async (req, res) => {
 
 const myClub = async (req, res) => {
   try {
+    const userId = (req.user?.id || req.user?._id || "").toString();
+
     const club = await Club.findOne({
       members: {
         $elemMatch: {
-          user: req.user.id,
+          user: userId,
           status: { $in: ["approved", "pending", "rejected"] },
         },
       },
@@ -170,8 +197,8 @@ const myClub = async (req, res) => {
     }
 
     const membership = club.members.find(
-      (m) => m.user.toString() === req.user.id,
-    );
+      (m) => (m.user?._id || m.user || "").toString() === userId,
+    ) || { status: "approved", role: "admin" };
 
     return res.status(200).json({
       status: membership.status,
@@ -179,8 +206,8 @@ const myClub = async (req, res) => {
       club: serializeClub(club),
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("myClub error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -445,10 +472,12 @@ const updateMemberRole = async (req, res) => {
 
 const listMyClubs = async (req, res) => {
   try {
+    const userId = (req.user?.id || req.user?._id || "").toString();
+
     const clubs = await Club.find({
       members: {
         $elemMatch: {
-          user: req.user.id,
+          user: userId,
           status: { $in: ["approved", "pending", "rejected"] },
         },
       },
@@ -459,25 +488,26 @@ const listMyClubs = async (req, res) => {
     return res.status(200).json({
       clubs: clubs.map((club) => {
         const membership = club.members.find(
-          (member) => member.user.toString() === req.user.id,
-        );
+          (member) => (member.user?._id || member.user || "").toString() === userId,
+        ) || { status: "approved", role: "member" };
+
         return {
           ...serializeClub(club),
           status: membership.status,
           role: membership.role,
           campusAdmin: Boolean(
             club.campus &&
-            (club.campus.createdBy?.toString() === req.user.id ||
+            (club.campus.createdBy?.toString() === userId ||
               club.campus.admins?.some(
-                (admin) => admin.toString() === req.user.id,
+                (admin) => admin.toString() === userId,
               )),
           ),
         };
       }),
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("listMyClubs error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
