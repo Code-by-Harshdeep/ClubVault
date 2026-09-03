@@ -60,18 +60,20 @@ const createBudget = async (req, res) => {
       return res.status(err.status || 400).json({ message: err.message });
     }
 
+    const userId = req.user?.id || req.user?._id;
+
     const budget = await Budget.create({
       club: req.club._id,
       title,
       category,
       description,
       allocated: amount,
-      createdBy: req.user.id,
+      createdBy: userId,
     });
 
     logActivity({
       clubId: req.club._id,
-      actorId: req.user.id,
+      actorId: userId,
       action: "BUDGET_CREATED",
       title: `Created Budget: ${title}`,
       details: `Allocated ₹${amount.toLocaleString("en-IN")} (${category})`,
@@ -80,8 +82,8 @@ const createBudget = async (req, res) => {
 
     return res.status(201).json({ message: "Budget created", budget });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("createBudget error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -127,9 +129,10 @@ const updateBudget = async (req, res) => {
     await budget.save();
     const [withSpent] = await attachSpent(req.club._id, [budget]);
 
+    const userId = req.user?.id || req.user?._id;
     logActivity({
       clubId: req.club._id,
-      actorId: req.user.id,
+      actorId: userId,
       action: "BUDGET_UPDATED",
       title: `Updated Budget: ${budget.title}`,
       details: `New allocation ₹${Number(budget.allocated).toLocaleString("en-IN")}`,
@@ -140,8 +143,8 @@ const updateBudget = async (req, res) => {
       .status(200)
       .json({ message: "Budget updated", budget: withSpent });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("updateBudget error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -166,9 +169,10 @@ const deleteBudget = async (req, res) => {
     if (!result.deletedCount)
       return res.status(404).json({ message: "Budget not found" });
 
+    const userId = req.user?.id || req.user?._id;
     logActivity({
       clubId: req.club._id,
-      actorId: req.user.id,
+      actorId: userId,
       action: "BUDGET_DELETED",
       title: `Deleted Budget: ${budget?.title || "Category"}`,
       details: "Removed unused budget line",
@@ -177,8 +181,8 @@ const deleteBudget = async (req, res) => {
 
     return res.status(200).json({ message: "Budget deleted" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("deleteBudget error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 

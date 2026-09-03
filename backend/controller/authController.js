@@ -201,7 +201,8 @@ const login = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select(
+    const userId = req.user?.id || req.user?._id;
+    const user = await User.findById(userId).select(
       "fullName universityEmail",
     );
 
@@ -213,8 +214,7 @@ const getProfile = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    console.error(error);
-
+    console.error("getProfile error:", error);
     res.status(500).json({
       message: "Internal server error",
     });

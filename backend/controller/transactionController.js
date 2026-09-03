@@ -106,12 +106,13 @@ const createTransaction = async (req, res) => {
       date: date || new Date(),
       budget: type === "expense" ? budgetId : undefined,
       event: eventId || undefined,
-      addedBy: req.user.id,
+      addedBy: req.user?.id || req.user?._id,
     });
 
+    const userId = req.user?.id || req.user?._id;
     logActivity({
       clubId: req.club._id,
-      actorId: req.user.id,
+      actorId: userId,
       action: type === "expense" ? (status === "Pending Bill" ? "CLAIM_SUBMITTED" : "EXPENSE_LOGGED") : "INCOME_LOGGED",
       title: type === "expense" ? (status === "Pending Bill" ? `Reimbursement Claim: ₹${spend.toLocaleString("en-IN")}` : `Logged Expense: ₹${spend.toLocaleString("en-IN")}`) : `Logged Inflow: ₹${spend.toLocaleString("en-IN")}`,
       details: `${title} (${category || budgetDoc?.category || "General"})`,
@@ -120,8 +121,8 @@ const createTransaction = async (req, res) => {
 
     return res.status(201).json({ message: "Transaction added", transaction });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("createTransaction error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -134,9 +135,10 @@ const deleteTransaction = async (req, res) => {
     if (!result.deletedCount)
       return res.status(404).json({ message: "Transaction not found" });
 
+    const userId = req.user?.id || req.user?._id;
     logActivity({
       clubId: req.club._id,
-      actorId: req.user.id,
+      actorId: userId,
       action: "TRANSACTION_DELETED",
       title: "Transaction Voided",
       details: `Transaction ID: ${req.params.id}`,
@@ -145,8 +147,8 @@ const deleteTransaction = async (req, res) => {
 
     return res.status(200).json({ message: "Transaction deleted" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("deleteTransaction error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -172,9 +174,10 @@ const updateTransactionStatus = async (req, res) => {
     if (!transaction)
       return res.status(404).json({ message: "Expense not found" });
 
+    const userId = req.user?.id || req.user?._id;
     logActivity({
       clubId: req.club._id,
-      actorId: req.user.id,
+      actorId: userId,
       action: status === "Approved" ? "CLAIM_APPROVED" : (status === "Reimbursed" ? "CLAIM_PAID" : "STATUS_UPDATED"),
       title: `Claim ${status}: ₹${transaction.amount.toLocaleString("en-IN")}`,
       details: transaction.title,
@@ -185,8 +188,8 @@ const updateTransactionStatus = async (req, res) => {
       .status(200)
       .json({ message: "Expense status updated", transaction });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("updateTransactionStatus error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 

@@ -219,26 +219,27 @@ const listRequests = async (req, res) => {
     );
 
     const requests = club.members
-      .filter((m) => m.status === "pending")
+      .filter((m) => m.status === "pending" && m.user)
       .map((m) => ({
-        userId: m.user._id,
-        fullName: m.user.fullName,
-        email: m.user.universityEmail,
+        userId: m.user?._id || m.user,
+        fullName: m.user?.fullName || "Member",
+        email: m.user?.universityEmail || "",
         role: m.role,
       }));
 
     return res.status(200).json({ requests });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("listRequests error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
 const approveRequest = async (req, res) => {
   try {
     const club = req.club;
+    const targetUserId = String(req.params.userId);
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId,
+      (m) => (m.user?._id || m.user || "").toString() === targetUserId,
     );
 
     if (!member) {
@@ -251,16 +252,17 @@ const approveRequest = async (req, res) => {
 
     return res.status(200).json({ message: "Member approved" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("approveRequest error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
 const rejectRequest = async (req, res) => {
   try {
     const club = req.club;
+    const targetUserId = String(req.params.userId);
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId,
+      (m) => (m.user?._id || m.user || "").toString() === targetUserId,
     );
 
     if (!member) {
@@ -272,8 +274,8 @@ const rejectRequest = async (req, res) => {
 
     return res.status(200).json({ message: "Request rejected" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("rejectRequest error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -285,11 +287,11 @@ const listMembers = async (req, res) => {
     );
 
     const members = club.members
-      .filter((m) => m.status === "approved")
+      .filter((m) => m.status === "approved" && m.user)
       .map((m) => ({
-        userId: m.user._id,
-        fullName: m.user.fullName,
-        email: m.user.universityEmail,
+        userId: m.user?._id || m.user,
+        fullName: m.user?.fullName || "Member",
+        email: m.user?.universityEmail || "",
         role: m.role,
         permissions: m.permissions,
         joinedAt: m.joinedAt,
@@ -301,23 +303,25 @@ const listMembers = async (req, res) => {
       members,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("listMembers error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
 const removeMember = async (req, res) => {
   try {
     const club = req.club;
+    const currentUserId = (req.user?.id || req.user?._id || "").toString();
+    const targetUserId = String(req.params.userId);
 
-    if (req.params.userId === req.user.id) {
+    if (targetUserId === currentUserId) {
       return res
         .status(400)
         .json({ message: "Admins can't remove themselves" });
     }
 
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId && m.status === "approved",
+      (m) => (m.user?._id || m.user || "").toString() === targetUserId && m.status === "approved",
     );
     if (!member)
       return res.status(404).json({ message: "Approved member not found" });
@@ -332,14 +336,14 @@ const removeMember = async (req, res) => {
     }
 
     club.members = club.members.filter(
-      (m) => m.user.toString() !== req.params.userId,
+      (m) => (m.user?._id || m.user || "").toString() !== targetUserId,
     );
     await club.save();
 
     return res.status(200).json({ message: "Member removed" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("removeMember error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
@@ -440,8 +444,9 @@ const updateMemberRole = async (req, res) => {
     }
 
     const club = req.club;
+    const targetUserId = String(req.params.userId);
     const member = club.members.find(
-      (m) => m.user.toString() === req.params.userId && m.status === "approved",
+      (m) => (m.user?._id || m.user || "").toString() === targetUserId && m.status === "approved",
     );
 
     if (!member) {
@@ -460,13 +465,18 @@ const updateMemberRole = async (req, res) => {
     }
 
     member.role = role;
-    member.permissions = role === "admin" ? "Full Access" : "View Only";
+    if (role === "admin") {
+      member.permissions = "Full Access";
+    } else {
+      member.permissions = "View Only";
+    }
+
     await club.save();
 
-    return res.status(200).json({ message: "Role updated" });
+    return res.status(200).json({ message: "Member role updated" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("updateMemberRole error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 

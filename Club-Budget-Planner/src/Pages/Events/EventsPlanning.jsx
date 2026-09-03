@@ -66,7 +66,7 @@ function EventCard({ event }) {
   );
 }
 
-function NewEventModal({ onClose, onSubmit, budgets }) {
+function NewEventModal({ onClose, onSubmit, budgets = [] }) {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("Workshop");
   const [date, setDate] = useState("");
@@ -134,11 +134,15 @@ function NewEventModal({ onClose, onSubmit, budgets }) {
               <label>Charge to Budget Line</label>
               <select value={budgetId} onChange={(e) => setBudgetId(e.target.value)}>
                 <option value="">Select a budget allocation</option>
-                {budgets.map((line) => (
-                  <option key={line._id} value={line._id}>
-                    {line.title} — ₹{Number(line.remaining ?? line.allocated - line.spent).toLocaleString("en-IN")} left
-                  </option>
-                ))}
+                {budgets.map((line) => {
+                  const id = line._id || line.id;
+                  const remainingVal = Number(line.remaining ?? line.allocated - (line.spent || 0));
+                  return (
+                    <option key={id} value={id}>
+                      {line.title} — ₹{remainingVal.toLocaleString("en-IN")} left
+                    </option>
+                  );
+                })}
               </select>
             </>
           )}

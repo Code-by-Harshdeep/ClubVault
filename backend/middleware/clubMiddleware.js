@@ -17,9 +17,21 @@ const clubMember = async (req, res, next) => {
       return res.status(404).json({ message: "Club not found" });
     }
 
-    const membership = club.members.find(
-      (m) => m.user.toString() === req.user.id,
+    const userId = (req.user?.id || req.user?._id || "").toString();
+
+    let membership = club.members.find(
+      (m) => (m.user?._id || m.user || "").toString() === userId,
     );
+
+    // If membership is missing but user is the club creator, grant admin access
+    if (!membership && club.createdBy?.toString() === userId) {
+      membership = {
+        user: userId,
+        role: "admin",
+        status: "approved",
+        permissions: "Full Access",
+      };
+    }
 
     if (!membership || membership.status !== "approved") {
       return res
@@ -32,14 +44,16 @@ const clubMember = async (req, res, next) => {
     req.membership = membership;
     next();
   } catch (error) {
-    console.error(error);
+    console.error("clubMember middleware error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // Must run after clubMember. Restricts route to club admins.
 const clubAdmin = (req, res, next) => {
-  if (!req.membership || req.membership.role !== "admin") {
+  const userId = (req.user?.id || req.user?._id || "").toString();
+  const isCreator = req.club?.createdBy?.toString() === userId;
+  if (!isCreator && (!req.membership || req.membership.role !== "admin")) {
     return res.status(403).json({ message: "Admin access required" });
   }
   next();

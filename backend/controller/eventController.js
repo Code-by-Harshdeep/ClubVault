@@ -84,6 +84,8 @@ const createEvent = async (req, res) => {
       }
     }
 
+    const userId = req.user?.id || req.user?._id;
+
     const event = await Event.create({
       club: req.club._id,
       title: String(title).trim(),
@@ -93,13 +95,13 @@ const createEvent = async (req, res) => {
       location,
       budget: eventBudget,
       budgetRef,
-      createdBy: req.user.id,
+      createdBy: userId,
     });
 
     return res.status(201).json({ message: "Event created", event });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("createEvent error:", error);
+    return res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
