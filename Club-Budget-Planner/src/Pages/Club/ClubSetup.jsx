@@ -1,11 +1,34 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Landmark, Sun, Moon, Clock, XCircle, LogOut, ArrowLeft } from "lucide-react";
+import {
+  Landmark,
+  Sun,
+  Moon,
+  Clock,
+  XCircle,
+  LogOut,
+  ArrowLeft,
+  Calendar,
+  BarChart3,
+  Receipt,
+  BellRing,
+  Layers,
+  Check,
+  Sparkles,
+} from "lucide-react";
 import { EXCLUSIVE_FEATURES } from "../../features";
 import { useTheme } from "../../ThemeContext";
 import { useClub } from "../../ClubContext";
 import { api } from "../../api";
 import "./ClubSetup.css";
+
+const FEATURE_ICONS = {
+  events: Calendar,
+  analytics: BarChart3,
+  reimbursements: Receipt,
+  notifications: BellRing,
+  integrations: Layers,
+};
 
 export default function ClubSetup() {
   const navigate = useNavigate();
@@ -287,27 +310,59 @@ export default function ClubSetup() {
                 </p>
 
                 <div className="club-setup-features-section">
-                  <h3>Optional Modular Features</h3>
-                  <p>You can also toggle any of these on or off later in Settings.</p>
-                  <div className="club-setup-features-grid">
-                    {EXCLUSIVE_FEATURES.map((feat) => (
-                      <label key={feat.key} className="club-setup-feature-item">
-                        <input
-                          type="checkbox"
-                          checked={!!exclusive[feat.key]}
-                          onChange={(e) =>
+                  <div className="club-setup-features-header">
+                    <h3>Optional Modular Features</h3>
+                    <span className="club-setup-features-counter">
+                      {Object.values(exclusive).filter(Boolean).length} / {EXCLUSIVE_FEATURES.length} enabled
+                    </span>
+                  </div>
+                  <p className="club-setup-features-subtitle">
+                    You can also toggle any of these on or off later in Settings.
+                  </p>
+                  <div className="club-setup-features-list">
+                    {EXCLUSIVE_FEATURES.map((feat) => {
+                      const IconComponent = FEATURE_ICONS[feat.key] || Layers;
+                      const isChecked = !!exclusive[feat.key];
+                      return (
+                        <div
+                          key={feat.key}
+                          className={`club-setup-feature-card ${isChecked ? "is-active" : ""}`}
+                          onClick={() =>
                             setExclusive((prev) => ({
                               ...prev,
-                              [feat.key]: e.target.checked,
+                              [feat.key]: !prev[feat.key],
                             }))
                           }
-                        />
-                        <div className="club-setup-feature-copy">
-                          <strong>{feat.label}</strong>
-                          <span>{feat.description}</span>
+                          role="checkbox"
+                          aria-checked={isChecked}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === " " || e.key === "Enter") {
+                              e.preventDefault();
+                              setExclusive((prev) => ({
+                                ...prev,
+                                [feat.key]: !prev[feat.key],
+                              }));
+                            }
+                          }}
+                        >
+                          <div className="club-setup-feature-left">
+                            <div className={`club-setup-feature-icon ${isChecked ? "active-icon" : ""}`}>
+                              <IconComponent size={18} />
+                            </div>
+                            <div className="club-setup-feature-info">
+                              <span className="club-setup-feature-title">{feat.label}</span>
+                              <span className="club-setup-feature-desc">{feat.description}</span>
+                            </div>
+                          </div>
+                          <div className={`club-setup-toggle-pill ${isChecked ? "checked" : ""}`}>
+                            <div className="club-setup-toggle-thumb">
+                              {isChecked && <Check size={11} strokeWidth={3} />}
+                            </div>
+                          </div>
                         </div>
-                      </label>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
