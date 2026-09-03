@@ -511,7 +511,7 @@ export default function Dashboard() {
           <div className="cv-actions-list">
             <button
               type="button"
-              className="cv-quick-action-pill highlight"
+              className={`cv-quick-action-pill ${!reimbursementsEnabled ? "disabled-feature" : ""}`}
               onClick={() => {
                 if (reimbursementsEnabled) {
                   setShowReimbursement(true);
@@ -553,7 +553,7 @@ export default function Dashboard() {
 
             <button
               type="button"
-              className="cv-quick-action-pill"
+              className={`cv-quick-action-pill ${!eventsEnabled ? "disabled-feature" : ""}`}
               onClick={() => {
                 if (eventsEnabled) {
                   navigate("/events");
