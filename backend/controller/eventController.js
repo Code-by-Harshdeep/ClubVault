@@ -10,7 +10,7 @@ const listEvents = async (req, res) => {
       .populate("budgetRef", "title category allocated")
       .sort({ date: 1 });
 
-    // Aggregate transactions grouped by event AND category
+    // Aggregate actual expenses per event from transactions
     const txSums = await Transaction.aggregate([
       {
         $match: {
@@ -21,54 +21,25 @@ const listEvents = async (req, res) => {
       },
       {
         $group: {
-          _id: { event: "$event", category: "$category" },
+          _id: "$event",
           totalSpent: { $sum: "$amount" },
         },
       },
     ]);
 
     const txMap = {};
-    const catMap = {};
     txSums.forEach((t) => {
-      const evId = String(t._id.event);
-      const cat = String(t._id.category || "").toLowerCase().trim();
-      const amt = roundMoney(t.totalSpent);
-
-      txMap[evId] = roundMoney((txMap[evId] || 0) + amt);
-
-      if (!catMap[evId]) catMap[evId] = {};
-      catMap[evId][cat] = roundMoney((catMap[evId][cat] || 0) + amt);
+      txMap[String(t._id)] = roundMoney(t.totalSpent);
     });
 
     const enriched = events.map((ev) => {
       const obj = ev.toObject();
-      const evId = String(ev._id);
-      const eventCatMap = catMap[evId] || {};
-
-      // Enrich each plan item with real transaction actuals matching its category name
-      const enrichedItems = (obj.items || []).map((it) => {
-        const catKey = String(it.name || "").toLowerCase().trim();
-        const txActual = eventCatMap[catKey] || 0;
-        const actual = roundMoney(Math.max(txActual, it.actual || 0));
-        return {
-          ...it,
-          actual,
-          variance: roundMoney((it.planned || 0) - actual),
-          isOver: actual > (it.planned || 0),
-        };
-      });
-
-      const totalItemsActual = enrichedItems.reduce((acc, it) => acc + it.actual, 0);
-      const totalActual = roundMoney(Math.max(txMap[evId] || 0, totalItemsActual, obj.spent || 0));
-      const totalPlanned = roundMoney(obj.budget || enrichedItems.reduce((acc, it) => acc + (it.planned || 0), 0));
-
+      const actualFromTx = txMap[String(ev._id)] || 0;
+      const actualFromItems = (obj.items || []).reduce((acc, it) => acc + (it.actual || 0), 0);
+      const totalActual = roundMoney(Math.max(actualFromTx, actualFromItems, obj.spent || 0));
       return {
         ...obj,
-        budget: totalPlanned,
-        items: enrichedItems,
         spent: totalActual,
-        variance: roundMoney(totalPlanned - totalActual),
-        isOver: totalActual > totalPlanned && totalPlanned > 0,
       };
     });
 

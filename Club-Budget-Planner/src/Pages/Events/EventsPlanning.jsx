@@ -57,7 +57,6 @@ function BudgetBar({ progress, isOver }) {
 // Modal to log an expense directly to this event
 function AddEventExpenseModal({ event, budgets, onClose, onSaved }) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState(event.items?.[0]?.name || "Decoration");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [budgetId, setBudgetId] = useState(event.budgetRef?._id || budgets[0]?._id || "");
@@ -80,7 +79,7 @@ function AddEventExpenseModal({ event, budgets, onClose, onSaved }) {
         date: date ? new Date(date) : new Date(),
         budgetId: budgetId || undefined,
         eventId: event._id,
-        category: category || "Event Expense",
+        category: event.title || "Event Expense",
       });
       onSaved();
       onClose();
@@ -107,30 +106,11 @@ function AddEventExpenseModal({ event, budgets, onClose, onSaved }) {
         </div>
 
         <form onSubmit={handleSubmit} className="ev-modal-form">
-          <label>Event Category</label>
-          {event.items && event.items.length > 0 ? (
-            <select value={category} onChange={(e) => setCategory(e.target.value)}>
-              {event.items.map((it, idx) => (
-                <option key={idx} value={it.name}>
-                  {it.name} (Planned: ₹{Number(it.planned || 0).toLocaleString("en-IN")})
-                </option>
-              ))}
-              <option value="General">Other / General</option>
-            </select>
-          ) : (
-            <input
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g. Decoration, Sound & Stage, Food"
-              required
-            />
-          )}
-
           <label>Expense Description</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Stage Flowers, DJ Advance"
+            placeholder="e.g. Stage Decoration, Sound System Rental"
             required
           />
 
@@ -363,7 +343,6 @@ function EventCard({ event, budgets, onRefresh }) {
   const completed = event.status === "completed";
 
   const items = event.items || [];
-  const hasDetails = items.length > 0;
 
   return (
     <>
@@ -423,42 +402,42 @@ function EventCard({ event, budgets, onRefresh }) {
             </span>
           </div>
 
-          {/* Planning vs Actual Breakdown - Always Visible */}
-          <div className="ev-breakdown-box">
-            <div className="ev-breakdown-header-bar">
-              <strong>Planned vs Actual Breakdown</strong>
-              <span style={{ fontSize: "11px", color: "var(--color-on-surface-variant)" }}>
-                {items.length} categories
-              </span>
-            </div>
+          {/* Planning vs Actual Breakdown Accordion */}
+          {items.length > 0 && (
+            <div className="ev-breakdown-box">
+              <button
+                type="button"
+                className="ev-breakdown-toggle"
+                onClick={() => setShowDetails(!showDetails)}
+              >
+                <span>
+                  <strong>Planned vs Actual Breakdown</strong> ({items.length} categories)
+                </span>
+                {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
 
-            <div className="ev-breakdown-list">
-              {items.length === 0 ? (
-                <div style={{ padding: "8px", fontSize: "11.5px", color: "var(--color-on-surface-variant)", textAlign: "center" }}>
-                  No planned categories yet. Click "Plan Categories" below.
-                </div>
-              ) : (
-                items.map((it, idx) => {
-                  const itemVar = (Number(it.planned) || 0) - (Number(it.actual) || 0);
-                  const itemOver = itemVar < 0;
-                  return (
-                    <div className="ev-breakdown-item" key={idx}>
-                      <div className="ev-bitem-name">{it.name}</div>
-                      <div className="ev-bitem-figures">
-                        <span style={{ color: "var(--color-on-surface-variant)" }}>Plan: {formatMoney(it.planned)}</span>
-                        <span style={{ fontWeight: 700, color: itemOver ? "#dc2626" : "inherit" }}>
-                          Act: {formatMoney(it.actual)}
-                        </span>
-                        <span className={`ev-bitem-badge ${itemOver ? "over" : "ok"}`}>
-                          {itemOver ? `Over by ${formatMoney(Math.abs(itemVar))}` : `Saved ${formatMoney(itemVar)}`}
-                        </span>
+              {showDetails && (
+                <div className="ev-breakdown-list">
+                  {items.map((it, idx) => {
+                    const itemVar = (it.planned || 0) - (it.actual || 0);
+                    const itemOver = itemVar < 0;
+                    return (
+                      <div className="ev-breakdown-item" key={idx}>
+                        <div className="ev-bitem-name">{it.name}</div>
+                        <div className="ev-bitem-figures">
+                          <span>Planned: {formatMoney(it.planned)}</span>
+                          <span style={{ fontWeight: 600 }}>Actual: {formatMoney(it.actual)}</span>
+                          <span className={`ev-bitem-badge ${itemOver ? "over" : "ok"}`}>
+                            {itemOver ? `+${formatMoney(Math.abs(itemVar))}` : `Saved ${formatMoney(itemVar)}`}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                </div>
               )}
             </div>
-          </div>
+          )}
 
           {/* Action Buttons: Add Expense & Plan Categories */}
           <div className="ev-card-actions">
