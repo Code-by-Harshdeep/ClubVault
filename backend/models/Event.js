@@ -37,6 +37,13 @@ const eventSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Budget",
     },
+    items: [
+      {
+        name: { type: String, required: true, trim: true },
+        planned: { type: Number, required: true, default: 0 },
+        actual: { type: Number, default: 0 },
+      },
+    ],
     spent: {
       type: Number,
       default: 0,

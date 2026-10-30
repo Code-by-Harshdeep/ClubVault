@@ -35,10 +35,11 @@ function formatDate(d) {
   });
 }
 
-function NewTransactionModal({ onClose, onSubmit, defaultType, budgets = [] }) {
+function NewTransactionModal({ onClose, onSubmit, defaultType, budgets = [], events = [], defaultEventId = "" }) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [budgetId, setBudgetId] = useState(budgets[0]?._id || budgets[0]?.id || "");
+  const [eventId, setEventId] = useState(defaultEventId || "");
   const [type, setType] = useState(defaultType === "income" ? "income" : "expense");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -83,6 +84,7 @@ function NewTransactionModal({ onClose, onSubmit, defaultType, budgets = [] }) {
         amount: Number(amount),
         date: date ? new Date(date) : new Date(),
         budgetId: type === "expense" ? finalBudgetId : undefined,
+        eventId: eventId || undefined,
       });
       onClose();
     } catch (err) {
@@ -158,6 +160,23 @@ function NewTransactionModal({ onClose, onSubmit, defaultType, budgets = [] }) {
                   })}
                 </select>
               )}
+
+              {events.length > 0 && (
+                <>
+                  <label>Assign to Event (Optional)</label>
+                  <select
+                    value={eventId}
+                    onChange={(e) => setEventId(e.target.value)}
+                  >
+                    <option value="">-- No specific event --</option>
+                    {events.map((ev) => (
+                      <option key={ev._id} value={ev._id}>
+                        {ev.title} ({ev.type || "Event"})
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
             </>
           ) : (
             <>
@@ -201,6 +220,7 @@ export default function Transactions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
@@ -221,12 +241,14 @@ export default function Transactions() {
     setLoading(true);
     setError("");
     try {
-      const [txData, budgetData] = await Promise.all([
+      const [txData, budgetData, eventData] = await Promise.all([
         api.get(`/api/clubs/${club._id}/transactions`),
         api.get(`/api/clubs/${club._id}/budgets`),
+        api.get(`/api/clubs/${club._id}/events`).catch(() => ({ events: [] })),
       ]);
       setTransactions(txData.transactions || []);
       setBudgets(budgetData.budgets || []);
+      setEvents(eventData.events || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -290,6 +312,7 @@ export default function Transactions() {
           onSubmit={handleCreate}
           defaultType={filter === "income" ? "income" : "expense"}
           budgets={budgets}
+          events={events}
         />
       )}
 

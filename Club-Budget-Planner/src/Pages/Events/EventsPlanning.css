@@ -296,3 +296,259 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+
+/* =========================================================
+   Event Planning vs Actual & Expense Integration Styles
+   ========================================================= */
+
+.ev-event-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ev-over-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.ev-event-card.is-over {
+  border-color: #fca5a5;
+  box-shadow: 0 0 0 1px #fca5a5;
+}
+
+.ev-progress.over {
+  background: #fee2e2;
+}
+
+.ev-progress-fill.over {
+  background: #dc2626;
+}
+
+.ev-progress-fill.warn {
+  background: #d97706;
+}
+
+.ev-card-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+
+.ev-stat-tag.ok {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.ev-stat-tag.over {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.ev-stat-util {
+  color: var(--color-on-surface-variant, #64748b);
+  font-weight: 600;
+}
+
+/* Actions in Card */
+.ev-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-soft, #f1f5f9);
+}
+
+.ev-btn-add-expense,
+.ev-btn-plan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ev-btn-add-expense {
+  background: var(--color-primary-container, #0f172a);
+  color: var(--color-on-primary, #ffffff);
+  border: none;
+}
+
+.ev-btn-add-expense:hover {
+  opacity: 0.9;
+}
+
+.ev-btn-plan {
+  background: var(--color-surface-container-low, #f8fafc);
+  border: 1px solid var(--color-border-mid, #cbd5e1);
+  color: var(--color-on-surface, #1e293b);
+}
+
+.ev-btn-plan:hover {
+  background: var(--color-surface-container-high, #e2e8f0);
+}
+
+/* Planning vs Actual Breakdown Accordion */
+.ev-breakdown-box {
+  margin-top: 10px;
+  border: 1px solid var(--color-border-soft, #e2e8f0);
+  border-radius: 8px;
+  background: var(--color-surface-container-lowest, #ffffff);
+  overflow: hidden;
+}
+
+.ev-breakdown-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--color-surface-container-low, #f8fafc);
+  border: none;
+  font-size: 12px;
+  color: var(--color-on-surface, #1e293b);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ev-breakdown-list {
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ev-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--color-border-soft, #f1f5f9);
+}
+
+.ev-breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.ev-bitem-name {
+  font-weight: 600;
+  color: var(--color-on-surface, #0f172a);
+}
+
+.ev-bitem-figures {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ev-bitem-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.ev-bitem-badge.ok {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.ev-bitem-badge.over {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Plan Items Table in Modal */
+.ev-plan-table-wrap {
+  max-height: 250px;
+  overflow-y: auto;
+  margin: 12px 0;
+  border: 1px solid var(--color-border-soft, #e2e8f0);
+  border-radius: 6px;
+}
+
+.ev-plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.ev-plan-table th,
+.ev-plan-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-soft, #f1f5f9);
+}
+
+.ev-plan-table th {
+  background: var(--color-surface-container-low, #f8fafc);
+  font-weight: 600;
+  color: var(--color-on-surface-variant, #64748b);
+}
+
+.ev-plan-table tfoot th {
+  background: var(--color-surface-container-low, #f8fafc);
+  border-top: 1px solid var(--color-border-mid, #cbd5e1);
+  font-weight: 700;
+}
+
+.ev-item-del-btn {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+}
+
+.ev-plan-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ev-add-item-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-primary-container, #0f172a);
+  color: var(--color-on-primary, #ffffff);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+.ev-breakdown-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--color-surface-container-low, #f8fafc);
+  border-bottom: 1px solid var(--color-border-soft, #e2e8f0);
+  font-size: 12px;
+  color: var(--color-on-surface, #1e293b);
+}
